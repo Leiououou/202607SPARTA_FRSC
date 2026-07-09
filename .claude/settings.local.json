@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(gh auth *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(env)",
+      "Bash(ssh -T git@github.com)"
     ]
   }
 }
