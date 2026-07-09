@@ -1,0 +1,31 @@
+# Build artifacts
+*.o
+*.obj
+*.exe
+*.a
+*.so
+*.dylib
+*.dll
+*.mod
+
+# Compiled binaries (SPARTA executable)
+src/spa_*
+
+# Object files directory
+src/Obj_*/
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.tmp
