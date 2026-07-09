@@ -4,7 +4,8 @@
       "Bash(gh auth *)",
       "Bash(git *)",
       "Bash(env)",
-      "Bash(ssh -T git@github.com)"
+      "Bash(ssh -T git@github.com)",
+      "Bash(start \"\" \"d:/博一/气固相互作用/202607_src/docs/GS_chemistry_analysis.html\")"
     ]
   }
 }

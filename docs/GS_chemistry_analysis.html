@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPARTA surf_react adsorb — GS 气-固反应完整公式推导</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root {
+    --bg: #0d1117; --fg: #c9d1d9; --border: #30363d;
+    --accent: #58a6ff; --warn: #d29922; --danger: #f85149;
+    --code-bg: #161b22; --highlight: #1c2128;
+    --h1c: #f0f6fc; --h2c: #e6edf3; --h3c: #c9d1d9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+    line-height: 1.65; max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem;
+  }
+  h1 { color: var(--h1c); font-size: 1.8rem; border-bottom: 2px solid var(--border); padding-bottom: .5rem; margin: 2rem 0 1rem; }
+  h2 { color: var(--h2c); font-size: 1.35rem; margin: 2rem 0 .8rem; border-bottom: 1px solid var(--border); padding-bottom: .3rem; }
+  h3 { color: var(--h3c); font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+  h4 { color: var(--warn); font-size: 1rem; margin: 1.2rem 0 .4rem; }
+  p { margin: .5rem 0; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 1.5rem; margin: .6rem 0; }
+  li { margin: .3rem 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .92rem; }
+  th, td { border: 1px solid var(--border); padding: .45rem .7rem; text-align: left; }
+  th { background: var(--code-bg); color: var(--accent); font-weight: 600; white-space: nowrap; }
+  td { background: var(--highlight); }
+  .formula-box {
+    background: var(--code-bg); border-left: 3px solid var(--accent);
+    padding: .8rem 1rem; margin: .7rem 0; overflow-x: auto;
+    font-size: 1.02rem;
+  }
+  .formula-box.warn { border-left-color: var(--warn); }
+  .formula-box.danger { border-left-color: var(--danger); }
+  .note {
+    background: #1a2332; border-left: 3px solid var(--warn);
+    padding: .5rem .9rem; margin: .7rem 0; font-size: .92rem; color: #e3b341;
+  }
+  .bug {
+    background: #2d1111; border-left: 3px solid var(--danger);
+    padding: .5rem .9rem; margin: .7rem 0; font-size: .92rem; color: #f87171;
+  }
+  code {
+    background: #1c2333; color: #e6edf3; padding: .12rem .35rem;
+    border-radius: 3px; font-family: "Cascadia Code", "Fira Code", Consolas, monospace; font-size: .88rem;
+  }
+  pre {
+    background: var(--code-bg); padding: .8rem 1rem;
+    overflow-x: auto; font-size: .85rem; line-height: 1.5;
+    border-radius: 4px; margin: .6rem 0;
+    font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  }
+  .tag {
+    display: inline-block; padding: .1rem .4rem; border-radius: 3px;
+    font-size: .78rem; font-weight: 700; margin: 0 .1rem;
+  }
+  .tag-g { background: #1b5e20; color: #81c784; }   /* gas */
+  .tag-s { background: #0d47a1; color: #90caf9; }   /* surface */
+  .tag-b { background: #4a148c; color: #ce93d8; }   /* bulk */
+  .tag-c { background: #37474f; color: #b0bec5; }   /* catalyst */
+  .flow-step {
+    display: flex; align-items: center; flex-wrap: wrap; gap: .3rem;
+    margin: .4rem 0; padding: .3rem .5rem; background: var(--highlight); border-radius: 4px;
+  }
+  .flow-arrow { color: var(--accent); font-weight: bold; margin: 0 .2rem; }
+  .flow-step code { background: transparent; }
+  .idx { color: #8b949e; font-size: .8rem; }
+</style>
+</head>
+<body>
+
+<h1>SPARTA <code>surf_react adsorb</code> — GS（气-固）反应完整公式推导</h1>
+
+<p>
+  本文档逐行还原 <code>SurfReactAdsorb::react()</code>（<a href="../src/surf_react_adsorb.cpp#L620-L1137">surf_react_adsorb.cpp:620-1137</a>）
+  中 <strong>GS（Gas-Surface）化学</strong>的每一处数学公式，覆盖全部 10 种反应类型。
+</p>
+
+<!-- ===== TABLE OF CONTENTS ===== -->
+<h2>目录</h2>
+<ol>
+  <li><a href="#sec1">数据预处理：表面覆盖度</a></li>
+  <li><a href="#sec2">反应速率常数 \(k_{\text{react}}\)</a></li>
+  <li><a href="#sec3">覆盖度依赖因子 \(S\theta\)</a></li>
+  <li><a href="#sec4">10 种反应类型的概率计算</a></li>
+  <li><a href="#sec5">表面共反应物因子</a></li>
+  <li><a href="#sec6">概率归一化 &amp; 反应抽选</a></li>
+  <li><a href="#sec7">反应执行：粒子命运</a></li>
+  <li><a href="#sec8">完整算法流程图</a></li>
+  <li><a href="#sec9">附录：stoich_pow 函数 &amp; 输入文件格式</a></li>
+</ol>
+
+<!-- ===== SECTION 1 ===== -->
+<h2 id="sec1">1. 数据预处理：表面覆盖度</h2>
+
+<p>在进入每种反应的概率计算之前，<code>react()</code> 先计算一组与当前表面元素 <code>isurf</code> 相关的物理量。对应代码第 644–647 行。</p>
+
+<h3>1.1 输入符号</h3>
+<table>
+  <tr><th>变量</th><th>代码来源</th><th>含义</th><th>单位</th></tr>
+  <tr><td>\(F_{\text{num}}\)</td><td><code>update-&gt;fnum</code></td><td>每个模拟粒子代表的真实分子数</td><td>—</td></tr>
+  <tr><td>\(\theta_{\max}\)</td><td><code>max_cover</code></td><td>最大覆盖度（用户指定）</td><td>—</td></tr>
+  <tr><td>\(A_s\)</td><td><code>area[isurf]</code></td><td>当前表面元素的面积</td><td>m²</td></tr>
+  <tr><td>\(W_s\)</td><td><code>weight[isurf]</code></td><td>当前表面元素的权重</td><td>—</td></tr>
+  <tr><td>\(N_{\text{tot}}\)</td><td><code>total_state[isurf]</code></td><td>当前表面元素上吸附的总粒子数（整数）</td><td>—</td></tr>
+  <tr><td>\(N_k\)</td><td><code>species_state[isurf][k]</code></td><td>表面物种 \(k\) 的吸附粒子数</td><td>—</td></tr>
+</table>
+
+<h3>1.2 导出量（精确公式，对照代码第 644–647 行）</h3>
+
+<div class="formula-box">
+  <strong>换算因子 \(\alpha\)（代码 <code>factor</code>）：</strong>
+  \[
+  \alpha = \frac{F_{\text{num}} \cdot W_s}{A_s}
+  \]
+</div>
+
+<div class="formula-box">
+  <strong>最大可吸附粒子数 \(N_{\max}\)（代码 <code>maxstick</code>，整数，向上取整）：</strong>
+  \[
+  N_{\max} = \left\lceil \frac{\theta_{\max} \cdot A_s}{F_{\text{num}} \cdot W_s} \right\rceil
+  \]
+</div>
+
+<div class="formula-box warn">
+  <strong>归一化因子 \(m_s^{-1}\)（代码 <code>ms_inv</code>）：</strong>
+  \[
+  m_s^{-1} = \frac{\alpha}{\theta_{\max}} = \frac{F_{\text{num}} \cdot W_s}{A_s \cdot \theta_{\max}}
+  \]
+  <span class="idx" style="color:#f85149;">
+    ⚠ 注意：代码是 <code>ms_inv = factor / max_cover</code>（除以 \(\theta_{\max}\)），
+    <strong>不是</strong> <code>factor / maxstick</code>（除以 \(N_{\max}\)）！
+  </span>
+</div>
+
+<div class="formula-box">
+  <strong>表面覆盖度 \(\theta\)（代码 <code>surf_cover</code>）：</strong>
+  \[
+  \theta = N_{\text{tot}} \cdot m_s^{-1} = N_{\text{tot}} \cdot \frac{F_{\text{num}} \cdot W_s}{A_s \cdot \theta_{\max}}
+  \]
+</div>
+
+<div class="formula-box">
+  <strong>近似关系：</strong>
+  \[
+  \theta \approx \frac{N_{\text{tot}}}{N_{\max}}
+  \]
+  因为 \(N_{\max} = \lceil X \rceil\)，其中 \(X = \dfrac{\theta_{\max} \cdot A_s}{F_{\text{num}} \cdot W_s} = \dfrac{1}{m_s^{-1}}\)，
+  所以 \(N_{\max} \cdot m_s^{-1} = \dfrac{\lceil X \rceil}{X} \approx 1\)（大 \(X\) 时近似精确）。
+  因此 \(\theta = N_{\text{tot}} \cdot m_s^{-1} \approx N_{\text{tot}} / N_{\max}\)。
+</div>
+
+<div class="note">
+  <strong>物理意义：</strong>\(\theta\) 是当前表面已被占据的比例。
+  \(N_{\max}\) 是换算到模拟粒子数层面的"座位数"。
+  \(m_s^{-1}\) 是每个吸附粒子对覆盖度的贡献——严格等于 \(1/X\) 而非 \(1/N_{\max}\)。
+</div>
+
+<!-- ===== SECTION 2 ===== -->
+<h2 id="sec2">2. 反应速率常数 \(k_{\text{react}}\)</h2>
+
+<p>在文件读取阶段（<code>readfile_gs()</code> 第 2111–2114 行）预先计算好，存入 <code>r-&gt;k_react</code>。</p>
+
+<h3>2.1 SIMPLE 风格</h3>
+<div class="formula-box">
+  \[
+  k_{\text{react}} = c_0
+  \]
+  <span class="idx">其中 \(c_0 =\) <code>coeff[0]</code>，用户指定的常数概率（无量纲）</span>
+</div>
+
+<h3>2.2 ARRHENIUS 风格</h3>
+<div class="formula-box">
+  \[
+  k_{\text{react}} = c_0 \cdot T_w^{\,c_1} \cdot \exp\!\left(-\frac{c_2}{T_w}\right)
+  \]
+  <span class="idx">
+    其中 \(c_0,c_1,c_2 =\) <code>coeff[0],coeff[1],coeff[2]</code>；
+    \(c_2 = E_a / k_B\)，即活化能除以 Boltzmann 常数，单位 K；
+    \(T_w =\) <code>twall</code>，壁面温度（恒定值，在命令行指定）。
+  </span>
+</div>
+
+<div class="note">
+  <strong>关键局限：</strong>k_react 使用全局恒定壁温 \(T_w\) 计算，<strong>在文件读取时一次性算好</strong>，运行时不再变化。
+  这意味着：① 不支持壁温随时间/空间变化；② 活化能依赖壁温而非入射动能——对于有限速率催化模型而言，通常
+  应该用入射粒子的平动能 \(E_i = \frac{1}{2}m|\mathbf{v}|^2\) 来判断是否能克服活化能势垒。
+</div>
+
+<!-- ===== SECTION 3 ===== -->
+<h2 id="sec3">3. 覆盖度依赖因子 \(S(\theta)\)</h2>
+
+<p>对于<strong>吸附介导</strong>型反应（AA, DA, LH1, LH3, CD），反应概率需乘以覆盖度依赖因子 \(S(\theta)\)。
+代码提供两种模型：</p>
+
+<h3>3.1 简单幂律模型（无 kisliuk 标志）</h3>
+<div class="formula-box">
+  \[
+  S(\theta) = (1 - \theta)^{\,n}
+  \]
+  <span class="idx">
+    其中 \(n =\) <code>coeff[coeff_val]</code>，是覆盖度依赖的阶数。
+    <br><code>coeff_val = 1</code>（SIMPLE 风格）或 <code>coeff_val = 3</code>（ARRHENIUS 风格）。
+  </span>
+</div>
+
+<div class="bug">
+  <strong>⚠ 疑似 Bug：</strong><code>coeff_val</code> 在 for 循环中按 <code>if (r-&gt;style == ARRHENIUS)</code> 赋值，
+  但 <strong>没有 else 分支归位</strong>。如果前一个反应是 ARRHENIUS，后续 SIMPLE 反应会错误地使用
+  <code>coeff_val = 3</code> 去读 <code>coeff[3]</code>。应补上 <code>else coeff_val = 1;</code>。
+</div>
+
+<h3>3.2 Kisliuk 前驱模型（带 <code>kisliuk</code> 选项）</h3>
+
+<div class="formula-box">
+  <strong>Kisliuk 平衡常数（Arrhenius 形式）：</strong>
+  \[
+  K_{\text{ads}} = A_K \cdot T_w^{\,b_K} \cdot \exp\!\left(-\frac{E_{a,K}}{T_w}\right)
+  \]
+  <span class="idx">
+    其中 \(A_K, b_K, E_{a,K} =\) <code>kisliuk_coeff[0],[1],[2]</code>
+  </span>
+</div>
+
+<div class="formula-box">
+  <strong>Kisliuk 覆盖度函数（仅当 \(\theta &lt; 1\)）：</strong>
+  \[
+  S(\theta) = \left( \frac{1 - \theta}{\,1 - \theta + K_{\text{ads}} \cdot \theta\,} \right)^{\,n}
+  \]
+</div>
+
+<div class="note">
+  <strong>Kisliuk 模型的物理意义：</strong>Kisliuk 前驱模型描述了分子首先以<em>前驱态</em>（precursor state）
+  物理吸附在已占据的吸附位上，然后在表面扩散寻找空位进行化学吸附的过程。\(K_{\text{ads}}\) 是
+  前驱态脱附速率与化学吸附速率之比。当 \(K_{\text{ads}} = 0\) 时退化为简单幂律模型。
+</div>
+
+<!-- ===== SECTION 4 ===== -->
+<h2 id="sec4">4. 10 种反应类型的概率计算 \(P_i\)</h2>
+
+<p>对入射粒子的每种可能反应 \(i\)（预存在 <code>reactions_gs[ip-&gt;ispecies].list[]</code> 中），
+按反应类型计算原始概率值 <code>prob_value[i]</code>。</p>
+
+<h3>4.1 非吸附介导型（无覆盖度依赖）</h3>
+
+<h4>4.1.1 DISSOCIATION（解离）</h4>
+<div class="formula-box">
+  \[
+  P_i = k_{\text{react}}
+  \]
+</div>
+<p>粒子命运：ip → 产物1 的气相物种，新粒子 jp = 产物2。ip 和 jp 的速度保持入射速度不变，
+之后由关联的 SurfCollide 模型重新散射。</p>
+
+<h4>4.1.2 EXCHANGE（交换）</h4>
+<div class="formula-box">
+  \[
+  P_i = k_{\text{react}}
+  \]
+</div>
+<p>粒子命运：ip 的物种直接改为产物物种，ip 继续存在。</p>
+
+<h4>4.1.3 RECOMBINATION（复合消失）</h4>
+<div class="formula-box">
+  \[
+  P_i = k_{\text{react}}
+  \]
+</div>
+<p>粒子命运：ip → NULL（入射粒子被壁面"吃掉"）。</p>
+
+<h4>4.1.4 CI（Collision-Induced，碰撞诱导）</h4>
+<div class="formula-box">
+  <strong>基础概率：</strong>
+  \[
+  P_i = k_{\text{react}}
+  \]
+</div>
+
+<div class="formula-box">
+  <strong>若启用 <code>energy</code> 选项：</strong>
+  \[
+  P_i = k_{\text{react}} \cdot E_i^{\,a} \cdot (\cos\theta)^{\,b}
+  \]
+</div>
+
+<div class="formula-box warn">
+  <strong>其中入射平动能与入射角：</strong>
+  \[
+  E_i = \frac{1}{2} m \cdot |\mathbf{v}|^2,
+  \qquad
+  \cos\theta = \frac{|\mathbf{v} \cdot \mathbf{n}|}{|\mathbf{v}|}
+  \]
+  <span class="idx">
+    其中 \(m =\) <code>species[ip-&gt;ispecies].mass</code>，
+    \(\mathbf{v} =\) <code>ip-&gt;v</code>，
+    \(\mathbf{n} =\) <code>norm</code>（表面法向量）；
+    \(a,b =\) <code>energy_coeff[0],[1]</code>。
+  </span>
+</div>
+
+<div class="note">
+  <strong>注意：</strong>CI 是<strong>唯一</strong>一个将入射粒子动能纳入概率计算的 GS 反应类型。
+  这一点对有限速率催化修改极具参考价值——我们可以参照此模式给吸附介导型反应也加入能量依赖。
+</div>
+
+<h4>4.1.5 ER（Eley-Rideal，气-表面碰撞反应）</h4>
+<div class="formula-box danger">
+  <strong>⚠ 代码中有 <code>dot = 2.0</code> 的硬编码覆盖</strong>，实际效果等同于：
+</div>
+
+<div class="formula-box">
+  \[
+  P_i = k_{\text{react}} \cdot (N_{\max} \cdot m_s^{-1} - \theta)
+      \approx k_{\text{react}} \cdot (1 - \theta) \quad (\text{当 } n_{\text{reactant}} = 1)
+  \]
+  \[
+  P_i = k_{\text{react}} \quad (\text{当 } n_{\text{reactant}} \gt 1)
+  \]
+  <span class="idx">
+    其中 \(N_{\max} \cdot m_s^{-1} = \lceil X \rceil / X\)，\(X = \theta_{\max}A_s/(F_{\text{num}}W_s)\)，
+    大 \(X\) 时 ≈ 1。
+  </span>
+</div>
+
+<div class="note">
+  <strong>原始意图 vs 代码实际：</strong>
+  原始代码先计算 <code>dot = MathExtra::dot3(ip-&gt;v, norm)</code>，
+  但紧接着 <code>dot = 2.0;</code> 将结果硬编码覆盖。
+  使得速度依赖完全失效。这很可能是调试过程中的临时修改，忘记恢复。
+  <br><br>
+  <strong>原始设计意图推测：</strong>
+  \[
+  P_i = \frac{2 \cdot k_{\text{react}} \cdot (N_{\max} - N_{\text{tot}}) \cdot m_s^{-1}}{|\mathbf{v} \cdot \mathbf{n}|}
+  \]
+  速度越慢的粒子在壁面附近停留时间越长，反应概率越高——这符合 Eley-Rideal 机制的物理图景。
+</div>
+
+<p>粒子命运：ip → 气相产物，可施加 cmodel_ip 散射模型。</p>
+
+<hr>
+
+<h3>4.2 吸附介导型（有覆盖度依赖）</h3>
+
+<p>以下 5 种类型（<strong>AA, DA, LH1, LH3, CD</strong>）共享相同的概率框架：</p>
+
+<div class="formula-box">
+  \[
+  \boxed{P_i = k_{\text{react}} \cdot S(\theta)}
+  \]
+</div>
+
+<p>区别在于粒子命运（详见 <a href="#sec7">§7</a>）：</p>
+
+<table>
+  <tr><th>类型</th><th>全称</th><th>入射粒子命运</th><th>物理意义</th></tr>
+  <tr>
+    <td><strong>AA</strong></td><td>Adsorption</td>
+    <td><code>ip → NULL</code></td>
+    <td>气体分子 \(\text{A(g)} \to \text{A(s)}\) 吸附在壁面</td>
+  </tr>
+  <tr>
+    <td><strong>DA</strong></td><td>Dissociative Adsorption</td>
+    <td><code>ip → NULL</code> 或变成气相产物</td>
+    <td>\(\text{AB(g)} \to \text{A(s)} + \text{B(s)}\)（解离吸附），
+        或 \(\to \text{A(s)} + \text{B(g)}\)（部分解离）</td>
+  </tr>
+  <tr>
+    <td><strong>LH1</strong></td><td>Langmuir-Hinshelwood 类型 1</td>
+    <td><code>ip → 气相产物</code></td>
+    <td>表面物种脱附到气相：\(\text{A(s)} \to \text{A(g)}\)</td>
+  </tr>
+  <tr>
+    <td><strong>LH3</strong></td><td>Langmuir-Hinshelwood 类型 3</td>
+    <td><code>ip → NULL</code></td>
+    <td>表面物种间反应生成新表面物种：\(\text{A(s)}+\text{B(s)} \to \text{C(s)}\)</td>
+  </tr>
+  <tr>
+    <td><strong>CD</strong></td><td>Consumption to Bulk</td>
+    <td><code>ip → NULL</code></td>
+    <td>表面物种扩散进入体相（体相消耗）</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>关键问题：</strong>所有 5 种吸附介导型反应的 \(S(\theta)\) 只依赖覆盖度，<strong>k_react 只依赖壁温</strong>。
+  对于有限速率催化，反应概率应当取决于：
+  \[
+  P_{\text{reaction}} = f(E_i, T_w, \theta, \ldots)
+  \]
+  其中 \(E_i\) = 入射平动能，决定粒子能否克服 \(E_a\) 势垒。
+  当前代码完全缺失此物理机制。
+</div>
+
+<!-- ===== SECTION 5 ===== -->
+<h2 id="sec5">5. 表面共反应物因子</h2>
+
+<p>对应代码第 849–863 行。当 GS 反应涉及<strong>额外的表面相反应物</strong>（即 \(j \ge 1\) 且
+<code>state_reactants[j] == 's'</code>），概率需乘以组合数因子：</p>
+
+<div class="formula-box">
+  <strong>若共反应物为催化性（<code>part_reactants[j] == 0</code>），使用总覆盖度：</strong>
+  \[
+  P_i \;\;*\mkern-8mu{=}\;\; \binom{N_{\text{tot}}}{\nu_j} \cdot \left(m_s^{-1}\right)^{\nu_j}
+  \]
+</div>
+
+<div class="formula-box">
+  <strong>若共反应物为参与性（<code>part_reactants[j] == 1</code>），使用该物种覆盖度：</strong>
+  \[
+  P_i \;\;*\mkern-8mu{=}\;\; \binom{N_{s,k}}{\nu_j} \cdot \left(m_s^{-1}\right)^{\nu_j}
+  \]
+</div>
+
+<p>其中 \(\nu_j =\) <code>stoich_reactants[j]</code>（化学计量系数），\(N_{s,k}\) 为表面物种 \(k\) 的吸附量。</p>
+
+<div class="note">
+  <strong>物理意义：</strong>对于 Langmuir-Hinshelwood 型反应（如 LH3: \(\text{A(s)}+\text{B(s)} \to \ldots\)），
+  GS 反应的"第一步"是气相粒子 A(g) 撞击壁面并找到已吸附的 B(s)。B(s) 的数量越多，反应概率越高。
+  \(\binom{N_{s,B}}{\nu}\) 表示从 \(N_{s,B}\) 个 B 中选 \(\nu\) 个的组合数，即反应"配对"的可能方式数。
+  \(m_s^{-1}\) 因子将粒子数归一化为覆盖度。
+</div>
+
+<h3>5.1 <code>stoich_pow(N, k)</code> 函数</h3>
+
+<p>代码第 3533–3577 行实现了二项式系数的查表计算：</p>
+
+<div class="formula-box">
+  \[
+  \texttt{stoich\_pow}(N, k) = \binom{N}{k} = \frac{N(N-1)\cdots(N-k+1)}{k!}
+  \]
+  支持 \(k = 0,1,\ldots,6\)。当 \(N &lt; k\) 时返回 0。
+</div>
+
+<!-- ===== SECTION 6 ===== -->
+<h2 id="sec6">6. 概率归一化 &amp; 反应抽选</h2>
+
+<p>代码第 865–897 行。这是 DSMC 中标准的"接受-拒绝"蒙特卡洛抽样。</p>
+
+<h3>6.1 求和与归一化</h3>
+
+<div class="formula-box">
+  \[
+  \Sigma = \sum_{i=1}^{n} P_i
+  \]
+</div>
+
+<div class="formula-box">
+  \[
+  \begin{cases}
+    \Sigma \le 1: & \text{correction} = 1,\quad P_{\text{scatter}} = 1 - \Sigma \\[6pt]
+    \Sigma \gt 1: & \text{correction} = \dfrac{1}{\Sigma},\quad P_{\text{scatter}} = 0
+  \end{cases}
+  \]
+</div>
+
+<div class="note">
+  <strong>物理意义：</strong>\(P_{\text{scatter}}\) 为"不发生任何反应，粒子直接弹性/非弹性散射"的概率。
+  如果所有反应的总概率超过 1，则将各反应概率等比例压缩，散射概率为 0（即粒子<strong>必然</strong>发生某种反应）。
+</div>
+
+<h3>6.2 反应抽选</h3>
+
+<div class="formula-box">
+  <strong>Step 1:</strong> 生成随机数 \(r \sim \mathcal{U}(0,1)\)
+</div>
+
+<div class="formula-box">
+  <strong>Step 2 (散射判定):</strong>
+  若 \(r &lt; P_{\text{scatter}}\)，粒子散射（无反应），返回 0。
+</div>
+
+<div class="formula-box">
+  <strong>Step 3 (反应选择):</strong>
+  从 \(p = P_{\text{scatter}}\) 出发，依次累加：
+  \[
+  p \leftarrow p + P_i \cdot \text{correction}
+  \]
+  当 \(p \gt r\) 时，选中反应 \(i\) 并执行。
+</div>
+
+<p>等价于：选中反应 \(i\) 的概率为 \(P_i \cdot \text{correction}\)，不反应的概率为 \(P_{\text{scatter}}\)。</p>
+
+<div class="formula-box warn">
+  \[
+  P_{\text{scatter}} + \sum_i P_i \cdot \text{correction} \le 1
+  \]
+  当 \(\Sigma \le 1\) 时严格等于 1；当 \(\Sigma \gt 1\) 时 \(P_{\text{scatter}} = 0\)。
+</div>
+
+<!-- ===== SECTION 7 ===== -->
+<h2 id="sec7">7. 反应执行：粒子命运 &amp; 表面状态更新</h2>
+
+<p>当反应 \(i\) 被选中后（代码第 900–1131 行），做两件事：</p>
+
+<h3>7.1 更新表面物种计数 delta</h3>
+
+<p>遍历反应物（\(j = 0 \ldots n_{\text{reactant}}-1\)）和产物（\(j = 0 \ldots n_{\text{product}}-1\)）：</p>
+
+<div class="formula-box">
+  <strong>反应物中参与性表面物种（<code>part_reactants[j]==1 &amp;&amp; state=='s'</code>）：</strong>
+  \[
+  \Delta N_{k} \;\;-\mkern-5mu{=}\;\; \nu_j
+  \]
+</div>
+
+<div class="formula-box">
+  <strong>产物中参与性表面物种（<code>part_products[j]==1 &amp;&amp; state=='s'</code>）：</strong>
+  \[
+  \Delta N_{k} \;\;+\mkern-5mu{=}\;\; \nu_j
+  \]
+</div>
+
+<p>\(\Delta N_k\) 存储在 <code>species_delta[isurf][k]</code>，每个 nsync 步汇总到 <code>species_state</code>。</p>
+
+<p>催化性（<code>part=0</code>）和气相（<code>state='g'</code>）物种不改变表面计数。</p>
+
+<h3>7.2 粒子操作汇总</h3>
+
+<table style="font-size:0.88rem">
+  <tr><th>反应类型</th><th>ip (入射粒子)</th><th>jp (新粒子)</th><th>velreset</th><th>说明</th></tr>
+  <tr>
+    <td><strong>DISSOCIATION</strong></td>
+    <td>物种→products[0]</td>
+    <td>新粒子=products[1]</td><td>0</td>
+    <td>由默认 SC 模型设速度</td>
+  </tr>
+  <tr>
+    <td><strong>EXCHANGE</strong></td>
+    <td>物种→products[0]</td><td>NULL</td><td>0</td>
+    <td>粒子保留，仅改物种</td>
+  </tr>
+  <tr>
+    <td><strong>RECOMBINATION</strong></td>
+    <td><strong>NULL</strong></td><td>NULL</td><td>—</td>
+    <td>粒子被销毁</td>
+  </tr>
+  <tr>
+    <td><strong>AA</strong></td>
+    <td><strong>NULL</strong></td><td>NULL</td><td>—</td>
+    <td>吸附消失</td>
+  </tr>
+  <tr>
+    <td><strong>DA</strong></td>
+    <td>NULL 或→气相产物</td>
+    <td>可能有多余气相产物</td>
+    <td>cmodel_ip→1</td>
+    <td>可部分解离，最复杂</td>
+  </tr>
+  <tr>
+    <td><strong>LH1</strong></td>
+    <td>物种→products[0]</td><td>NULL</td>
+    <td>cmodel_ip→1</td>
+    <td>脱附为气相</td>
+  </tr>
+  <tr>
+    <td><strong>LH3</strong></td>
+    <td><strong>NULL</strong></td><td>NULL</td><td>—</td>
+    <td>表面→新表面</td>
+  </tr>
+  <tr>
+    <td><strong>CD</strong></td>
+    <td><strong>NULL</strong></td><td>NULL</td><td>—</td>
+    <td>消耗到体相</td>
+  </tr>
+  <tr>
+    <td><strong>ER</strong></td>
+    <td>物种→products[0]</td><td>NULL</td>
+    <td>cmodel_ip→1</td>
+    <td>Eley-Rideal 产物</td>
+  </tr>
+  <tr>
+    <td><strong>CI</strong></td>
+    <td>物种→products[0]</td>
+    <td>可能=products[1]</td>
+    <td>cmodel_ip→1</td>
+    <td>碰撞诱导</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>关于 velreset：</strong>当 <code>cmodel_ip != NOMODEL</code> 时设为 1，表示反应已在 <code>react()</code>
+  内部通过 <code>cmodels[r-&gt;cmodel_ip]-&gt;wrapper()</code> 设置了产物速度，
+  外层 <code>SurfCollide::collide()</code> 不再重复散射。
+</div>
+
+<p><strong>返回值：</strong><code>return list[i] + 1</code>（1-based 反应编号，0 = 无反应）。</p>
+
+<!-- ===== SECTION 8 ===== -->
+<h2 id="sec8">8. 完整算法流程图</h2>
+
+<pre style="font-size:.8rem; line-height:1.8;">
+┌─────────────────────────────────────────────────────────────────────────┐
+│  SurfReactAdsorb::react(ip, isurf, norm, jp, velreset)                  │
+│  ───────────────────────────────────────────────────                    │
+│  被 SurfCollide::collide() 调用（每粒子·每步·每次壁面碰撞）                │
+└─────────────────────────────────────────────────────────────────────────┘
+  │
+  ├─[1]────────────────────────────────────────────────────────────────────
+  │  if (!gsflag) return 0;                         // GS 模式未启用
+  │  if (isurf<0 && mode==SURF) ERROR;               // 模式不匹配检查
+  │  if (isurf>=0 && mode==FACE) ERROR;
+  │  if (mode == FACE) isurf = -(isurf+1);           // 负索引→0~5
+  │
+  ├─[2]────────────────────────────────────────────────────────────────────
+  │  list[] = reactions_gs[ip->ispecies].list;       // 该物种的可能反应
+  │  n = reactions_gs[ip->ispecies].n;
+  │  if (n == 0) return 0;                           // 无反应 → 散射
+  │
+  ├─[3]──── 计算覆盖度 ────────────────────────────────────────────────────
+  │  fnum = update->fnum;
+  │  Nmax = ceil(max_cover * area / (fnum * weight));
+  │  α = fnum * weight / area;
+  │  ms⁻¹ = α / max_cover;        ← ⚠ 注意:除以 max_cover,不是 maxstick!
+  │  θ = Ntot * ms⁻¹;             θ ≈ Ntot/Nmax (近似)
+  │
+  ├─[4]──── 计算各反应概率 ───────────────────────────────────────────────
+  │  for each possible reaction i:
+  │  │
+  │  ├── 基础 k_react（已在 readfile_gs 中算好）:
+  │  │   SIMPLE:      k = coeff[0]
+  │  │   ARRHENIUS:   k = coeff[0] * Tw^coeff[1] * exp(-coeff[2]/Tw)
+  │  │
+  │  ├── 覆盖度因子 S(θ)（仅 AA/DA/LH1/LH3/CD）:
+  │  │   Kisliuk:  Kads = A*Tw^b*exp(-Ea/Tw)
+  │  │             S(θ) = [(1-θ)/(1-θ+Kads*θ)]^n
+  │  │   简单:      S(θ) = (1-θ)^n
+  │  │
+  │  ├── 按类型:
+  │  │   D/E/R:     P_i = k
+  │  │   AA/DA/     P_i = k * S(θ)
+  │  │   LH1/LH3/CD:
+  │  │   ER:        P_i = k * (1-θ)     (dot被硬编码为2.0)
+  │  │   CI:        P_i = k * Ei^a * cosθ^b  (可选)
+  │  │
+  │  └── 额外表面共反应物因子 (∀j≥1, state[j]=='s'):
+  │      P_i *= C(N_ads, νj) * (ms⁻¹)^νj
+  │
+  ├─[5]──── 概率归一化 ────────────────────────────────────────────────────
+  │  Σ = Σ P_i
+  │  if (Σ > 1):  correction = 1/Σ,  Pscatter = 0
+  │  else:        correction = 1,    Pscatter = 1 - Σ
+  │
+  ├─[6]──── 蒙特卡洛抽选 ──────────────────────────────────────────────────
+  │  r = uniform(0,1)
+  │  if (r < Pscatter) return 0;      // 散射，无反应
+  │
+  │  p = Pscatter
+  │  for each reaction i:
+  │    p += P_i * correction
+  │    if (p > r): 选中反应 i, break
+  │
+  ├─[7]──── 执行反应 ──────────────────────────────────────────────────────
+  │  nsingle++, tally_single[list[i]]++
+  │  mark[isurf] = 1
+  │
+  │  // 更新表面 delta
+  │  for reactants:  if (part && state=='s')  ΔN -= ν
+  │  for products:   if (part && state=='s')  ΔN += ν
+  │
+  │  // 按类型处理粒子
+  │  switch(type):
+  │    D:  ip→prod[0], 新jp
+  │    E:  ip→prod[0]
+  │    R:  ip=NULL
+  │    AA: ip=NULL
+  │    DA: ip可能→气相产物, 可能有多余jp
+  │    LH1: ip→气相产物, 施加cmodel_ip
+  │    LH3: ip=NULL
+  │    CD:  ip=NULL
+  │    ER:  ip→气相产物, 施加cmodel_ip
+  │    CI:  ip→气相产物, 可能+jp, 施加cmodel
+  │
+  └─[8]────────────────────────────────────────────────────────────────────
+     return list[i] + 1;    // 1~N = 反应编号
+</pre>
+
+<!-- ===== SECTION 9 ===== -->
+<h2 id="sec9">9. 附录</h2>
+
+<h3>9.1 类型枚举</h3>
+
+<table>
+  <tr><th>枚举值</th><th>代码枚举名</th><th>含义</th><th>输入文件标识</th></tr>
+  <tr><td>0</td><td><code>DISSOCIATION</code></td><td>解离</td><td>D / d</td></tr>
+  <tr><td>1</td><td><code>EXCHANGE</code></td><td>交换</td><td>E / e</td></tr>
+  <tr><td>2</td><td><code>RECOMBINATION</code></td><td>复合</td><td>R / r</td></tr>
+  <tr><td>3</td><td><code>AA</code></td><td>吸附</td><td>AA / aa</td></tr>
+  <tr><td>4</td><td><code>DA</code></td><td>解离吸附</td><td>DA / da</td></tr>
+  <tr><td>5</td><td><code>LH1</code></td><td>L-H 脱附</td><td>LH1 / lh1</td></tr>
+  <tr><td>6</td><td><code>LH3</code></td><td>L-H 表面反应</td><td>LH3 / lh3</td></tr>
+  <tr><td>7</td><td><code>CD</code></td><td>体相消耗</td><td>CD / cd</td></tr>
+  <tr><td>8</td><td><code>ER</code></td><td>Eley-Rideal</td><td>ER / er</td></tr>
+  <tr><td>9</td><td><code>CI</code></td><td>碰撞诱导</td><td>CI / ci</td></tr>
+</table>
+
+<h3>9.2 物种状态标记</h3>
+
+<table>
+  <tr><th>标记</th><th>含义</th><th>输入语法示例</th></tr>
+  <tr><td><span class="tag tag-g">g</span></td><td>气相 (gas)</td><td><code>O2(g)</code></td></tr>
+  <tr><td><span class="tag tag-s">s</span></td><td>表面吸附态 (surface)</td><td><code>O(s)</code></td></tr>
+  <tr><td><span class="tag tag-b">b</span></td><td>体相 (bulk)</td><td><code>O(b)</code></td></tr>
+  <tr><td><span class="tag tag-c">c</span></td><td>催化性 (catalyst, 不消耗)</td><td><code>Pt(c)(s)</code></td></tr>
+</table>
+
+<h3>9.3 输入文件格式</h3>
+
+<p><strong>Input 命令：</strong></p>
+<pre>surf_react ID adsorb gs gs_file nsync face Twall max_cover surf_sp1 surf_sp2 ...
+surf_react ID adsorb gs gs_file nsync surf Twall max_cover surf_sp1 ...</pre>
+
+<p><strong>GS 反应文件（每反应 2 + nextra 行）：</strong></p>
+<pre>
+# 第1行: 反应方程（可选前缀数字为化学计量系数）
+O2(g) --> 2O(s)                    # 解离吸附: AB → 2表面物种
+A(g) --> A(s)                      # 吸附
+A(s) --> A(g)                      # 脱附 (LH1)
+A(s) + B(s) --> AB(g)              # LH1 + 表面共反应物 (ER 也可)
+A(s) + B(s) --> C(s)               # LH3
+A(s) + 2B(s) --> AB2(g)            # LH2 型（由 PS 化学处理）
+
+# 第2行: 类型 风格 [系数...] [可选选项]
+AA S 0.8 2                          # SIMPLE: prob=0.8, 覆盖度阶数n=2
+DA A 1e-2 0.5 3000 1               # ARRHENIUS: A=0.01, b=0.5, Ea=3000K, n=1
+DA S 0.5 1 kisliuk 0.1 0 1000      # SIMPLE + Kisliuk
+CI S 0.3 energy 0.5 1.0             # CI + 能量依赖
+
+# 可选第3行（1个气相产物时）: SurfCollide模型
+diffuse 300.0
+
+# 可选第3,4行（2个气相产物时）: 分别为ip和jp的SC模型
+diffuse 300.0
+cll 0.8 0.9 1.0
+</pre>
+
+<h3>9.4 <code>stoich_pow</code> 完整对照</h3>
+
+<div class="formula-box">
+  \[
+  \begin{aligned}
+  \texttt{stoich\_pow}(N,0) &= 1 \\
+  \texttt{stoich\_pow}(N,1) &= N \\
+  \texttt{stoich\_pow}(N,2) &= \tfrac{1}{2}N(N-1) = \binom{N}{2} \\
+  \texttt{stoich\_pow}(N,3) &= \tfrac{1}{6}N(N-1)(N-2) = \binom{N}{3} \\
+  \texttt{stoich\_pow}(N,4) &= \tfrac{1}{24}N(N-1)(N-2)(N-3) = \binom{N}{4} \\
+  \texttt{stoich\_pow}(N,5) &= \tfrac{1}{120}N(N-1)(N-2)(N-3)(N-4) = \binom{N}{5} \\
+  \texttt{stoich\_pow}(N,6) &= \tfrac{1}{720}N(N-1)(N-2)(N-3)(N-4)(N-5) = \binom{N}{6}
+  \end{aligned}
+  \]
+</div>
+
+<h3>9.5 关键文件索引</h3>
+
+<table>
+  <tr><th>文件</th><th>关键行</th><th>内容</th></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>620–1137</td><td><code>react()</code> — GS 反应主函数</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>1177–1231</td><td><code>tally_update()</code> — 每 nsync 步同步状态</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>1235–1370</td><td><code>PS_chemistry()</code> — PS 化学调度</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>1502–1594</td><td><code>init_reactions_gs()</code> — GS 反应初始化</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>1598–2262</td><td><code>readfile_gs()</code> — 读 GS 反应文件</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>2107–2114</td><td><code>k_react</code> 预计算（Arrhenius 公式）</td></tr>
+  <tr><td><code>surf_react_adsorb.cpp</code></td><td>3533–3577</td><td><code>stoich_pow()</code> — 二项式系数</td></tr>
+  <tr><td><code>surf_react_adsorb.h</code></td><td>107–133</td><td><code>OneReaction_GS</code> — GS 反应数据结构</td></tr>
+  <tr><td><code>surf_collide_diffuse.cpp</code></td><td>140–199</td><td>调用 <code>react()</code> 的典型 SC 模型</td></tr>
+</table>
+
+<hr>
+<p style="color:#8b949e; font-size:.85rem; margin-top:2rem;">
+  生成时间: 2026-07-09 · 基于 SPARTA 源代码 <code>surf_react_adsorb.cpp</code> 逐行分析
+</p>
+
+</body>
+</html>
