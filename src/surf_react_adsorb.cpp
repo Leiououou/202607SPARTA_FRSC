@@ -1597,7 +1597,7 @@ void SurfReactAdsorb::init_reactions_gs()
 
 void SurfReactAdsorb::readfile_gs(char *fname)
 {
-  int n,n1,n2,eof;
+  int n,n1,n2,eof;  // 临时变量，用于计数和判断文件结束
   char line1[MAXLINE],line2[MAXLINE];
   char copy1[MAXLINE],copy2[MAXLINE];
   char *word;
@@ -1672,13 +1672,13 @@ void SurfReactAdsorb::readfile_gs(char *fname)
 
     n = strlen(line1) - 1;
     r->id = new char[n+1];
-    strncpy(r->id,line1,n);
+    strncpy(r->id,line1,n);           //以反应整行作为单个反应的id
     r->id[n] = '\0';
 
     word = strtok(line1," \t\n");
 
     while (1) {
-      if (!word) {
+      if (!word) {                   //如果第一个单词为空，则报错
         if (side == 0) {
           print_reaction(copy1,copy2);
           error->all(FLERR,"Invalid reaction formula in file");
@@ -1701,7 +1701,7 @@ void SurfReactAdsorb::readfile_gs(char *fname)
           start = 0;
           r->part_reactants[r->nreactant] = 1;
           r->stoich_reactants[r->nreactant] = 1;
-          if (word[n-2] != ')') {
+          if (word[n-2] != ')') {        //该物种没有括号就报错
             print_reaction(copy1,copy2);
             error->all(FLERR,"Specify the state of the reactants");
           }
@@ -1727,7 +1727,7 @@ void SurfReactAdsorb::readfile_gs(char *fname)
             print_reaction(copy1,copy2);
             error->all(FLERR,"Bulk phase reactants cannot be catalytic");
           }
-          if (isdigit(word[0])) {
+          if (isdigit(word[0])) {     //统计该物种的化学计量系数
             r->stoich_reactants[r->nreactant] = atoi(word);
             start=1;
           }
