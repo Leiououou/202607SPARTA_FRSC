@@ -20,7 +20,9 @@
       "Read(//d/Program Files/Microsoft MPI//**)",
       "Bash(wsl --list --verbose)",
       "Bash(wsl whoami *)",
-      "Bash(wsl bash *)"
+      "Bash(wsl bash *)",
+      "Bash(ls -la \"C:/Users/DELL/.claude/projects/d------------202607-src/memory/\")",
+      "Read(//d/claude/.claude/projects/d------------202607-src/memory/**)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018"
