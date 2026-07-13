@@ -10,7 +10,17 @@
       "Bash(grep -n \"inserted\\\\|Missing\\\\|\\\\$\" gs_probabilities.log)",
       "Bash(grep -n \"Missing \\\\$ inserted\" gs_probabilities.log)",
       "Bash(grep -v '\\\\\\\\_')",
-      "Bash(grep -v 'equation\\\\|align\\\\|\\\\\\\\begin\\\\|\\\\\\\\end\\\\|\\\\\\\\usepackage\\\\|math\\\\|\\\\\\\\text\\\\|\\\\\\\\mathrm\\\\|\\\\\\\\binom\\\\|\\\\\\\\frac\\\\|\\\\\\\\sum\\\\|\\\\\\\\boxed\\\\|\\\\\\\\min\\\\|\\\\\\\\exp\\\\|\\\\\\\\left\\\\|\\\\\\\\cdot\\\\|\\\\\\\\max\\\\|\\\\\\\\tt\\\\|\\\\\\\\ge')"
+      "Bash(grep -v 'equation\\\\|align\\\\|\\\\\\\\begin\\\\|\\\\\\\\end\\\\|\\\\\\\\usepackage\\\\|math\\\\|\\\\\\\\text\\\\|\\\\\\\\mathrm\\\\|\\\\\\\\binom\\\\|\\\\\\\\frac\\\\|\\\\\\\\sum\\\\|\\\\\\\\boxed\\\\|\\\\\\\\min\\\\|\\\\\\\\exp\\\\|\\\\\\\\left\\\\|\\\\\\\\cdot\\\\|\\\\\\\\max\\\\|\\\\\\\\tt\\\\|\\\\\\\\ge')",
+      "Read(//d/Program Files/Microsoft MPI/Bin//**)",
+      "Read(//d/msys64/mingw64/bin/**)",
+      "Read(//d/Program Files/Microsoft MPI/**)",
+      "Read(//d/Program Files \\\\\\(x86\\\\\\)/Microsoft SDKs/**)",
+      "Read(//d/Program Files/**)",
+      "Read(//c/Program Files/**)",
+      "Read(//d/Program Files/Microsoft MPI//**)",
+      "Bash(wsl --list --verbose)",
+      "Bash(wsl whoami *)",
+      "Bash(wsl bash *)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018"

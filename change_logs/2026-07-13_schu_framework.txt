@@ -1,0 +1,134 @@
+============================================================
+SPARTA schu 有限速率框架搭建 — 修改日志
+============================================================
+修改时间: 2026-07-13
+修改目的: 搭建 Molchanova 有限速率壁面催化模型的基础代码框架，
+         新增 react_gs_finite_rate() 函数和 schu 关键词开关，
+         为后续修改概率公式做准备。
+修改人:   (Claude Code assistant)
+============================================================
+
+一、修改文件清单
+-----------------
+1. src/surf_react_adsorb.h  — 头文件
+2. src/surf_react_adsorb.cpp — 实现文件
+
+二、surf_react_adsorb.h 修改详情
+---------------------------------
+
+[修改1] L49: 新增成员变量 schu_flag
+  位置: 在 "int gsflag,psflag;" 之后
+  原代码:
+    int gsflag,psflag;                // 0/1 if gas and/or surf chem enabled
+  新代码:
+    int gsflag,psflag;                // 0/1 if gas and/or surf chem enabled
+    int schu_flag;                   // 0=原概率公式（默认），1=有限速率公式
+  说明: schu_flag = 0 使用原有 react() 函数（向后兼容），
+        schu_flag = 1 使用新的 react_gs_finite_rate() 函数。
+
+[修改2] L34: 新增成员函数声明 react_gs_finite_rate()
+  位置: 在 "int react(...)" 声明之后
+  原代码:
+    int react(Particle::OnePart *&, int, double *, Particle::OnePart *&, int &);
+  新代码:
+    int react(Particle::OnePart *&, int, double *, Particle::OnePart *&, int &);
+    int react_gs_finite_rate(Particle::OnePart *&, int, double *,
+                             Particle::OnePart *&, int &);
+  说明: 函数签名与 react() 完全一致，输入输出参数相同。
+
+三、surf_react_adsorb.cpp 修改详情
+-----------------------------------
+
+[修改3] 构造函数: 新增 schu 关键词解析 (约 L137-146)
+  位置: 在 "iarg += 5;" 之后、"species_surf = new char*[narg-iarg];" 之前
+  新增代码:
+    // schu = yes/no for finite-rate GS model
+
+    schu_flag = 0;
+    if (iarg < narg && strcmp(arg[iarg],"schu") == 0) {
+      iarg++;
+      if (strcmp(arg[iarg],"yes") == 0) schu_flag = 1;
+      else if (strcmp(arg[iarg],"no") == 0) schu_flag = 0;
+      else error->all(FLERR,"Illegal surf_react adsorb schu option");
+      iarg++;
+    }
+  说明:
+  - 默认 schu_flag = 0（不使用有限速率模型，向后兼容）
+  - 可选关键词 "schu yes" 或 "schu no"
+  - 必须在 iarg+=5 之后检测，因为 arg[iarg] 此时指向第一个物种名或 schu
+
+[修改4] react() 函数顶部: 新增派发逻辑 (L634-637)
+  位置: 在 "if (!gsflag) return 0;" 之前
+  新增代码:
+    // if schu finite-rate model enabled, use new function
+
+    if (schu_flag && gsflag)
+      return react_gs_finite_rate(ip, isurf, norm, jp, velreset);
+  说明:
+  - 同时检查 schu_flag 和 gsflag（仅 GS 反应才走新函数）
+  - 派发到 react_gs_finite_rate()，参数原样传递
+  - return 立即退出 react()，后续原代码不执行
+
+[修改5] 新增函数 react_gs_finite_rate() (L1157-1677)
+  位置: 在 react() 函数的闭合花括号之后（原 react 结束于 L1153），
+        在 "void SurfReactAdsorb::tally_update()" 之前
+  内容: 完整复制 react() 函数体，仅做以下改动：
+    1. 函数名: SurfReactAdsorb::react -> SurfReactAdsorb::react_gs_finite_rate
+    2. 去掉派发代码段（即 [修改4] 新增的那几行），避免无限递归
+  说明:
+  - 当前 react_gs_finite_rate() 与原 react() 逻辑完全一致
+  - 后续将在本函数中逐步替换各反应类型的概率公式
+  - 函数总长约 520 行
+
+四、输入文件格式
+-----------------
+不含 schu 关键词（默认原函数）:
+  surf_react sr adsorb gs data.gs nsync 10 face 300 1.0 O(s) N(s)
+
+含 schu 关键词（启用新函数）:
+  surf_react sr adsorb gs data.gs nsync 10 face 300 1.0 schu yes O(s) N(s)
+
+五、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译命令: cd src && make mpi -j4
+编译结果: 成功，无错误、无警告
+生成文件: src/spa_mpi (2.5 MB)
+  text:   2,166,200
+  data:     107,680
+  bss:       14,568
+  total:  2,288,448
+
+依赖生成: surf_react_adsorb.d (自动依赖文件已更新)
+重编译文件: surf_react_adsorb.o, compute_surf.o, surf.o
+
+六、遇到的问题与修复
+-----------------------
+[问题1] schu 关键词位置逻辑错误
+  描述: 初始版本在 "iarg += 5" 之前检测 schu，
+        此时 arg[iarg] 指向的是 "nsync" 字符串而非 schu 或物种名，
+        导致检测永远失败。
+  修复: 将 schu 解析代码移到 "iarg += 5" 之后执行，
+        此时 arg[iarg] 正确指向第一个物种名或 schu 关键词。
+
+[问题2] 首次尝试用 mingw32-make 编译失败
+  描述: Windows Git Bash 环境下没有 mpic++ 编译器
+  修复: 改用 WSL Ubuntu-20.04 环境（用户告知 SPARTA 应在 Linux 编译）
+
+[问题3] 直接用 Obj_mpi/Makefile 编译失败
+  描述: ar 命令报错，因为 OBJ 和 EXE 变量未传递
+  修复: 改用根目录 Makefile: "make mpi"，正确传递 OBJ/EXE 等变量
+
+七、默认行为影响分析
+-----------------------
+- 不写 schu 关键词: 与修改前完全一致，走原 react() 函数，零影响
+- 写入 schu no: 同上
+- 写入 schu yes: 走 react_gs_finite_rate()（当前逻辑与原 react() 相同，
+  概率公式尚未修改，无实际效果差异）
+
+八、下一步计划
+-----------------
+在 react_gs_finite_rate() 中实现 Molchanova 统一概率公式：
+- D/E/R: 保持 P = k_react 常数概率
+- AA/DA/LH1/LH3/CD/ER: 替换为 P = min(1, 2K(Tw)·Γ/Vn)
+- CI: 保留 SPARTA 原有逻辑（含 energy 选项）

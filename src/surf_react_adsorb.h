@@ -31,6 +31,8 @@ class SurfReactAdsorb : public SurfReact {
   ~SurfReactAdsorb();
   void init();
   int react(Particle::OnePart *&, int, double *, Particle::OnePart *&, int &);
+  int react_gs_finite_rate(Particle::OnePart *&, int, double *,
+                           Particle::OnePart *&, int &);
 
   char *reactionID(int);
   double reaction_coeff(int) {return 0.0;};
@@ -45,6 +47,7 @@ class SurfReactAdsorb : public SurfReact {
   int distributed;
 
   int gsflag,psflag;                // 0/1 if gas and/or surf chem enabled
+  int schu_flag;                   // 0=原概率公式（默认），1=有限速率公式
   int mode;                         // FACE or SURF
   int nsync;                        // synchronize surf state
                                     // every this many steps

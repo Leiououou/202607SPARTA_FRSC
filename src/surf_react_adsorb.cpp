@@ -133,6 +133,17 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
   // species_surf = list of surface species IDs
 
   iarg += 5;
+
+  // schu = yes/no for finite-rate GS model
+
+  schu_flag = 0;
+  if (iarg < narg && strcmp(arg[iarg],"schu") == 0) {
+    iarg++;
+    if (strcmp(arg[iarg],"yes") == 0) schu_flag = 1;
+    else if (strcmp(arg[iarg],"no") == 0) schu_flag = 0;
+    else error->all(FLERR,"Illegal surf_react adsorb schu option");
+    iarg++;
+  }
   species_surf = new char*[narg-iarg];
   nspecies_surf = 0;
 
@@ -619,6 +630,533 @@ void SurfReactAdsorb::init()
 
 int SurfReactAdsorb::react(Particle::OnePart *&ip, int isurf, double *norm,
                            Particle::OnePart *&jp, int &velreset)
+{
+  // if schu finite-rate model enabled, use new function
+
+  if (schu_flag && gsflag)
+    return react_gs_finite_rate(ip, isurf, norm, jp, velreset);
+
+  // just return if GS model not defined
+
+  if (!gsflag) return 0;
+
+  // error checks
+
+  if (isurf < 0 && mode == SURF)
+    error->one(FLERR,"Surf_react adsorb surf used with box faces");
+  if (isurf >= 0 && mode == FACE)
+    error->one(FLERR,"Surf_react adsorb face used with surface elements");
+
+  // convert face index from negative value to 0 to 5 inclusive
+
+  if (mode == FACE) isurf = -(isurf+1);
+
+  // n = # of possible reactions for particle IP
+
+  int *list = reactions_gs[ip->ispecies].list;
+  int n = reactions_gs[ip->ispecies].n;
+  if (n == 0) return 0;
+
+  double fnum = update->fnum;
+  long int maxstick = ceil(max_cover*area[isurf] / (fnum*weight[isurf]));
+  double factor = fnum * weight[isurf] / area[isurf];
+  double ms_inv = factor / max_cover;
+
+  // loop over possible reactions for this species
+
+  Particle::Species *species = particle->species;
+
+  OneReaction_GS *r;
+  double prob_value[n], sum_prob = 0.0;
+  double scatter_prob = 0.0, correction = 1.0;
+  //int check_ads = 0, ads_index = -1;
+
+  int coeff_val = 1;
+
+  for (int i = 0; i < n; i++) {
+    r = &rlist_gs[list[i]];
+
+    if (r->style == ARRHENIUS) coeff_val = 3;
+
+    switch (r->type) {
+    case DISSOCIATION:
+      {
+        //prob_value[i] = r->coeff[0];
+        prob_value[i] = r->k_react;
+        break;
+      }
+
+    case EXCHANGE:
+      {
+        //prob_value[i] = r->coeff[0];
+        prob_value[i] = r->k_react;
+        break;
+      }
+
+    case RECOMBINATION:
+      {
+        //prob_value[i] = r->coeff[0];
+        prob_value[i] = r->k_react;
+        break;
+      }
+
+    case AA:
+      {
+        //check_ads = 1;
+        //ads_index = i;
+        double surf_cover = total_state[isurf] * ms_inv;
+        double S_theta = 0.0;
+
+        if (r->kisliuk_flag)
+        {
+          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
+          exp(-r->kisliuk_coeff[2]/twall);
+          if (surf_cover < 1)
+            S_theta = pow((1 - surf_cover) /
+                          (1 - surf_cover +
+                           K_ads*surf_cover),r->coeff[coeff_val]);
+        }
+        else
+        {
+          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        }
+        //scatter_prob = 1 - r->k_react*S_theta;
+        //prob_value[i] = 1.0;
+        prob_value[i] = r->k_react*S_theta;
+        break;
+      }
+
+    case DA:
+      {
+        double surf_cover = total_state[isurf] * ms_inv;
+        double S_theta = 0.0;
+
+        if (r->kisliuk_flag) {
+          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
+            exp(-r->kisliuk_coeff[2]/twall);
+          if (surf_cover < 1)
+            S_theta = pow((1 - surf_cover) /
+                          (1 - surf_cover +
+                           K_ads*surf_cover),r->coeff[coeff_val]);
+        } else {
+          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        }
+
+        prob_value[i] = r->k_react*S_theta;
+
+        /*
+        if (r->state_products[1][0] == 's') {
+          double K_ads2 = r->coeff[6] * pow(twall,r->coeff[7]) *
+            exp(-r->coeff[8]/twall);
+          double S_ratio2 = (1 - surf_cover) /
+               (1 - surf_cover + K_ads*surf_cover);
+          prob_value[i] *= (S_ratio2);
+        }
+        */
+
+        break;
+      }
+
+    case LH1:
+      {
+        double surf_cover = total_state[isurf] * ms_inv;
+        double S_theta = 0.0;
+
+        if (r->kisliuk_flag) {
+          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
+            exp(-r->kisliuk_coeff[2]/twall);
+          if (surf_cover < 1)
+            S_theta = pow((1 - surf_cover) /
+                          (1 - surf_cover +
+                           K_ads*surf_cover),r->coeff[coeff_val]);
+        } else {
+          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        }
+
+        prob_value[i] = r->k_react*S_theta;
+        break;
+      }
+
+    case LH3:
+      {
+        double surf_cover = total_state[isurf] * ms_inv;
+        double S_theta = 0.0;
+
+        if (r->kisliuk_flag) {
+          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
+            exp(-r->kisliuk_coeff[2]/twall);
+          if (surf_cover < 1)
+            S_theta = pow((1 - surf_cover) /
+                          (1 - surf_cover +
+                           K_ads*surf_cover),r->coeff[coeff_val]);
+        } else {
+          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        }
+
+        prob_value[i] = r->k_react*S_theta;
+        break;
+      }
+
+    case CD:
+      {
+        double surf_cover = total_state[isurf] * ms_inv;
+        double S_theta = 0.0;
+
+        if (r->kisliuk_flag) {
+          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
+            exp(-r->kisliuk_coeff[2]/twall);
+          if (surf_cover < 1)
+            S_theta = pow((1 - surf_cover) /
+                          (1 - surf_cover +
+                           K_ads*surf_cover),r->coeff[coeff_val]);
+        } else {
+          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        }
+
+        prob_value[i] = r->k_react*S_theta;
+        break;
+      }
+
+    case ER:
+      {
+        double dot = MathExtra::dot3(ip->v,norm);
+        dot = 2.0;
+
+        if (r->nreactant == 1) {
+          prob_value[i] = 2.0 * r->k_react *
+            (maxstick - total_state[isurf]) * ms_inv / fabs(dot);
+        } else {
+          prob_value[i] = 2.0 * r->k_react / fabs(dot);
+        }
+        break;
+
+      }
+
+    case CI:
+      {
+        prob_value[i] = r->k_react;
+        if (r->energy_flag) {
+          double *v = ip->v;
+          double dot = MathExtra::dot3(v,norm);
+          double vmag_sq = MathExtra::lensq3(v);
+          double E_i = 0.5 * species[ip->ispecies].mass * vmag_sq;
+          double cos_theta = abs(dot) / sqrt(vmag_sq);
+          prob_value[i] *= pow(E_i,r->energy_coeff[0]) *
+          pow(cos_theta,r->energy_coeff[1]);
+        }
+        break;
+      }
+
+    /*
+    case CI2:
+      {
+        double *v = ip->v;
+        double dot = MathExtra::dot3(v,norm);
+        double vmag_sq = MathExtra::lensq3(v);
+        double E_i = 0.5 * species[ip->ispecies].mass * vmag_sq;
+        double cos_theta = dot/sqrt(vmag_sq);
+        prob_value[i] = r->k_react * pow(E_i,r->coeff[3]) *
+          pow(cos_theta,r->coeff[4]);
+        break;
+      }
+      */
+    }
+
+    for (int j = 1; j < r->nreactant; j++) {
+      if (r->state_reactants[j][0] == 's') {
+        if (r->part_reactants[j] == 0) {
+          prob_value[i] *=
+            stoich_pow(total_state[isurf],
+                       r->stoich_reactants[j]) *
+            pow(ms_inv,r->stoich_reactants[j]);
+        } else {
+          prob_value[i] *=
+            stoich_pow(species_state[isurf][r->reactants_ad_index[j]],
+                       r->stoich_reactants[j]) *
+            pow(ms_inv,r->stoich_reactants[j]);
+        }
+      }
+    }
+
+    sum_prob += prob_value[i];
+  }
+
+  // NOTE: scatter_prob is always zero?
+  /*
+  if (check_ads) {
+    if (sum_prob > (1-scatter_prob))
+      correction = (1-scatter_prob) / sum_prob;
+  } else if (sum_prob > 1.0) correction = 1.0/sum_prob;
+  */
+
+  if (sum_prob > 1.0) correction = 1.0/sum_prob;
+  else scatter_prob = 1.0 - sum_prob;
+
+  //if (sum_prob > (1.0-scatter_prob))
+  //  correction = (1.0-scatter_prob) / sum_prob;
+
+  // probablity to compare to reaction probability
+
+  double react_prob = scatter_prob;
+  double random_prob = random->uniform();
+
+  if (react_prob > random_prob) return 0;
+  else {
+    // NOTE: at this point is it guaranteed a reaction will take place?
+
+    if (mode == SURF) mark[isurf] = 1;
+
+    // NOTE: why summing to previous react_prob?
+
+    for (int i = 0; i < n; i++) {
+      r = &rlist_gs[list[i]];
+      react_prob += prob_value[i] * correction;
+      if (react_prob <= random_prob) continue;
+
+      // perform the reaction and return
+      // if dissociation or CI2 performs a realloc:
+      //   make copy of x,v, then repoint ip to new particles data struct
+
+      nsingle++;
+      tally_single[list[i]]++;
+
+      for (int j = 0; j < r->nreactant; j++) {
+        if (r->part_reactants[j] == 1) {
+          switch(r->state_reactants[j][0]) {
+          case 's':
+            {
+              species_delta[isurf][r->reactants_ad_index[j]] -=
+                r->stoich_reactants[j];
+              break;
+            }
+
+          case 'g': {}
+          case 'b': {}
+          }
+        }
+      }
+
+      for (int j = 0; j < r->nproduct; j++) {
+        if (r->part_products[j] == 1) {
+          switch(r->state_products[j][0]) {
+          case 's':
+            {
+              species_delta[isurf][r->products_ad_index[j]] +=
+                r->stoich_products[j];
+              break;
+            }
+
+          case 'g': {}
+          case 'b': {}
+          }
+        }
+      }
+
+      // for each reaction, post-reaction velocities must be set
+      // if NOMODEL:
+      //   leave velreset = 0 (value passed by caller)
+      //   SC instance associated with the surf/face sets vels after return
+      // else:
+      //   set velreset = 1
+      //   SC style created when GS file was read does velocity reset
+
+      switch (r->type) {
+
+      case DISSOCIATION:
+        {
+          double x[3],v[3];
+          ip->ispecies = r->products[0];
+          int id = MAXSMALLINT*random->uniform();
+          memcpy(x,ip->x,3*sizeof(double));
+          memcpy(v,ip->v,3*sizeof(double));
+          Particle::OnePart *particles = particle->particles;
+
+          int jp_species;
+          if (r->stoich_products[0] == 2) jp_species = r->products[0];
+          else jp_species = r->products[1];
+
+          int reallocflag =
+            particle->add_particle(id,jp_species,ip->icell,x,v,0.0,0.0);
+          if (reallocflag) ip = particle->particles + (ip - particles);
+          jp = &particle->particles[particle->nlocal-1];
+          return (list[i] + 1);
+         break;
+        }
+
+      case EXCHANGE:
+        {
+          ip->ispecies = r->products[0];
+          return (list[i] + 1);
+          break;
+        }
+
+      case RECOMBINATION:
+        {
+          ip = NULL;
+          return (list[i] + 1);
+          break;
+        }
+
+      case AA:
+        {
+          ip = NULL;
+          return (list[i] + 1);
+          break;
+        }
+
+      case DA:
+        {
+          if (r->nprod_g == 0) ip = NULL;
+          else {
+            int n = 1;
+            for (int j = 1; j < r->nproduct; j++) {
+              if (r->state_products[j][0] == 'g') {
+                if (n == 1) {
+                  n++;
+                  ip->ispecies = r->products[j];
+                  if (r->cmodel_ip != NOMODEL)
+                    cmodels[r->cmodel_ip]->
+                      wrapper(ip,norm,r->cmodel_ip_flags,r->cmodel_ip_coeffs);
+
+                  if (r->stoich_products[j] == 2) {
+                    double x[3],v[3];
+                    memcpy(x,ip->x,3*sizeof(double));
+                    memcpy(v,ip->v,3*sizeof(double));
+
+                    int id = MAXSMALLINT*random->uniform();
+                    Particle::OnePart *particles = particle->particles;
+
+                    int reallocflag =
+                      particle->add_particle(id,r->products[j],ip->icell,
+                                             x,v,0.0,0.0);
+                    if (reallocflag) ip = particle->particles + (ip - particles);
+                    jp = &particle->particles[particle->nlocal-1];
+
+                    if (r->cmodel_ip != NOMODEL)
+                      cmodels[r->cmodel_ip]->
+                        wrapper(jp,norm,r->cmodel_ip_flags,r->cmodel_ip_coeffs);
+                  }
+
+                } else {
+                    double x[3],v[3];
+                    memcpy(x,ip->x,3*sizeof(double));
+                    memcpy(v,ip->v,3*sizeof(double));
+
+                    int id = MAXSMALLINT*random->uniform();
+                    Particle::OnePart *particles = particle->particles;
+
+                    int reallocflag =
+                      particle->add_particle(id,r->products[j],ip->icell,
+                                             x,v,0.0,0.0);
+                    if (reallocflag) ip = particle->particles + (ip - particles);
+                    jp = &particle->particles[particle->nlocal-1];
+
+                    if (r->cmodel_jp != NOMODEL)
+                      cmodels[r->cmodel_jp]->
+                        wrapper(jp,norm,r->cmodel_jp_flags,r->cmodel_jp_coeffs);
+                }
+              }
+            }
+          }
+
+          if (r->cmodel_ip != NOMODEL) velreset = 1;
+          return (list[i] + 1);
+          break;
+        }
+
+      case LH1:
+        {
+          ip->ispecies = r->products[0];
+          if (r->cmodel_ip != NOMODEL)
+            cmodels[r->cmodel_ip]->
+              wrapper(ip,norm,r->cmodel_ip_flags,r->cmodel_ip_coeffs);
+
+          if (r->cmodel_ip != NOMODEL) velreset = 1;
+          return (list[i] + 1);
+          break;
+        }
+
+      case LH3:
+        {
+          ip = NULL;
+          return (list[i] + 1);
+          break;
+        }
+
+      case CD:
+        {
+          ip = NULL;
+          return (list[i] + 1);
+          break;
+        }
+
+      case ER:
+        {
+          ip->ispecies = r->products[0];
+          if (r->cmodel_ip != NOMODEL)
+            cmodels[r->cmodel_ip]->
+              wrapper(ip,norm,r->cmodel_ip_flags,r->cmodel_ip_coeffs);
+
+          if (r->cmodel_ip != NOMODEL) velreset = 1;
+          return (list[i] + 1);
+          break;
+        }
+
+      case CI:
+        {
+          ip->ispecies = r->products[0];
+
+          if (r->cmodel_ip != NOMODEL)
+            cmodels[r->cmodel_ip]->
+              wrapper(ip,norm,r->cmodel_ip_flags,r->cmodel_ip_coeffs);
+
+          if (r->nprod_g_tot == 2) {
+            double x[3],v[3];
+            memcpy(x,ip->x,3*sizeof(double));
+            memcpy(v,ip->v,3*sizeof(double));
+
+            int id = MAXSMALLINT*random->uniform();
+            Particle::OnePart *particles = particle->particles;
+
+            if (r->stoich_products[0] == 2) {
+              int reallocflag =
+                particle->add_particle(id,r->products[0],ip->icell,x,v,0.0,0.0);
+              if (reallocflag) ip = particle->particles + (ip - particles);
+              jp = &particle->particles[particle->nlocal-1];
+
+              if (r->cmodel_ip != NOMODEL)
+                cmodels[r->cmodel_ip]->wrapper(jp,norm,r->cmodel_ip_flags,
+                                               r->cmodel_ip_coeffs);
+            } else {
+              int reallocflag =
+                particle->add_particle(id,r->products[1],ip->icell,x,v,0.0,0.0);
+              if (reallocflag) ip = particle->particles + (ip - particles);
+              jp = &particle->particles[particle->nlocal-1];
+
+              if (r->cmodel_jp != NOMODEL)
+                cmodels[r->cmodel_jp]->wrapper(jp,norm,r->cmodel_jp_flags,
+                                               r->cmodel_jp_coeffs);
+            }
+          }
+
+          if (r->cmodel_ip != NOMODEL) velreset = 1;
+          return (list[i] + 1);
+          break;
+        }
+      }
+    }
+  }
+
+  // no reaction
+
+  return 0;
+}
+
+/* ---------------------------------------------------------------------- */
+
+int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
+                                          double *norm,
+                                          Particle::OnePart *&jp, int &velreset)
 {
   // just return if GS model not defined
 
