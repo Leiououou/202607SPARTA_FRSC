@@ -1,0 +1,217 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\title{SPARTA GS 反应微观概率公式（基于 Molchanova et al. 2018）}
+\author{}
+\date{2026-07-13}
+
+\begin{document}
+\maketitle
+
+\section{符号表}
+\begin{align*}
+  F_N      & \quad \text{每个模拟粒子代表的真实分子数} \quad (\texttt{fnum})\\
+  S_e      & \quad \text{表面元素面积} \quad (\texttt{area[isurf]})\\
+  \theta_{\max} & \quad \text{最大覆盖度} \quad (\texttt{max\_cover})\\
+  N_{\max} & \quad \text{最大可吸附模拟粒子数} \quad (\texttt{maxstick})\\
+  N_{\text{tot}} & \quad \text{当前表面吸附总粒子数} \quad (\texttt{total\_state[isurf]})\\
+  N_{S}    & \quad \text{空闲表面位数} = N_{\max} - N_{\text{tot}}\\
+  N_{AS,k} & \quad \text{吸附物种 }k\text{ 的数目} \quad (\texttt{species\_state[isurf][k]})\\
+  V_n      & \quad \text{入射粒子法向速度} = |\mathbf{v} \cdot \mathbf{n}|\\
+  T_w      & \quad \text{壁面温度}\\
+  k_B      & \quad \text{Boltzmann 常数}\\
+  m        & \quad \text{入射粒子质量}
+\end{align*}
+
+\section{Arrhenius 反应速率常数}
+\begin{equation}
+  K(T_w) = A \cdot T_w^{\,b} \cdot \exp\!\left(-\frac{E_a}{k_B T_w}\right)
+\end{equation}
+对于 SIMPLE 类型反应，$K(T_w)$ 退化为常数：$b = 0,\; E_a = 0$。
+
+\section{GS 反应分类与处理方式}
+
+根据反应是否涉及表面物种参与，将 GS 反应分为两类处理：
+
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+\textbf{类别} & \textbf{反应类型} & \textbf{概率公式} \\
+\midrule
+常数概率型 & D, E, R & $P = k_{\text{react}}$（与 SPARTA 原实现一致）\\
+有限速率型 & AA, DA, LH1, LH3, CD, ER & $P(V_n) = \min\!\left(1,\; \dfrac{2K(T_w)}{V_n} \cdot \Gamma\right)$ \\
+\midrule
+SPARTA 原样 & CI & 见第\ref{sec:ci}节（与 SPARTA 原实现一致）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{有限速率统一公式（文献 Eq. 35）}
+AA、DA、LH1、LH3、CD、ER 六种反应的微观概率统一为：
+\begin{equation}
+  \boxed{P(V_n) = \min\!\left(1,\; \frac{2K(T_w)}{V_n} \cdot \Gamma\right)}
+\end{equation}
+当 $V_n < 10^{-10} \; \text{m/s}$ 时，$P(V_n) = 1$。
+
+其中 $\Gamma$ 为表面密度因子，物理意义为\emph{气相粒子需要与之作用的表面物种的数密度}，
+由反应类型决定（见下文）。
+
+\section{D/E/R：常数概率型}
+
+\subsection{DISSOCIATION（解离）}
+无表面参与，保持 SPARTA 原有常数概率：
+\begin{equation}
+  P = k_{\text{react}}
+\end{equation}
+
+\subsection{EXCHANGE（交换）}
+无表面参与，保持 SPARTA 原有常数概率：
+\begin{equation}
+  P = k_{\text{react}}
+\end{equation}
+
+\subsection{RECOMBINATION（复合消失）}
+无表面参与，保持 SPARTA 原有常数概率：
+\begin{equation}
+  P = k_{\text{react}}
+\end{equation}
+
+\section{AA/DA/ER：单因子有限速率型}
+
+\subsection{AA（吸附）}
+气相粒子与\emph{空闲位点}作用（A + S $\to$ AS）：
+\begin{equation}
+  \Gamma = \frac{N_S \cdot F_N}{S_e} \qquad (\text{空闲位点数密度})
+\end{equation}
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{\text{ads}}(T_w)}{V_n} \cdot \frac{N_S \cdot F_N}{S_e}\right)
+\end{equation}
+
+\subsection{DA（解离吸附）}
+气相分子需\emph{两个空闲位点}（AB + 2S $\to$ A(s) + B(s)）：
+\begin{equation}
+  \Gamma = \left(\frac{N_S \cdot F_N}{S_e}\right)^2 \qquad (\text{空闲位点数密度的平方})
+\end{equation}
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{\text{disads}}(T_w)}{V_n} \cdot \left(\frac{N_S \cdot F_N}{S_e}\right)^2\right)
+\end{equation}
+
+\subsection{ER（Eley-Rideal 复合）}
+气相粒子与\emph{吸附态共反应物}作用（AS + B $\to$ AB + S）：
+\begin{equation}
+  \Gamma = \frac{N_{AS} \cdot F_N}{S_e} \qquad (\text{吸附物种的数密度})
+\end{equation}
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{ER}(T_w)}{V_n} \cdot \frac{N_{AS} \cdot F_N}{S_e}\right)
+\end{equation}
+
+\section{LH1/LH3/CD：多因子有限速率型}
+
+这三种反应涉及表面共反应物（可能不止一个），$\Gamma$ 为各表面反应物因子的连乘。
+
+\subsection{表面共反应物因子 $\Gamma_j$}
+遍历反应式中所有表面相反应物 $j \ge 1$，按催化性/参与性分别计算：
+
+\begin{equation}
+  \Gamma_j =
+  \begin{cases}
+    \displaystyle \binom{N_{\text{tot}}}{\nu_j} \cdot \left(\frac{F_N}{S_e}\right)^{\nu_j}, & \text{催化性（\texttt{part == 0}}）\\[12pt]
+    \displaystyle \binom{N_{AS,k}}{\nu_j} \cdot \left(\frac{F_N}{S_e}\right)^{\nu_j}, & \text{参与性（\texttt{part == 1}}）
+  \end{cases}
+\end{equation}
+\begin{equation}
+  \Gamma = \prod_{j \,\ge\, 1,\; \text{state}=\text{s}} \Gamma_j
+\end{equation}
+
+其中 $\binom{N}{k} = \texttt{stoich\_pow}(N, k)$ 为二项式组合数（SPARTA 已实现）。\\
+$\frac{F_N}{S_e}$ 与 SPARTA 原实现保持一致，不额外乘以 $W_s$ 权重。
+
+\subsection{LH1（脱附）}
+气相粒子触发\emph{表面共反应物}脱附（A(g) + B(s) $\to$ AB(g)）：
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{\text{LH1}}(T_w)}{V_n} \cdot \Gamma\right)
+\end{equation}
+
+\subsection{LH3（表面物种间反应）}
+气相粒子触发与表面共反应物的反应，生成新表面物种：
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{\text{LH3}}(T_w)}{V_n} \cdot \Gamma\right)
+\end{equation}
+
+\subsection{CD（体相消耗）}
+表面物种被消耗进入体相：
+\begin{equation}
+  P(V_n) = \min\!\left(1,\; \frac{2 K_{\text{CD}}(T_w)}{V_n} \cdot \Gamma\right)
+\end{equation}
+
+\section{CI（碰撞诱导）}\label{sec:ci}
+
+CI 反应与 SPARTA 原实现保持一致，\textbf{不使用}统一有限速率公式：
+
+\begin{itemize}
+  \item 基础形式（无 \texttt{energy} 关键词）：
+  \begin{equation}
+    P = k_{\text{react}} \cdot \Gamma
+  \end{equation}
+
+  \item 含 \texttt{energy} 关键词时，额外引入 $m$、$n$ 两个能量因子参数：
+  \begin{equation}
+    P = k_{\text{react}} \cdot E_i^{\,m} \cdot (\cos\theta)^{\,n} \cdot \Gamma
+  \end{equation}
+  其中 $E_i = \frac{1}{2}m|\mathbf{v}|^2$（入射粒子动能），$\cos\theta = V_n / |\mathbf{v}|$（入射角余弦），\\
+  $m = \texttt{energy\_coeff[0]}$，$n = \texttt{energy\_coeff[1]}$。
+\end{itemize}
+
+上述 $\Gamma$ 与 LH1/LH3/CD 中的定义完全一致（表面共反应物因子的连乘）。
+
+\section{$\Gamma$ 汇总表}
+
+\begin{center}
+\begin{tabular}{c|c|l}
+\toprule
+\textbf{反应类型} & \textbf{$\Gamma$} & \textbf{物理含义} \\
+\midrule
+D & — & 常数概率 $P = k_{\text{react}}$（SPARTA 原样）\\
+E & — & 常数概率 $P = k_{\text{react}}$（SPARTA 原样）\\
+R & — & 常数概率 $P = k_{\text{react}}$（SPARTA 原样）\\
+\midrule
+AA & $\displaystyle \frac{N_S \cdot F_N}{S_e}$ & 空闲位点数密度 \\
+DA & $\displaystyle \left(\frac{N_S \cdot F_N}{S_e}\right)^2$ & 空闲位点数密度的平方 \\
+LH1 & $\displaystyle \prod \Gamma_j$ & 表面共反应物数密度 \\
+LH3 & $\displaystyle \prod \Gamma_j$ & 表面共反应物数密度 \\
+CD & $\displaystyle \prod \Gamma_j$ & 表面共反应物数密度 \\
+ER & $\displaystyle \frac{N_{AS} \cdot F_N}{S_e}$ & 吸附态共反应物数密度 \\
+\midrule
+CI & $\displaystyle \prod \Gamma_j$ & 表面共反应物数密度（SPARTA 原样，不用统一公式）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{概率归一化与反应抽选}
+\begin{enumerate}
+  \item 计算所有可能反应的概率 $P_i$
+  \item $\Sigma = \sum_i P_i$
+  \item 若 $\Sigma \le 1$：$P_{\mathrm{scatter}} = 1 - \Sigma$，correction = 1
+  \item 若 $\Sigma > 1$：$P_{\mathrm{scatter}} = 0$，correction = $1/\Sigma$
+  \item 蒙特卡洛抽选：$r \sim \mathcal{U}(0,1)$；若 $r < P_{\mathrm{scatter}}$ 则散射；否则依次累加 $P_i \cdot \mathrm{correction}$ 选中反应
+\end{enumerate}
+
+与 SPARTA 原实现逻辑一致。
+
+\section{实现要点}
+
+\begin{enumerate}
+  \item \textbf{D/E/R}：不修改，$P = k_{\text{react}}$ 常数概率。
+  \item \textbf{AA/DA/ER}：直接计算单因子 $\Gamma$，代入 $P = \min(1, 2K/V_n \cdot \Gamma)$。
+  \item \textbf{LH1/LH3/CD}：遍历表面反应物 $j \ge 1$ 连乘 $\Gamma_j$，代入统一公式。
+  \item \textbf{CI}：完全保留 SPARTA 原逻辑 —— 基础形式 $P = k_{\text{react}} \cdot \prod\Gamma_j$，
+        energy 开启时额外乘以 $E_i^m \cdot (\cos\theta)^n$。
+  \item \textbf{$F_N/S_e$ 权重}：与 SPARTA 原实现一致，不额外乘 $W_s$。
+  \item \textbf{概率截断与归一化}：保留 SPARTA 原有逻辑。
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pdftotext \"D:\\\\博一\\\\气固相互作用\\\\Molchanova\\\\107105_1_online.pdf\" -)",
+      "Bash(mkdir -p \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\schu_2018\")",
+      "Bash(xelatex -interaction=nonstopmode gs_probabilities.tex)",
+      "Bash(grep -n '\\\\$' gs_probabilities.tex)",
+      "Bash(grep -n -B5 \"Command \\\\\\\\\\\\\\\\item invalid\" gs_probabilities.log)",
+      "Bash(awk '/Command \\\\\\\\\\\\\\\\item invalid/{found=1} found{print; if\\(/^l\\\\./\\)exit}' gs_probabilities.log)",
+      "Bash(grep -n \"inserted\\\\|Missing\\\\|\\\\$\" gs_probabilities.log)",
+      "Bash(grep -n \"Missing \\\\$ inserted\" gs_probabilities.log)",
+      "Bash(grep -v '\\\\\\\\_')",
+      "Bash(grep -v 'equation\\\\|align\\\\|\\\\\\\\begin\\\\|\\\\\\\\end\\\\|\\\\\\\\usepackage\\\\|math\\\\|\\\\\\\\text\\\\|\\\\\\\\mathrm\\\\|\\\\\\\\binom\\\\|\\\\\\\\frac\\\\|\\\\\\\\sum\\\\|\\\\\\\\boxed\\\\|\\\\\\\\min\\\\|\\\\\\\\exp\\\\|\\\\\\\\left\\\\|\\\\\\\\cdot\\\\|\\\\\\\\max\\\\|\\\\\\\\tt\\\\|\\\\\\\\ge')"
+    ],
+    "additionalDirectories": [
+      "D:\\博一\\气固相互作用\\202607_src\\schu_2018"
+    ]
+  }
+}
