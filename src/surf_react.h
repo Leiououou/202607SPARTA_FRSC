@@ -40,6 +40,7 @@ class SurfReact : protected Pointers {
                     Particle::OnePart *&, int &) = 0;
   virtual char *reactionID(int) = 0;
   virtual double reaction_coeff(int) = 0;
+  virtual const char *gs_model() {return (const char *) "SPARTA";}
   virtual int match_reactant(char *, int) = 0;
   virtual int match_product(char *, int) = 0;
 

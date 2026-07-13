@@ -333,10 +333,12 @@ void Finish::end(int flag, double time_multiple_runs)
       SurfReact *sr = surf->sr[i];
       int nlist = sr->nlist;
       if (me == 0) {
-        if (screen) fprintf(screen,"  id %s style %s #-of-reactions %d\n",
-                            sr->id,sr->style,nlist);
-        if (logfile) fprintf(logfile,"  id %s style %s #-of-reactions %d\n",
-                             sr->id,sr->style,nlist);
+        if (screen) fprintf(screen,"  id %s style %s #-of-reactions %d, "
+                            "model: %s\n",
+                            sr->id,sr->style,nlist,sr->gs_model());
+        if (logfile) fprintf(logfile,"  id %s style %s #-of-reactions %d, "
+                             "model: %s\n",
+                             sr->id,sr->style,nlist,sr->gs_model());
       }
       tally = sr->compute_vector(1);
       if (me == 0) {

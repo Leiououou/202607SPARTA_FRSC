@@ -33,6 +33,7 @@ class SurfReactAdsorb : public SurfReact {
   int react(Particle::OnePart *&, int, double *, Particle::OnePart *&, int &);
   int react_gs_finite_rate(Particle::OnePart *&, int, double *,
                            Particle::OnePart *&, int &);
+  const char *gs_model();
 
   char *reactionID(int);
   double reaction_coeff(int) {return 0.0;};

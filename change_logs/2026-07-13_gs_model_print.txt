@@ -1,0 +1,121 @@
+============================================================
+SPARTA schu 模型信息打印 — 修改日志
+============================================================
+修改时间: 2026-07-13
+修改目的: 在运行开始前和结束后，向 screen 和 logfile 打印壁面化学反应
+         使用的模型（SPARTA 原版 或 Molchanova schu 有限速率模型）
+修改人:   (Claude Code assistant)
+============================================================
+
+一、设计思路
+-----------------
+采用虚函数多态方案：
+- SurfReact 基类新增 virtual const char* gs_model() 方法，默认返回 "SPARTA"
+- SurfReactAdsorb 覆写该方法，根据 schu_flag 返回对应字符串
+- init() 中打印启动信息
+- Finish::end() 中打印结束信息（利用已有的 Surface reaction tallies 段）
+
+二、修改文件清单
+-----------------
+1. src/surf_react.h        — 基类添加虚方法
+2. src/surf_react_adsorb.h  — 派生类声明
+3. src/surf_react_adsorb.cpp — 派生类实现 + init() 启动消息
+4. src/finish.cpp            — 结束消息
+
+三、surf_react.h 修改详情
+---------------------------
+
+[修改1] 新增虚方法 gs_model()
+  位置: 在 "virtual double reaction_coeff(int) = 0;" 之后
+  新增代码:
+    virtual const char *gs_model() {return (const char *) "SPARTA";}
+  说明:
+  - 内联实现，默认返回 "SPARTA"
+  - SurfReactGlobal 和 SurfReactProb 无需修改，自动继承默认行为
+  - 不涉及 surf_react.cpp 修改
+
+四、surf_react_adsorb.h 修改详情
+---------------------------------
+
+[修改2] 声明 gs_model() 覆写
+  位置: 在 react_gs_finite_rate() 声明之后、reactionID() 之前
+  新增代码:
+    const char *gs_model();
+
+五、surf_react_adsorb.cpp 修改详情
+-----------------------------------
+
+[修改3] 实现 gs_model() (约 L222-227)
+  位置: 构造函数之后、析构函数之前
+  新增函数:
+    const char *SurfReactAdsorb::gs_model()
+    {
+      if (schu_flag) return "Molchanova finite-rate (schu)";
+      return "SPARTA";
+    }
+
+[修改4] init() 中添加启动消息 (约 L519-524)
+  位置: init_reactions_gs() 和 init_reactions_ps() 之后
+  新增代码:
+    // print wall chemistry model info
+
+    if (gsflag && comm->me == 0) {
+      if (screen) fprintf(screen,"  Wall chemistry model: %s\n",gs_model());
+      if (logfile) fprintf(logfile,"  Wall chemistry model: %s\n",gs_model());
+    }
+  说明:
+  - 仅在 gsflag 开启时打印（GS 反应才有 schu 模型）
+  - comm->me == 0 保证只由 proc 0 打印（避免重复）
+  - if(screen) / if(logfile) 空指针保护（遵循 SPARTA 惯例）
+
+六、finish.cpp 修改详情
+--------------------------
+
+[修改5] Surface reaction tallies 段添加模型名 (L335-340)
+  位置: 在打印 "id %s style %s #-of-reactions %d" 处
+  原代码:
+    fprintf(screen,"  id %s style %s #-of-reactions %d\n",
+            sr->id,sr->style,nlist);
+  新代码:
+    fprintf(screen,"  id %s style %s #-of-reactions %d, "
+            "model: %s\n",
+            sr->id,sr->style,nlist,sr->gs_model());
+  说明:
+  - 通过 sr->gs_model() 多态调用，对非 adsorb 类型自动返回 "SPARTA"
+  - screen 和 logfile 同步输出
+
+七、输出效果示例
+-------------------
+
+启动时:
+  Wall chemistry model: SPARTA
+  或
+  Wall chemistry model: Molchanova finite-rate (schu)
+
+结束时 (Surface reaction tallies 段):
+  id sr style adsorb #-of-reactions 3, model: SPARTA
+  或
+  id sr style adsorb #-of-reactions 3, model: Molchanova finite-rate (schu)
+
+八、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译命令: cd src && make mpi -j16
+编译结果: 成功，无错误、无警告
+生成文件: src/spa_mpi (2,289,288 bytes)
+  text:   2,167,008
+  data:     107,712
+  bss:       14,568
+
+重编译文件:
+- surf_react_adsorb.cpp (新增 gs_model() + init() 消息)
+- finish.cpp (新增 model 打印)
+- surf_react.cpp, surf_react_global.cpp, surf_react_prob.cpp (基类头文件变更)
+- 以及间接依赖的文件
+
+九、影响分析
+-----------------
+- SurfReactGlobal 和 SurfReactProb 不受影响（使用基类默认实现 "SPARTA"）
+- 不写 schu 关键词时，启动和结束均显示 "SPARTA"
+- 写 schu yes 时，显示 "Molchanova finite-rate (schu)"
+- 不影响任何计算逻辑

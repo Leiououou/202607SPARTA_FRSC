@@ -221,6 +221,14 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
 
 /* ---------------------------------------------------------------------- */
 
+const char *SurfReactAdsorb::gs_model()
+{
+  if (schu_flag) return "Molchanova finite-rate (schu)";
+  return "SPARTA";
+}
+
+/* ---------------------------------------------------------------------- */
+
 SurfReactAdsorb::~SurfReactAdsorb()
 {
   delete random;
@@ -507,6 +515,13 @@ void SurfReactAdsorb::init()
 
   if (gsflag) init_reactions_gs();
   if (psflag) init_reactions_ps();
+
+  // print wall chemistry model info
+
+  if (gsflag && comm->me == 0) {
+    if (screen) fprintf(screen,"  Wall chemistry model: %s\n",gs_model());
+    if (logfile) fprintf(logfile,"  Wall chemistry model: %s\n",gs_model());
+  }
 
   // create/initialze tau only for PS models
   // wait until now b/c need nactive_ps from init_reactions_ps()
