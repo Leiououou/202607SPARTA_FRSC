@@ -159,6 +159,17 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
     iarg++;
   }
 
+  // tally_only = yes/no for tally-only mode (no reaction execution)
+
+  tally_only_flag = 0;
+  if (iarg < narg && strcmp(arg[iarg],"tally_only") == 0) {
+    iarg++;
+    if (strcmp(arg[iarg],"yes") == 0) tally_only_flag = 1;
+    else if (strcmp(arg[iarg],"no") == 0) tally_only_flag = 0;
+    else error->all(FLERR,"Illegal surf_react adsorb tally_only option");
+    iarg++;
+  }
+
   species_surf = new char*[narg-iarg];
   nspecies_surf = 0;
 
@@ -238,8 +249,17 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
 
 const char *SurfReactAdsorb::gs_model()
 {
-  if (schu_flag) return "Molchanova finite-rate (schu)";
-  return "SPARTA";
+  const char *base;
+  if (schu_flag) base = "Molchanova finite-rate (schu)";
+  else base = "SPARTA";
+  if (tally_only_flag) {
+    // return a static buffer with TALLY-ONLY appended
+    // safe because caller uses it immediately (fprintf or copy)
+    static char buf[128];
+    snprintf(buf,128,"%s [TALLY-ONLY]",base);
+    return buf;
+  }
+  return base;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -536,6 +556,12 @@ void SurfReactAdsorb::init()
   if (gsflag && comm->me == 0) {
     if (screen) fprintf(screen,"  Wall chemistry model: %s\n",gs_model());
     if (logfile) fprintf(logfile,"  Wall chemistry model: %s\n",gs_model());
+    if (tally_only_flag) {
+      if (screen) fprintf(screen,"  *** TALLY-ONLY mode: "
+                          "reactions counted but NOT executed ***\n");
+      if (logfile) fprintf(logfile,"  *** TALLY-ONLY mode: "
+                          "reactions counted but NOT executed ***\n");
+    }
   }
 
   // create/initialze tau only for PS models
@@ -1030,6 +1056,9 @@ int SurfReactAdsorb::react(Particle::OnePart *&ip, int isurf, double *norm,
       nsingle++;
       tally_single[list[i]]++;
 
+      // tally_only: count reaction but do not execute
+      if (tally_only_flag) return 0;
+
       for (int j = 0; j < r->nreactant; j++) {
         if (r->part_reactants[j] == 1) {
           switch(r->state_reactants[j][0]) {
@@ -1470,6 +1499,9 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
 
       nsingle++;
       tally_single[list[i]]++;
+
+      // tally_only: count reaction but do not execute
+      if (tally_only_flag) return 0;
 
       for (int j = 0; j < r->nreactant; j++) {
         if (r->part_reactants[j] == 1) {

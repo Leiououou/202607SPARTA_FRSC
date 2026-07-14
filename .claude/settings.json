@@ -35,7 +35,15 @@
       "Bash(make clean-mpi *)",
       "Bash(make mpi *)",
       "Bash(cp /mnt/d/博一/气固相互作用/202607_src/spa_mpi /mnt/d/博一/气固相互作用/202607_src/test/20260714_2/spa_mpi && wsl bash -c \"cd /mnt/d/博一/气固相互作用/202607_src/test/20260714_2 && timeout 30 mpirun -np 4 ../spa_mpi < in.beam.surf.gs 2>&1\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(wsl which *)",
+      "Bash(wsl \"apt list --installed 2>/dev/null | grep -i poppler\")",
+      "Bash(start \"\" \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\test\\\\20260714_4\\\\K_ER_validation.html\")",
+      "Bash(pdftotext -f 1 -l 20 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
+      "Bash(pdftotext -f 10 -l 12 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
+      "Bash(pdftotext -f 7 -l 11 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
+      "Bash(pdftotext -f 4 -l 8 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
+      "Bash(pdftotext -f 5 -l 6 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",

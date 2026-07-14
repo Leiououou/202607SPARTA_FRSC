@@ -1,0 +1,122 @@
+============================================================
+SPARTA tally_only 关键词 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 在 surf_react adsorb 命令中新增 tally_only yes/no 关键词。
+         启用后正常计算反应概率、执行蒙特卡洛抽选并统计，
+         但不实际执行反应（不修改 species_delta、不改变粒子状态）。
+         用于调试、模型对比验证和参数扫描。
+============================================================
+
+一、修改文件清单
+-----------------
+1. src/surf_react_adsorb.h  — 头文件
+2. src/surf_react_adsorb.cpp — 实现文件
+
+二、surf_react_adsorb.h 修改详情
+---------------------------------
+
+[修改1] L55: 新增成员变量 tally_only_flag
+  位置: 在 int init_cover_index; 之后、int mode; 之前
+  新增:
+    int tally_only_flag;             // 0=正常执行反应, 1=仅统计不执行
+
+三、surf_react_adsorb.cpp 修改详情
+-----------------------------------
+
+[修改2] 构造函数: 新增 tally_only 关键词解析
+  位置: 在 init_cover 解析之后、species_surf 初始化之前
+  新增:
+    // tally_only = yes/no for tally-only mode (no reaction execution)
+    tally_only_flag = 0;
+    if (iarg < narg && strcmp(arg[iarg],"tally_only") == 0) {
+      iarg++;
+      if (strcmp(arg[iarg],"yes") == 0) tally_only_flag = 1;
+      else if (strcmp(arg[iarg],"no") == 0) tally_only_flag = 0;
+      else error->all(FLERR,"Illegal surf_react adsorb tally_only option");
+      iarg++;
+    }
+  默认 tally_only_flag = 0（正常执行，向后兼容）
+
+[修改3] react() 函数: 添加 tally_only 跳过 (L1044)
+  位置: 在 nsingle++; tally_single[list[i]]++; 之后、
+        for (int j = 0; j < r->nreactant; j++) 之前
+  新增:
+    // tally_only: count reaction but do not execute
+    if (tally_only_flag) return 0;
+
+[修改4] react_gs_finite_rate() 函数: 添加 tally_only 跳过 (L1488)
+  位置: 与 react() 相同位置（nsingle/tally_single 之后，反应物消耗之前）
+  新增: 与 [修改3] 相同代码
+
+[修改5] gs_model() 函数: 添加 [TALLY-ONLY] 标注
+  修改前: 返回 "SPARTA" 或 "Molchanova finite-rate (schu)"
+  修改后: 当 tally_only_flag=1 时追加 " [TALLY-ONLY]" 后缀
+  实现: 使用 static char buf[128] + snprintf 保证线程安全
+
+[修改6] init() 函数: 启动时打印 tally_only 警告
+  位置: 在 "Wall chemistry model:" 打印之后
+  新增:
+    if (tally_only_flag) {
+      打印 "*** TALLY-ONLY mode: reactions counted but NOT executed ***"
+    }
+
+四、输入文件格式
+-----------------
+surf_react sr adsorb gs data.gs nsync 10 face 300 1.0 \
+  schu yes init_cover O(s) tally_only yes O(s) N(s)
+
+关键词顺序: max_cover → schu → init_cover → tally_only → 物种列表
+tally_only 可选值: yes / no（默认 no，向后兼容）
+
+五、运行效果
+-----------------
+启动时打印:
+  Wall chemistry model: Molchanova finite-rate (schu) [TALLY-ONLY]
+  *** TALLY-ONLY mode: reactions counted but NOT executed ***
+
+stats 行: Surf reactions = 0（反应未实际执行）
+Surface reaction tallies: 显示正常统计数（tally 照常记录）
+
+结束时打印:
+  id sr style adsorb #-of-reactions 5, model: Molchanova finite-rate (schu) [TALLY-ONLY]
+
+六、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译命令: cd src && make mpi -j16
+编译结果: 成功，零错误、零警告
+生成文件: src/spa_mpi
+  text:   2,168,312
+  data:     107,712
+  bss:       14,704
+  dec:    2,290,728
+
+七、运行验证
+-----------------
+测试用例: test/20260714_2/in.beam.surf.gs.tally_only
+  - 100% N atoms, init_cover O, schu yes, tally_only yes
+  - 200 steps, 4 MPI processes
+
+对比结果:
+                    无 tally_only   有 tally_only
+  Surf reactions     11              0  ← 反应未执行
+  tally: reaction all 11              11 ← 统计正常
+  SurfColl checks    2.64M           2.64M
+  SurfColl occurs    6301            6301
+
+验证结论: tally_only 正确统计了 11 个 N+O→NO ER 反应，
+但表面 O(s) 未被消耗，粒子状态未改变，系统状态完全保留。
+
+八、设计要点
+-----------------
+- tally_only 影响 GS 反应（react 和 react_gs_finite_rate 均有检查）
+- PS 反应（PS_chemistry）暂不受影响，后续可扩展
+- tally + return 0 的语义清晰：统计但不执行
+- 蒙特卡洛抽选照常使用随机数（与正常模式相比随机数序列略有偏离）
+- 多次运行 tally_only 模式的概率分布完全一致（表面状态不变）
+
+九、后续工作
+-----------------
+- PS 反应的 tally_only 支持
+- 与 Molchanova 2018 Fig 4 验证算例结合使用

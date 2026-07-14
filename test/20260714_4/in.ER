@@ -40,7 +40,7 @@ surf_collide        1 diffuse 1000 1
 
 
 
-surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 face 1000 6.022e18 schu yes init_cover O O CO N N2 O2 NO
+surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 face 1000 6.022e18 schu yes init_cover O tally_only yes O CO N N2 O2 NO
 
 bound_modify        xhi collide 1 react adsorb_test_gs2
 

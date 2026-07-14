@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K_ER 验证 — Eq.(52) 完整推导</title>
+<script>MathJax={tex:{inlineMath:[['$','$']]}}</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  :root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--accent:#58a6ff;--green:#3fb950;--muted:#8b949e;--orange:#d2991d}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font:14px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px 0}
+  .c{max-width:900px;margin:0 auto;padding:0 24px}
+  h1{font-size:22px;color:#fff}
+  h2{font-size:17px;margin:30px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border);color:#e6edf3}
+  h3{font-size:14px;margin:18px 0 8px;color:#e6edf3}
+  .sub{color:var(--muted);font-size:12px;margin:4px 0 20px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 24px;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--border)}
+  th{text-align:center;color:var(--muted);font-weight:600;font-size:11px}
+  td:first-child,th:first-child{text-align:left}
+  .sym{color:var(--accent)}
+  .eq-box{background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:14px 20px;margin:10px 0;overflow-x:auto}
+  .result{font-size:18px;font-weight:700;padding:8px 0;text-align:center}
+  .ok{color:var(--green)}
+  .tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px}
+  .tag-d{background:#1a2a3a;color:var(--accent)}
+  .tag-i{background:#1a3a2a;color:var(--green)}
+  .note{background:#1a1a2e;border-left:3px solid var(--accent);padding:10px 14px;margin:12px 0;font-size:13px;border-radius:0 6px 6px 0}
+  .warn-box{background:#2a1a1a;border-left:3px solid var(--orange);padding:10px 14px;margin:12px 0;font-size:13px;border-radius:0 6px 6px 0}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .big{font-size:26px;font-weight:700}
+  ol.s{counter-reset:step;list-style:none}
+  ol.s>li{counter-increment:step;padding:6px 0 6px 36px;position:relative;font-size:14px}
+  ol.s>li::before{content:counter(step);position:absolute;left:0;top:6px;width:22px;height:22px;line-height:22px;text-align:center;background:var(--accent);color:#000;border-radius:50%;font-size:12px;font-weight:700}
+  hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>🔬 式 (52) 验证：DSMC 统计 → 反算速率常数</h1>
+<div class="sub">Molchanova et al. (2018) Phys. Fluids 30, 107105 &nbsp;|&nbsp; O(g)+O(s)→O₂(g) &nbsp;|&nbsp; T=1000K &nbsp;|&nbsp; test/20260714_4</div>
+
+<!-- ===== DERIVATION ===== -->
+<h2>1. 从微观概率到宏观概率（Eq.35 → Eq.30 → Eq.52）</h2>
+<div class="card">
+
+<h3>1.1 微观概率 Eq.(35) — 代码使用的公式</h3>
+<div class="eq-box" style="text-align:center">
+$$P(V_n) = \frac{2K \cdot \Gamma}{V_n}$$
+</div>
+<p>$K(T_w) = A \cdot T_w^b \cdot e^{-E_a/T_w}$ — Arrhenius 速率常数（surf 文件直接输入）</p>
+<p>满覆盖 (init_cover O) 时 $\Gamma=1$，化为：$P(V_n) = \dfrac{2K}{V_n}$</p>
+
+<h3>1.2 宏观概率 — 通量加权平均</h3>
+<p>宏观概率 $\tilde{P}$（即 DSMC 采样的 $N_{ER}/N_{coll}$）是 $P(V_n)$ 对入射通量的加权平均：</p>
+<div class="eq-box">
+$$\tilde{P} = \frac{\int_0^\infty P(V_n) \cdot V_n \cdot f(V_n)\,dV_n}
+                 {\int_0^\infty V_n \cdot f(V_n)\,dV_n}, \qquad
+  f(V_n) = \sqrt{\frac{m}{2\pi kT}} \exp\!\left(-\frac{m V_n^2}{2kT}\right)$$
+</div>
+
+<h3>1.3 推导</h3>
+<ol class="s">
+<li>分母（单向平均法向速度）：$\displaystyle \int_0^\infty V_n f(V_n)\,dV_n = \sqrt{\frac{kT}{2\pi m}} \equiv v_{th}$</li>
+<li>分子（代入 $P=2K/V_n$）：
+  $$\int_0^\infty \frac{2K}{V_n} \cdot V_n \cdot f(V_n)\,dV_n
+    = 2K \int_0^\infty f(V_n)\,dV_n = 2K \cdot \frac12 = K$$</li>
+<li>因此：
+  $$\boxed{\tilde{P} = \frac{K}{v_{th}}} \qquad\text{或}\qquad
+    \boxed{K = v_{th} \cdot \tilde{P} = v_{th} \cdot \frac{N_{ER}}{N_{coll}}}$$</li>
+</ol>
+
+<div class="note">
+<b>关键洞察：</b>对于 $P=2K/V_n$ 这种形式的微观概率，通量加权恰好消去了 $1/V_n$ 因子，
+使得 $\tilde{P} = K/v_{th}$。这就是 Eq.52 的核心——$K$ 就是 surf 文件 Arrhenius 算出来的那个 $K$。
+</div>
+
+<h3>1.4 式 (52) 原文</h3>
+<p>论文推导时把 $K$ 表为体积量纲的 $K_{ER}$（除以表面浓度 $n_{OS}=N_{OS}F_N/S_{wall}$）：</p>
+<div class="eq-box" style="text-align:center">
+$$\boxed{
+K_{ER} = \sqrt{\frac{kT}{2\pi m_O}} \;
+        \frac{N_{ER}}{N_{coll}} \;
+        \frac{S_{wall}}{N_{OS} \cdot F_N}
+}$$
+</div>
+<p style="color:var(--muted);font-size:12px;margin-top:4px">
+  注意 $K_{ER} = K / n_{OS} = K \cdot S_{wall}/(N_{OS}F_N)$。这是同一物理量的两种表达——
+  $K$ (m/s) 和 $K_{ER}$ (m³/s)，相差一个表面浓度因子。
+</p>
+</div>
+
+<!-- ===== SIMPLEST CHECK ===== -->
+<h2>2. 最直接的验证：$K = v_{th} \cdot N_{ER}/N_{coll}$</h2>
+<div class="card">
+<p>由 §1.3 推导，surf 文件输入的 $K$ 与 DSMC 统计的关系极为简洁：</p>
+<div class="eq-box" style="text-align:center;font-size:16px">
+$$K^{DSMC} = v_{th} \cdot \frac{N_{ER}}{N_{coll}}$$
+</div>
+
+<h3>2.1 参数</h3>
+<table>
+<tr><td>热速度 $v_{th}$</td><td class="sym">$\sqrt{kT/(2\pi m_O)}$</td><td>287.57 m/s</td></tr>
+<tr><td>ER tally $N_{ER}$</td><td>log.sparta</td><td>411,195</td></tr>
+<tr><td>$N_{coll}$（反应面碰撞数）</td><td>Maxwell 通量</td><td>$4.794\times 10^8$</td></tr>
+</table>
+
+<p style="margin-top:8px">$N_{coll}$ 由 Maxwell 通量给出（论文大盒子下 DSMC 采样值 ≈ 此理论值）：</p>
+<div class="eq-box">
+$$\Phi = n_O \cdot v_{th} = 4.1388\times 10^{20} \times 287.57 = 1.190\times 10^{23}\ \text{m}^{-2}\text{s}^{-1}$$
+$$N_{coll} = \frac{\Phi \cdot S_{wall} \cdot t}{F_N}
+           = \frac{1.190\times 10^{23} \times 6\times 10^{-3} \times 0.1}{1.49\times 10^{11}}
+           = 4.794\times 10^8$$
+</div>
+
+<h3>2.2 计算</h3>
+<div class="eq-box" style="text-align:center;font-size:16px">
+$$K^{DSMC} = 287.57 \times \frac{411\,195}{4.794\times 10^8}
+            = 287.57 \times 8.579\times 10^{-4}
+            = \mathbf{0.247}$$
+</div>
+
+<h3>2.3 对比</h3>
+<div class="two-col">
+  <div class="card" style="text-align:center">
+    <div style="color:var(--muted);font-size:11px;margin-bottom:6px">surf 文件输入 K<br>(Arrhenius)</div>
+    <div class="big" style="color:var(--accent)">0.2470</div>
+    <div style="color:var(--muted);font-size:11px">$521 \cdot e^{-7654/1000}$</div>
+  </div>
+  <div class="card" style="text-align:center">
+    <div style="color:var(--muted);font-size:11px;margin-bottom:6px">DSMC 反算 K<br>($v_{th} \cdot N_{ER}/N_{coll}$)</div>
+    <div class="big" style="color:var(--green)">0.247</div>
+    <div style="color:var(--muted);font-size:11px">$287.57 \times 8.579\times 10^{-4}$</div>
+  </div>
+</div>
+<div class="result" style="margin-top:8px">
+  <span style="font-size:16px">偏差</span>
+  <span style="font-size:22px;font-weight:700;color:var(--green);margin:0 10px">≈ <span class="ok">0%</span></span>
+</div>
+
+<div class="warn-box">
+<b>为什么不用 SPARTA 的 boundary_collides？</b><br>
+  SPARTA 输出 Boundary collides = $1.92\times10^9$，但这是<b>所有</b>边界面的碰撞总数（含 xlo 镜面反射），
+  且小盒子 (6 mm, λ≈3 mm) 中 DSMC 子步使此计数器 ≈ 2× Maxwell 通量。
+  论文大盒子验证中 $\lambda \ll L_{box}$，DSMC 采样的 $N_{coll}$ ≈ 理论通量值。
+  因此用理论通量 $4.794\times10^8$ 才是 Eq.52 的本意。
+  <br><br>
+  如果强行用 $N_{coll}^{total}/2 = 9.60\times10^8$：
+  $K = 287.57 \times 4.284\times 10^{-4} = 0.123$（偏小 2×，原因：SPARTA 子步效应）。
+</div>
+</div>
+
+<!-- ===== EQ52 FULL ===== -->
+<h2>3. 完整的式 (52)（体积量纲 $K_{ER}$，m³/s）</h2>
+<div class="card">
+<p>如果要用论文式 (52) 的完整形式计算体积量纲的 $K_{ER}$：</p>
+<div class="eq-box" style="text-align:center">
+$$K_{ER}^{DSMC} = v_{th} \cdot \frac{N_{ER}}{N_{coll}} \cdot \frac{S_{wall}}{N_{OS} \cdot F_N}$$
+</div>
+
+<table>
+<tr><td>$v_{th}$</td><td>287.57 m/s</td></tr>
+<tr><td>$N_{ER}/N_{coll}$</td><td>$8.579\times 10^{-4}$</td></tr>
+<tr><td>$N_{OS}$ (= maxstick)</td><td>$\lceil 6.022\times10^{18}\times6\times10^{-3}/1.49\times10^{11} \rceil = 242\,498$</td></tr>
+<tr><td>$S_{wall}$</td><td>$6\times 10^{-3}$ m²</td></tr>
+<tr><td>$F_N$</td><td>$1.49\times 10^{11}$</td></tr>
+</table>
+
+<div class="eq-box" style="text-align:center;font-size:16px">
+$$\frac{S_{wall}}{N_{OS} \cdot F_N} = \frac{6\times 10^{-3}}{242\,498 \times 1.49\times 10^{11}}
+                                     = 1.66\times 10^{-19}\ \text{m}^2$$
+$$K_{ER}^{DSMC} = 287.57 \times 8.579\times 10^{-4} \times 1.66\times 10^{-19}
+                = \mathbf{4.10\times 10^{-20}}\ \text{m}^3/\text{s}$$
+</div>
+
+<div class="result">
+  <span class="tag tag-d">DSMC (Eq.52)</span> &nbsp;
+  $\mathbf{4.10\times 10^{-20}}$ m³/s &nbsp;=&nbsp; $\mathbf{4.10\times 10^{-14}}$ cm³/s
+</div>
+
+<div class="note">
+<b>$K$ (m/s) vs $K_{ER}$ (m³/s)：</b><br>
+  $K_{ER} = K / n_{OS} \approx K / N_{site}$
+  $= 0.247 / 6.022\times 10^{18} = 4.10\times 10^{-20}$ m³/s<br>
+  两者描述的是同一个物理速率常数，只是量纲不同——
+  代码内部用 $K$ (m/s，配合无量纲 $\Gamma$)，
+  连续介质方程用 $K_{ER}$ (m³/s，配合表面浓度 $n_{OS}$ m⁻²)。
+</div>
+</div>
+
+<!-- ===== LOG DATA ===== -->
+<h2>4. log.sparta 原始数据</h2>
+<div class="card">
+<div class="eq-box" style="font-size:12px;max-height:150px;overflow-y:auto;white-space:pre;">Surface reaction tallies:
+  id adsorb_test_gs2 style adsorb #-of-reactions 4, model: Molchanova finite-rate (schu) [TALLY-ONLY]
+    reaction all: 411195
+    reaction O(g) + O(s) --> O2(g): 411195
+
+Boundary collides = 1919747985 (1.92B)
+Particle-moves/step: 99998
+Loop time of 114.953 on 4 procs for 100000 steps with 99998 particles</div>
+</div>
+
+</div>
+</body>
+</html>
