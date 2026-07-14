@@ -1,0 +1,124 @@
+============================================================
+SPARTA schu 有限速率概率公式实现 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 在 react_gs_finite_rate() 中将 GS 反应概率公式替换为
+         Molchanova et al. (2018) 统一有限速率公式
+对齐文档: schu_2018/gs_probabilities.{tex,pdf}
+============================================================
+
+一、修改概览
+-----------------
+文件: src/surf_react_adsorb.cpp
+函数: SurfReactAdsorb::react_gs_finite_rate()
+只修改概率计算部分（switch + 表面循环 + min截断），
+反应执行部分（归一化、抽选、粒子命运、delta更新）完全不变。
+
+二、修改详情
+-----------------
+
+[修改1] 新增 Vn 计算 (L1202 后)
+  新增代码:
+    double Vn = fabs(MathExtra::dot3(ip->v, norm));
+  用途: 有限速率统一公式 P = 2K(Tw)*Gamma/Vn 的法向速度
+
+[修改2] D/E/R — 保持不变
+  合并为一个 fall-through case:
+    case DISSOCIATION:
+    case EXCHANGE:
+    case RECOMBINATION:
+        prob_value[i] = r->k_react;
+  删除注释掉的旧代码和 coeff_val 变量
+
+[修改3] AA — 新公式
+  删除: Kisliuk/S_theta 逻辑 (~24行)
+  替换为:
+    if (Vn < 1e-10) P = 1
+    else: Gamma = (maxstick - total_state) * ms_inv
+          P = min(1, 2*r->k_react/Vn * Gamma)
+
+[修改4] DA — 新公式
+  删除: Kisliuk/S_theta 逻辑 + 被注释的第二个吸附系数代码块
+  替换为:
+    if (Vn < 1e-10) P = 1
+    else: Gamma = (maxstick - total_state) * ms_inv
+          P = min(1, 2*r->k_react/Vn * Gamma^2)
+
+[修改5] LH1/LH3/CD — 新公式
+  删除: Kisliuk/S_theta 逻辑
+  替换为:
+    if (Vn < 1e-10) P = 1
+    else: prob = 2*r->k_react/Vn  (Gamma由下方循环补乘)
+
+[修改6] ER — 新公式
+  删除: 硬编码 dot=2.0 + nreactant分支
+  替换为:
+    if (Vn < 1e-10) P = 1
+    else: prob = 2*r->k_react/Vn  (Gamma由循环补乘)
+  ER只有一种模式：气相+吸附态(s)，永远2个反应物
+
+[修改7] CI — 保持SPARTA原逻辑（不变）
+  保留 k_react + energy_flag 分支
+
+[修改8] 表面循环 — 新增体相(b)跳过
+  新增语句:
+    if (r->state_reactants[j][0] == 'b') continue;
+  表明体相物种数密度=1(常数)，不影响反应速率
+
+[修改9] 统一 min(1, ...) 截断
+  位置: 表面循环之后、sum_prob累加之前
+  新增代码:
+    if (r->type != DISSOCIATION && r->type != EXCHANGE &&
+        r->type != RECOMBINATION && r->type != AA && r->type != DA) {
+      prob_value[i] = MIN(prob_value[i], 1.0);
+    }
+  AA/DA已在case内截断，D/E/R不需要截断
+
+三、删除的代码
+-----------------
+- coeff_val 变量声明 (原L1211)
+- if (r->style == ARRHENIUS) coeff_val = 3 (原L1216)
+- AA/DA/LH1/LH3/CD 的 surf_cover, S_theta, kisliuk_flag 逻辑
+- DA 被注释的第二个吸附系数代码块
+- ER 的硬编码 dot=2.0
+- CI2 被注释的代码块
+- check_ads / ads_index 注释掉的变量
+
+四、各类型概率公式对照
+-----------------
+类型  原公式                    新公式
+─────────────────────────────────────────────────
+D     k_react                  k_react (不变)
+E     k_react                  k_react (不变)
+R     k_react                  k_react (不变)
+AA    k_react * S_theta        min(1, 2K/Vn * N_S*FN/Se)
+DA    k_react * S_theta        min(1, 2K/Vn * (N_S*FN/Se)^2)
+LH1   k_react * S_theta        min(1, 2K/Vn * prod(Gamma_j))
+LH3   k_react * S_theta        min(1, 2K/Vn * prod(Gamma_j))
+CD    k_react * S_theta        min(1, 2K/Vn * prod(Gamma_j))
+ER    2*k_r/dot=2 * ...        min(1, 2K/Vn * Gamma) (真实Vn)
+CI    k_react (× energy)       k_react (× energy) (不变)
+
+五、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译命令: cd src && make mpi -j16
+编译结果: 成功，无错误、无警告
+生成文件: src/spa_mpi (2,289,176 bytes)
+  text:   2,166,896  (原: 2,167,008, -112 bytes)
+  data:     107,712  (不变)
+  bss:       14,568  (不变)
+  dec:    2,289,176
+
+六、影响分析
+-----------------
+- schu_flag=0 (默认): 走原react()，不受影响
+- schu_flag=1: 走react_gs_finite_rate()，使用有限速率公式
+- 向后兼容：无schu关键词的输入文件行为不变
+- 概率归一化和反应抽选逻辑不变
+- 反应执行（粒子生成/销毁、surface delta）不变
+
+七、后续工作
+-----------------
+- 需要用实际算例验证有限速率公式的正确性
+- 体相参与的烧蚀反应后续单独实现

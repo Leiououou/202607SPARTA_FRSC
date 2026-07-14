@@ -22,7 +22,10 @@
       "Bash(wsl whoami *)",
       "Bash(wsl bash *)",
       "Bash(ls -la \"C:/Users/DELL/.claude/projects/d------------202607-src/memory/\")",
-      "Read(//d/claude/.claude/projects/d------------202607-src/memory/**)"
+      "Read(//d/claude/.claude/projects/d------------202607-src/memory/**)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(pdflatex gs_probabilities.tex)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018"

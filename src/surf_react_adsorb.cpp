@@ -1199,6 +1199,9 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
   double factor = fnum * weight[isurf] / area[isurf];
   double ms_inv = factor / max_cover;
 
+  // Vn = incident normal velocity magnitude for finite-rate formula
+  double Vn = fabs(MathExtra::dot3(ip->v, norm));
+
   // loop over possible reactions for this species
 
   Particle::Species *species = particle->species;
@@ -1206,213 +1209,129 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
   OneReaction_GS *r;
   double prob_value[n], sum_prob = 0.0;
   double scatter_prob = 0.0, correction = 1.0;
-  //int check_ads = 0, ads_index = -1;
-
-  int coeff_val = 1;
 
   for (int i = 0; i < n; i++) {
     r = &rlist_gs[list[i]];
 
-    if (r->style == ARRHENIUS) coeff_val = 3;
-
     switch (r->type) {
+
+    // D/E/R: constant probability, unchanged from SPARTA original
     case DISSOCIATION:
-      {
-        //prob_value[i] = r->coeff[0];
-        prob_value[i] = r->k_react;
-        break;
-      }
-
     case EXCHANGE:
-      {
-        //prob_value[i] = r->coeff[0];
-        prob_value[i] = r->k_react;
-        break;
-      }
-
     case RECOMBINATION:
       {
-        //prob_value[i] = r->coeff[0];
         prob_value[i] = r->k_react;
         break;
       }
 
+    // AA: finite-rate, Gamma = N_S * FN/Se  (empty site number density)
     case AA:
       {
-        //check_ads = 1;
-        //ads_index = i;
-        double surf_cover = total_state[isurf] * ms_inv;
-        double S_theta = 0.0;
-
-        if (r->kisliuk_flag)
-        {
-          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
-          exp(-r->kisliuk_coeff[2]/twall);
-          if (surf_cover < 1)
-            S_theta = pow((1 - surf_cover) /
-                          (1 - surf_cover +
-                           K_ads*surf_cover),r->coeff[coeff_val]);
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else {
+          double Gamma = (maxstick - total_state[isurf]) * ms_inv;
+          prob_value[i] = 2.0 * r->k_react / Vn * Gamma;
+          prob_value[i] = MIN(prob_value[i], 1.0);
         }
-        else
-        {
-          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
-        }
-        //scatter_prob = 1 - r->k_react*S_theta;
-        //prob_value[i] = 1.0;
-        prob_value[i] = r->k_react*S_theta;
         break;
       }
 
+    // DA: finite-rate, Gamma = (N_S * FN/Se)^2  (two empty sites needed)
     case DA:
       {
-        double surf_cover = total_state[isurf] * ms_inv;
-        double S_theta = 0.0;
-
-        if (r->kisliuk_flag) {
-          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
-            exp(-r->kisliuk_coeff[2]/twall);
-          if (surf_cover < 1)
-            S_theta = pow((1 - surf_cover) /
-                          (1 - surf_cover +
-                           K_ads*surf_cover),r->coeff[coeff_val]);
-        } else {
-          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else {
+          double Gamma = (maxstick - total_state[isurf]) * ms_inv;
+          prob_value[i] = 2.0 * r->k_react / Vn * Gamma * Gamma;
+          prob_value[i] = MIN(prob_value[i], 1.0);
         }
-
-        prob_value[i] = r->k_react*S_theta;
-
-        /*
-        if (r->state_products[1][0] == 's') {
-          double K_ads2 = r->coeff[6] * pow(twall,r->coeff[7]) *
-            exp(-r->coeff[8]/twall);
-          double S_ratio2 = (1 - surf_cover) /
-               (1 - surf_cover + K_ads*surf_cover);
-          prob_value[i] *= (S_ratio2);
-        }
-        */
-
         break;
       }
 
+    // LH1: finite-rate, base = 2K/Vn, Gamma = prod(Gamma_j) by loop below
     case LH1:
       {
-        double surf_cover = total_state[isurf] * ms_inv;
-        double S_theta = 0.0;
-
-        if (r->kisliuk_flag) {
-          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
-            exp(-r->kisliuk_coeff[2]/twall);
-          if (surf_cover < 1)
-            S_theta = pow((1 - surf_cover) /
-                          (1 - surf_cover +
-                           K_ads*surf_cover),r->coeff[coeff_val]);
-        } else {
-          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
-        }
-
-        prob_value[i] = r->k_react*S_theta;
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
       }
 
+    // LH3: finite-rate, same structure as LH1
     case LH3:
       {
-        double surf_cover = total_state[isurf] * ms_inv;
-        double S_theta = 0.0;
-
-        if (r->kisliuk_flag) {
-          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
-            exp(-r->kisliuk_coeff[2]/twall);
-          if (surf_cover < 1)
-            S_theta = pow((1 - surf_cover) /
-                          (1 - surf_cover +
-                           K_ads*surf_cover),r->coeff[coeff_val]);
-        } else {
-          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
-        }
-
-        prob_value[i] = r->k_react*S_theta;
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
       }
 
+    // CD: finite-rate, same structure as LH1
     case CD:
       {
-        double surf_cover = total_state[isurf] * ms_inv;
-        double S_theta = 0.0;
-
-        if (r->kisliuk_flag) {
-          double K_ads = r->kisliuk_coeff[0] * pow(twall,r->kisliuk_coeff[1]) *
-            exp(-r->kisliuk_coeff[2]/twall);
-          if (surf_cover < 1)
-            S_theta = pow((1 - surf_cover) /
-                          (1 - surf_cover +
-                           K_ads*surf_cover),r->coeff[coeff_val]);
-        } else {
-          S_theta = pow((1-surf_cover),r->coeff[coeff_val]);
-        }
-
-        prob_value[i] = r->k_react*S_theta;
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
       }
 
+    // ER: gas + adsorbed(s), always 2 reactants, e.g. CO(g)+O(s)->CO2(g)+(s)
+    //     Gamma = N_AS * FN/Se from loop below
     case ER:
       {
-        double dot = MathExtra::dot3(ip->v,norm);
-        dot = 2.0;
-
-        if (r->nreactant == 1) {
-          prob_value[i] = 2.0 * r->k_react *
-            (maxstick - total_state[isurf]) * ms_inv / fabs(dot);
-        } else {
-          prob_value[i] = 2.0 * r->k_react / fabs(dot);
-        }
+        if (Vn < 1.0e-10)
+          prob_value[i] = 1.0;
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
-
       }
 
+    // CI: keep SPARTA original logic (NOT finite-rate formula)
     case CI:
       {
         prob_value[i] = r->k_react;
         if (r->energy_flag) {
           double *v = ip->v;
-          double dot = MathExtra::dot3(v,norm);
+          double dot = MathExtra::dot3(v, norm);
           double vmag_sq = MathExtra::lensq3(v);
           double E_i = 0.5 * species[ip->ispecies].mass * vmag_sq;
           double cos_theta = abs(dot) / sqrt(vmag_sq);
-          prob_value[i] *= pow(E_i,r->energy_coeff[0]) *
-          pow(cos_theta,r->energy_coeff[1]);
+          prob_value[i] *= pow(E_i, r->energy_coeff[0]) *
+                           pow(cos_theta, r->energy_coeff[1]);
         }
         break;
       }
-
-    /*
-    case CI2:
-      {
-        double *v = ip->v;
-        double dot = MathExtra::dot3(v,norm);
-        double vmag_sq = MathExtra::lensq3(v);
-        double E_i = 0.5 * species[ip->ispecies].mass * vmag_sq;
-        double cos_theta = dot/sqrt(vmag_sq);
-        prob_value[i] = r->k_react * pow(E_i,r->coeff[3]) *
-          pow(cos_theta,r->coeff[4]);
-        break;
-      }
-      */
     }
 
+    // multiply by surface co-reactant factors Gamma_j (j >= 1)
+    // skip bulk-phase (b) species: Gamma_j = 1 (constant)
     for (int j = 1; j < r->nreactant; j++) {
+      if (r->state_reactants[j][0] == 'b') continue;
       if (r->state_reactants[j][0] == 's') {
         if (r->part_reactants[j] == 0) {
           prob_value[i] *=
             stoich_pow(total_state[isurf],
                        r->stoich_reactants[j]) *
-            pow(ms_inv,r->stoich_reactants[j]);
+            pow(ms_inv, r->stoich_reactants[j]);
         } else {
           prob_value[i] *=
             stoich_pow(species_state[isurf][r->reactants_ad_index[j]],
                        r->stoich_reactants[j]) *
-            pow(ms_inv,r->stoich_reactants[j]);
+            pow(ms_inv, r->stoich_reactants[j]);
         }
       }
+    }
+
+    // finite-rate unified formula: P = min(1, 2K*Gamma/Vn)
+    // AA, DA already clamped in their cases above
+    if (r->type != DISSOCIATION && r->type != EXCHANGE &&
+        r->type != RECOMBINATION && r->type != AA && r->type != DA) {
+      prob_value[i] = MIN(prob_value[i], 1.0);
     }
 
     sum_prob += prob_value[i];
@@ -2666,30 +2585,25 @@ void SurfReactAdsorb::readfile_gs(char *fname)
       r->k_react = r->k_react * pow(twall,r->coeff[1]) *
         exp(-r->coeff[2]/(twall));
 
-    // process 3rd line of reaction
-    // NOTE: RIGHT HERE
-
-    // nextra = # of extra lines to read in this reaction: 0,1,2
-    // please add some code that computes nextra based on gas species count
+    // process collision model line for scattered gas-phase products
+    // nextra = nprod_g tells how many collision models we need (0,1,2)
+    // readone() already read the model line (2nd line of reaction)
+    // into copy2 — reuse it directly, no extra file reads needed
+    // GS format is always 2 lines per reaction (eqn + model)
 
     int nextra = r->nprod_g;
-
-    // NOTE: END of ADDED CODE
 
     if (nextra == 0) {
       nlist_gs++;
       continue;
     }
 
-    if (me == 0) eof = readextra(nextra,line1,line2,n1,n2);
-    MPI_Bcast(&eof,1,MPI_INT,0,world);
-    if (eof) error->all(FLERR,"Missing line(s) for collision model to use");
-
-    MPI_Bcast(&n1,1,MPI_INT,0,world);
-    MPI_Bcast(line1,n1,MPI_CHAR,0,world);
+    // line2 was mangled by strtok during parsing; copy2 has pristine copy
+    strcpy(line1, copy2);
+    n1 = strlen(line1) + 1;
     if (nextra == 2) {
-      MPI_Bcast(&n2,1,MPI_INT,0,world);
-      MPI_Bcast(line2,n2,MPI_CHAR,0,world);
+      strcpy(line2, copy2);
+      n2 = strlen(line2) + 1;
     }
 
     // process reactions for particles IP and JP, if they exist

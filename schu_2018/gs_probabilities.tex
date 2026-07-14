@@ -113,18 +113,37 @@ AA、DA、LH1、LH3、CD、ER 六种反应的微观概率统一为：
 
 这三种反应涉及表面共反应物（可能不止一个），$\Gamma$ 为各表面反应物因子的连乘。
 
+\subsection{表面共反应物状态类型：(s) 与 (b)}
+
+在 LH1/LH3/CD 反应中，表面相反应物的状态标签分为两种：
+
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+\textbf{状态标签} & \textbf{类型} & \textbf{$\Gamma_j$ 处理} \\
+\midrule
+\texttt{(s)} & 表面吸附态 & 实时计算 $\Gamma_j$（参与反应消耗）\\
+\texttt{(b)} & 体相 & $\Gamma_j = 1$（常数，不参与实时更新）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+体相物种的数密度远大于表面吸附态，其消耗对浓度的相对变化可以忽略，因此设为常数 1。\\
+\textbf{注意：}体相参与的烧蚀反应（ablation）\textbf{不在本次修改范围内}，后续单独考虑。
+
 \subsection{表面共反应物因子 $\Gamma_j$}
-遍历反应式中所有表面相反应物 $j \ge 1$，按催化性/参与性分别计算：
+遍历反应式中所有表面相反应物 $j \ge 1$，\textbf{仅对 (s) 态}按催化性/参与性分别计算：
 
 \begin{equation}
   \Gamma_j =
   \begin{cases}
     \displaystyle \binom{N_{\text{tot}}}{\nu_j} \cdot \left(\frac{F_N}{S_e}\right)^{\nu_j}, & \text{催化性（\texttt{part == 0}}）\\[12pt]
-    \displaystyle \binom{N_{AS,k}}{\nu_j} \cdot \left(\frac{F_N}{S_e}\right)^{\nu_j}, & \text{参与性（\texttt{part == 1}}）
+    \displaystyle \binom{N_{AS,k}}{\nu_j} \cdot \left(\frac{F_N}{S_e}\right)^{\nu_j}, & \text{参与性（\texttt{part == 1}}）\\[12pt]
+    1, & \text{体相 \texttt{(b)}，不参与计算}
   \end{cases}
 \end{equation}
 \begin{equation}
-  \Gamma = \prod_{j \,\ge\, 1,\; \text{state}=\text{s}} \Gamma_j
+  \Gamma = \prod_{j \,\ge\, 1,\; \text{state}\neq\text{(b)}} \Gamma_j
 \end{equation}
 
 其中 $\binom{N}{k} = \texttt{stoich\_pow}(N, k)$ 为二项式组合数（SPARTA 已实现）。\\
