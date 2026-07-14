@@ -1,0 +1,81 @@
+============================================================
+SPARTA GS 反应碰撞模型解析修复 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 修复 readfile_gs 中碰撞模型解析的 bug
+============================================================
+
+一、问题根源分析
+-----------------
+这个 bug 从原始代码（e7136bb）起就存在，属于"沉睡 bug"：
+之前从未被触发，因为旧输入文件的 GS 反应中没有气相产物（即从未使用 ER/CI 等反应类型）。
+
+原始代码的碰撞模型解析逻辑：
+  strcpy(line1, copy2);   // copy2 = 第2行 "ER  A  0.4E-16  0  5051"
+  words[1] = strtok(line1," \t\n");  // 第一个token = "ER"
+  → "ER" 不匹配任何碰撞模型名 → 报错
+
+这段代码从来就不可能正确工作，因为第2行的第一个token永远是反应类型。
+
+当 nextra = nprod_g = 0（无气相产物）时，碰撞模型代码被跳过，bug 不触发。
+
+二、正确修复方案
+-----------------
+GS 碰撞模型解析改用 readextra() 从文件读取独立的第3行（与 PS 部分一致）。
+PS 部分一直是正确的实现，GS 部分应该采用相同的模式。
+
+修改文件: src/surf_react_adsorb.cpp readfile_gs() (L2651-2717)
+
+修改前:
+  从 copy2（第2行副本）重新 strtok，期望碰撞模型在反应参数后面
+  → 第一个token是反应类型，永远不匹配
+
+修改后:
+  调用 readextra(nextra, line1, line2, n1, n2) 从文件读取第3行
+  line1 = "diffuse"（独立一行，直接解析为碰撞模型名）
+  → 与 PS 部分完全一致的实现
+
+三、GS 反应文件正确格式（3行/反应）
+-----------------
+第1行: 反应方程式
+第2行: type style coeff1 coeff2 coeff3
+第3行: 碰撞模型名
+
+示例:
+  N(g) + N(s) --> N2(g)
+  ER  A  0.4E-16  0  5051
+  diffuse
+
+注意:
+  - 不写纯位点 (s)（SPARTA 输入文件规范）
+  - 碰撞模型在独立的第3行，不在第2行末尾
+  - 支持碰撞模型: none, diffuse, specular, cll, td, impulsive
+
+四、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译结果: 成功，无错误、无警告
+
+五、2026-07-14 补充修改 — 对齐原始SPARTA_2026注释
+-----------------
+目的: 最大程度保留和原始SPARTA_2026源代码接近的处理方式
+
+修改内容:
+  GS碰撞模型段落的注释恢复为原始SPARTA_2026的写法:
+
+  修改前:
+    // process collision model line for scattered gas-phase products
+    // nextra = nprod_g tells how many collision models we need (0,1,2)
+    // readextra() reads the collision model line(s) from file
+    // GS format: 3 lines per reaction (eqn + params + collision model)
+
+  修改后（与原始SPARTA_2026完全一致）:
+    // process 3rd line of reaction
+    // NOTE: RIGHT HERE
+    // nextra = # of extra lines to read in this reaction: 0,1,2
+    // please add some code that computes nextra based on gas species count
+    // NOTE: END of ADDED CODE
+
+  代码逻辑无变化，仅注释对齐。
+
+运行验证: test/20260714/schu_gs_1.surf, 1000步, 56724次表面反应, 无错误

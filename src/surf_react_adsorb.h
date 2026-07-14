@@ -49,6 +49,9 @@ class SurfReactAdsorb : public SurfReact {
 
   int gsflag,psflag;                // 0/1 if gas and/or surf chem enabled
   int schu_flag;                   // 0=原概率公式（默认），1=有限速率公式
+  int init_cover_flag;             // 0=空表面, 1=初始满覆盖
+  char *init_cover_name;           // 初始覆盖物种名（暂存）
+  int init_cover_index;            // 初始覆盖物种在 species_surf 中的索引
   int mode;                         // FACE or SURF
   int nsync;                        // synchronize surf state
                                     // every this many steps
@@ -69,8 +72,8 @@ class SurfReactAdsorb : public SurfReact {
 
   int nface;       // # of box faces, 4 (2d) or 6 (3d)
 
-  int **face_species_state;     // 4 state quantities for up to 6 box faces
-  int *face_total_state;
+  double **face_species_state;     // 4 state quantities for up to 6 box faces
+  double *face_total_state;
   double *face_area;
   double *face_weight;
   double **face_tau;
@@ -98,8 +101,8 @@ class SurfReactAdsorb : public SurfReact {
   // ptrs to data for each box face or surface element
   // used in react() and react_PS() and sync operations
 
-  int *total_state;          // total count at last sync
-  int **species_state;       // perspecies count at last sync
+  double *total_state;          // total count at last sync
+  double **species_state;       // perspecies count at last sync
   double *area;              // area of surf
   double *weight;            // weight of surf
   double **tau;              // PS time of surf
@@ -248,7 +251,7 @@ class SurfReactAdsorb : public SurfReact {
   void cll(Particle::OnePart *, double *, double, double, double);
   */
 
-  double stoich_pow(int, int);
+  double stoich_pow(double, int);
   int find_surf_species(char *);
   void print_reaction(char *, char *);
   int readone(char *, char *, int &, int &);

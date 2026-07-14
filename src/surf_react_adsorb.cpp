@@ -144,6 +144,21 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
     else error->all(FLERR,"Illegal surf_react adsorb schu option");
     iarg++;
   }
+
+  // init_cover = species name for initial full surface coverage
+
+  init_cover_flag = 0;
+  init_cover_name = NULL;
+  init_cover_index = -1;
+  if (iarg < narg && strcmp(arg[iarg],"init_cover") == 0) {
+    iarg++;
+    init_cover_flag = 1;
+    int n = strlen(arg[iarg]) + 1;
+    init_cover_name = new char[n];
+    strcpy(init_cover_name, arg[iarg]);
+    iarg++;
+  }
+
   species_surf = new char*[narg-iarg];
   nspecies_surf = 0;
 
@@ -458,9 +473,9 @@ void SurfReactAdsorb::create_per_surf_state()
   if (weight_index < 0) flag --;
 
   if (flag == -4) {
-    total_state_index = surf->add_custom((char *) "nstick_total",INT,0);
+    total_state_index = surf->add_custom((char *) "nstick_total",DOUBLE,0);
     species_state_index = surf->add_custom((char *) "nstick_species",
-                                           INT,nspecies_surf);
+                                           DOUBLE,nspecies_surf);
     area_index = surf->add_custom((char *) "area",DOUBLE,0);
     weight_index = surf->add_custom((char *) "weight",DOUBLE,0);
 
@@ -544,6 +559,32 @@ void SurfReactAdsorb::init()
     }
   }
 
+  // init_cover = fill all surface sites with specified species at startup
+  // FACE mode: can be done now, all data structures are available
+  // SURF mode: handled later after area/weight are fully set up
+
+  if (init_cover_flag) {
+    init_cover_index = find_surf_species(init_cover_name);
+    if (init_cover_index < 0)
+      error->all(FLERR,"Init_cover species not in surface species list");
+
+    double fnum = update->fnum;
+    if (mode == FACE) {
+      for (int iface = 0; iface < nface; iface++) {
+        long int maxstick = ceil(max_cover * face_area[iface] /
+                                 (fnum * face_weight[iface]));
+        face_species_state[iface][init_cover_index] = maxstick;
+        face_total_state[iface] = maxstick;
+      }
+      if (comm->me == 0) {
+        if (screen) fprintf(screen,"  Init_cover: all sites filled with %s\n",
+                            init_cover_name);
+        if (logfile) fprintf(logfile,"  Init_cover: all sites filled with %s\n",
+                             init_cover_name);
+      }
+    }
+  }
+
   // one-time initialize of custom per-surf attributes for area and weight
   // counts were initialized to zero by Surf class when custom vecs/arrays added
   // only set for surf elements assigned to this command ID
@@ -616,11 +657,65 @@ void SurfReactAdsorb::init()
     surf->spread_custom(weight_index);
     if (psflag) surf->spread_custom(tau_index);
 
-    total_state = surf->eivec_local[surf->ewhich[total_state_index]];
-    species_state = surf->eiarray_local[surf->ewhich[species_state_index]];
+    total_state = surf->edvec_local[surf->ewhich[total_state_index]];
+    species_state = surf->edarray_local[surf->ewhich[species_state_index]];
     area = surf->edvec_local[surf->ewhich[area_index]];
     weight = surf->edvec_local[surf->ewhich[weight_index]];
     if (psflag) tau = surf->edarray_local[surf->ewhich[tau_index]];
+  }
+
+  // init_cover for SURF mode
+  // must be done after spread_custom and local pointer setup
+  // must set BOTH owned and local arrays:
+  //   - local arrays are used by react_gs_finite_rate during simulation
+  //   - owned arrays are the source for update_state_surf's recalculation
+  //     (update_state_surf recalculates total_state from owned species_state
+  //      and spreads owned → local, overwriting local values)
+
+  if (init_cover_flag && mode == SURF) {
+    double fnum = update->fnum;
+    int nall = surf->nlocal + surf->nghost;
+
+    // set local arrays first (for react_gs_finite_rate immediate use)
+    // local area/weight are fully populated from spread_custom above
+    for (int isurf = 0; isurf < nall; isurf++) {
+      long int maxstick = ceil(max_cover * area[isurf] /
+                               (fnum * weight[isurf]));
+      species_state[isurf][init_cover_index] = maxstick;
+      total_state[isurf] = maxstick;
+    }
+
+    // also set owned arrays (so update_state_surf preserves init values)
+    // non-distributed: OWNED[k] ↔ LOCAL[me + k*nprocs] (round-robin)
+    // distributed:     OWNED[k] ↔ LOCAL[k] (direct mapping)
+    double *owned_total = surf->edvec[surf->ewhich[total_state_index]];
+    double **owned_species = surf->edarray[surf->ewhich[species_state_index]];
+    int nsown = surf->nown;
+
+    if (!distributed) {
+      for (int k = 0; k < nsown; k++) {
+        int lidx = comm->me + k * nprocs;  // round-robin mapping
+        long int maxstick = ceil(max_cover * area[lidx] /
+                                 (fnum * weight[lidx]));
+        owned_species[k][init_cover_index] = maxstick;
+        owned_total[k] = maxstick;
+      }
+    } else {
+      for (int k = 0; k < nsown; k++) {
+        long int maxstick = ceil(max_cover * area[k] /
+                                 (fnum * weight[k]));
+        owned_species[k][init_cover_index] = maxstick;
+        owned_total[k] = maxstick;
+      }
+    }
+
+    // print info
+    if (comm->me == 0) {
+      if (screen) fprintf(screen,"  Init_cover: all sites filled with %s\n",
+                          init_cover_name);
+      if (logfile) fprintf(logfile,"  Init_cover: all sites filled with %s\n",
+                           init_cover_name);
+    }
   }
 
   // for distributed: setup list of unique surfs
@@ -1691,8 +1786,8 @@ void SurfReactAdsorb::grid_changed()
   surf->spread_custom(weight_index);
   if (psflag) surf->spread_custom(tau_index);
 
-  total_state = surf->eivec_local[surf->ewhich[total_state_index]];
-  species_state = surf->eiarray_local[surf->ewhich[species_state_index]];
+  total_state = surf->edvec_local[surf->ewhich[total_state_index]];
+  species_state = surf->edarray_local[surf->ewhich[species_state_index]];
   area = surf->edvec_local[surf->ewhich[area_index]];
   weight = surf->edvec_local[surf->ewhich[weight_index]];
   if (psflag) tau = surf->edarray_local[surf->ewhich[tau_index]];
@@ -1945,8 +2040,8 @@ void SurfReactAdsorb::update_state_surf()
   // set total_state = sum of species_state over species
   // total_state and species_state must be for owned, not local values
 
-  total_state = surf->eivec[surf->ewhich[total_state_index]];
-  species_state = surf->eiarray[surf->ewhich[species_state_index]];
+  total_state = surf->edvec[surf->ewhich[total_state_index]];
+  species_state = surf->edarray[surf->ewhich[species_state_index]];
 
   int nsown = surf->nown;
 
@@ -1965,8 +2060,8 @@ void SurfReactAdsorb::update_state_surf()
   surf->spread_custom(total_state_index);
   surf->spread_custom(species_state_index);
 
-  total_state = surf->eivec_local[surf->ewhich[total_state_index]];
-  species_state = surf->eiarray_local[surf->ewhich[species_state_index]];
+  total_state = surf->edvec_local[surf->ewhich[total_state_index]];
+  species_state = surf->edarray_local[surf->ewhich[species_state_index]];
 }
 
 /* ---------------------------------------------------------------------- */
@@ -2585,25 +2680,30 @@ void SurfReactAdsorb::readfile_gs(char *fname)
       r->k_react = r->k_react * pow(twall,r->coeff[1]) *
         exp(-r->coeff[2]/(twall));
 
-    // process collision model line for scattered gas-phase products
-    // nextra = nprod_g tells how many collision models we need (0,1,2)
-    // readone() already read the model line (2nd line of reaction)
-    // into copy2 — reuse it directly, no extra file reads needed
-    // GS format is always 2 lines per reaction (eqn + model)
+    // process 3rd line of reaction
+    // NOTE: RIGHT HERE
+
+    // nextra = # of extra lines to read in this reaction: 0,1,2
+    // please add some code that computes nextra based on gas species count
 
     int nextra = r->nprod_g;
+
+    // NOTE: END of ADDED CODE
 
     if (nextra == 0) {
       nlist_gs++;
       continue;
     }
 
-    // line2 was mangled by strtok during parsing; copy2 has pristine copy
-    strcpy(line1, copy2);
-    n1 = strlen(line1) + 1;
+    if (me == 0) eof = readextra(nextra,line1,line2,n1,n2);
+    MPI_Bcast(&eof,1,MPI_INT,0,world);
+    if (eof) error->all(FLERR,"Missing line(s) for collision model to use");
+
+    MPI_Bcast(&n1,1,MPI_INT,0,world);
+    MPI_Bcast(line1,n1,MPI_CHAR,0,world);
     if (nextra == 2) {
-      strcpy(line2, copy2);
-      n2 = strlen(line2) + 1;
+      MPI_Bcast(&n2,1,MPI_INT,0,world);
+      MPI_Bcast(line2,n2,MPI_CHAR,0,world);
     }
 
     // process reactions for particles IP and JP, if they exist
@@ -3997,7 +4097,7 @@ int SurfReactAdsorb::find_cell(int isurf, double *x)
 
 /* ---------------------------------------------------------------------- */
 
-double SurfReactAdsorb::stoich_pow(int base, int pow)
+double SurfReactAdsorb::stoich_pow(double base, int pow)
 {
   double value = 0.0;
   switch (pow) {

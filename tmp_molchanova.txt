@@ -1,0 +1,1252 @@
+RESEARCH ARTICLE | OCTOBER 31 2018
+
+Surface recombination in the direct simulation Monte Carlo
+method 
+
+Alexandra N. Molchanova; Alexander V. Kashkovsky ; Yevgeniy A. Bondar
+
+Physics of Fluids 30, 107105 (2018)
+https://doi.org/10.1063/1.5048353
+
+                                                                                      
+
+                                                                                       View Export
+                                                                                      Online Citation
+
+Articles You May Be Interested In
+
+Effect of surface catalycity on high-altitude aerothermodynamics of reentry vehicles
+
+AIP Conf. Proc. (October 2016)
+
+                                                                                                       10 June 2026 04:54:07
+                                                           PHYSICS OF FLUIDS 30, 107105 (2018)
+
+Surface recombination in the direct simulation Monte Carlo method
+
+          Alexandra N. Molchanova,a) Alexander V. Kashkovsky, and Yevgeniy A. Bondar
+            Khristianovich Institute of Theoretical and Applied Mechanics SB RAS, 63090 Novosibirsk, Russia
+
+          (Received 13 July 2018; accepted 4 October 2018; published online 31 October 2018)
+
+          This work is aimed at the development of surface chemistry models for the Direct Simulation Monte
+          Carlo (DSMC) method applicable to non-equilibrium high-temperature flows about reentry vehicles.
+          Probabilities of adsorption and Eley-Rideal recombination dependent on individual properties of
+          each particular molecule and frequencies of desorption and Langmuir-Hinshelwood recombination
+          are determined from macroscopic reaction rate data. Various macroscopic finite-rate surface reaction
+          sets are used for the construction of the DSMC surface recombination models for the reaction cured
+          glass and -alumina surfaces. The models are implemented in the SMILE++ software system for
+          DSMC computations, and detailed verification of the code is performed. The proposed approach is
+          used to study the effects of surface recombination on the aerothermodynamics of a blunt body at
+          high-altitude reentry conditions. Published by AIP Publishing. https://doi.org/10.1063/1.5048353
+
+I. INTRODUCTION                                                      Ref. 12, is used most frequently). The most popular model          10 June 2026 04:54:07
+                                                                     for real engineering applications of the DSMC method is the
+     At the early stages of the space vehicle aeroshell design, it   total collision energy model (TCE, Refs. 13 and 2), where data
+is necessary to accurately predict the aerothermodynamic char-       on the macroscopic reaction rate under thermal equilibrium are
+acteristics of the vehicle along its reentry trajectory (see, e.g.,  used for determining the probability of the chemical reaction
+Ref. 1). A typical feature of the flow around the reentry vehi-      between two molecules (see also the recent modification of the
+cle is a significant degree of thermochemical non-equilibrium.       model in Refs. 14 and 15). This phenomenological approach
+Experimental modeling of high-altitude non-equilibrium flight        was generalized in order to take into account the effects of
+environment in ground-based facilities is extremely difficult;       vibration dissociation favoring (see, e.g., Refs. 16­23). The
+therefore, numerical modeling is the main tool for study-            main advantage of the phenomenological approach to model-
+ing such flows. There are two high-fidelity approaches to            ing chemical reactions is its relative simplicity, possibility of
+numerical simulation of gas flows: continuum and kinetic.            easy extension to complex multispecies mixtures, and com-
+The continuum approach based on the Navier-Stokes equa-              patibility of such models with macroscopic models used in
+tions is inapplicable at high flight altitudes where the mean        continuum CFD. There are many papers dealing with the val-
+free path of molecules is comparable with the size of the vehi-      idation of DSMC gas-phase chemistry models against data of
+cle, and the kinetic approach should be used for modeling            ground-based and flight experiments (see, e.g., Refs. 16 and
+such flows. The best-developed and efficient implementation          24­32).
+of the kinetic approach is the Direct Simulation Monte Carlo
+(DSMC) method (Ref. 2).                                                   It should be noted that surface chemical processes at the
+                                                                     atmospheric reentry conditions have been studied to a much
+     The magnitude of the heat flux onto the reentry vehicle         smaller extent than gas-phase reactions, and the degree of
+surface is largely determined by physical and chemical pro-          uncertainty associated with modeling these processes is much
+cesses in the shock layer and on the surface of the thermal          higher. In continuum gas dynamics, surface processes can be
+protection system (TPS). Reactions of dissociation of free-          taken into account with different degrees of detail: from a sim-
+stream molecules into atoms and simpler molecules proceed            ple variant of a constant recombination probability (the value
+in the high-temperature viscous shock layer on the spacecraft        of this parameter equal to zero and unity correspond to the
+surface, which leads to cooling of the flow. Simultaneously,         limiting cases of noncatalytic and perfectly catalytic walls,
+however, the spacecraft surface serves as a catalyst for exother-    respectively) to sufficiently complex finite-rate surface chem-
+mic reverse reactions of recombination, which can severalfold        istry models, which take into account the kinetics of various
+increase the heat flux to the vehicle (Refs. 3 and 4).               physical and chemical processes on the spacecraft surface. A
+                                                                     number of models of surface chemical reactions with differ-
+     Much attention has been always paid to the modeling of          ent levels of detail and accuracy have been proposed in the
+gas-phase chemical processes in computational fluid dynamics         framework of the continuum approach (Refs. 4 and 33­40).
+(CFD) within the framework of both the continuum and kinetic         These models include those based on empirical data as well
+approaches. Codes based on the continuum approach (e.g.,             as some modern models that employ the results of ab initio
+Refs. 5­11) usually involve chemical reaction models that            calculations.
+take into account the reaction rate dependence on translational
+and vibrational temperature (the model developed by Park,                 As for the kinetic approach, and particularly the DSMC
+                                                                     method, very little attention has been paid to the particle mod-
+a)Electronic mail: molchanova@itam.nsc.ru.                           eling of spacecraft aerothermodynamics taking into account
+
+1070-6631/2018/30(10)/107105/17/$30.00  30, 107105-1                 Published by AIP Publishing.
+107105-2 Molchanova, Kashkovsky, and Bondar                                                  Phys. Fluids 30, 107105 (2018)
+
+surface catalytic processes. There are few publications deal-      TABLE I. Elementary surface processes. Reproduced with permission from
+ing with this topic (Refs. 41­46); moreover, the influence of      Molchanova et al., AIP Conf. Proc. 1770, 040010 (2016). Copyright 2016
+heterogeneous chemical reactions on high-altitude aerother-        AIP Publishing LLC.
+modynamics of space vehicles has not been studied by the
+DSMC method almost at all.                                                                           Impact mechanisms      A + S  AS
+                                                                                                                         AS + B  AB + S
+     The principal goal of the present study is to provide         Adsorption                                            AB + S  AS + B
+researchers and engineers who use the DSMC method with             Eley-Rideal recombination
+an approach to modeling surface catalytic processes, which         Dissociative adsorption                                  AS  A + S
+could be used in real engineering applications and could simul-                                                         AS + BS  AB + 2S
+taneously ensure the level of detail equal to or greater than                                       Surface mechanisms
+the conventional DSMC models of gas-phase chemical reac-
+tions. This paper describes activities that continue and extend    Desorption
+the research started in Refs. 47 and 48. The main idea is to       Langmuir-Hinshelwood recombination
+construct DSMC surface chemistry models based on detailed
+finite-rate macroscopic surface reaction sets. All the DSMC        with the surface. As the result of these processes, the surface         10 June 2026 04:54:07
+model parameters that determine the microscopic probabilities      coverage is changed and new particles are produced.
+of the processes are obtained from the macroscopic reaction
+rate coefficients. In a certain sense, this approach is an exten-       Elementary processes typical of heterogeneous catalysis
+sion of that used in the TCE model to surface reactions. This      are listed in Table I. A and B denote atoms or molecules, S
+approach to surface chemistry modeling was partially devel-        is the surface site where adsorption occurs, and the subscript
+oped in Ref. 43. A pioneering general method of constructing       S denotes the particles adsorbed by the surface. All surface
+DSMC surface chemistry models on the basis of an almost            processes can be divided into two groups: impact mecha-
+arbitrary macroscopic finite-rate surface reaction set including   nisms, which involve gas-phase particles colliding with the
+various surface processes (adsorption, desorption, Eley-Rideal     surface, and surface mechanisms, which involve only parti-
+and Langmuir-Hinshelwood recombination reactions, etc.) is         cles adsorbed by the surface. These processes are illustrated
+proposed in this paper.                                            in Fig. 1.
+
+     The paper is structured as follows. Section II provides            Heterogeneous processes in the macroscopic description
+the necessary basic information on heterogeneous catalytic         are characterized by the reaction rate coefficients K(T ). The
+processes. The mathematical approach to obtaining micro-           dependence of these coefficients on the temperature T is
+scopic parameters of DSMC surface chemistry models on the          usually assumed to be in the Arrhenius form
+basis of prescribed macroscopic reaction rate coefficients for
+each type of the surface process separately is formulated in                         K(T ) = AT bexp - Ea ,             (1)
+Sec. III, where general issues of implementation of the resul-                                    kT
+tant models in the DSMC code are briefly described as well.
+Section IV describes some examples of various materials used       where k is the Boltzmann constant and Ea is the reaction energy
+for the thermal protection of space vehicles for which finite-
+rate macroscopic surface reaction sets in air are available in     barrier. These coefficients are different for different surface
+the literature; DSMC surface chemistry models are developed
+for these materials on the basis of the proposed approach. Sec-    materials.
+tion V deals with verification of the developed DSMC surface
+chemistry models implemented into the SMILE++ software             Heterogeneous processes in continuum CFD (e.g., based
+system (Refs. 49 and 50) for numerical studies of aerothermo-
+dynamic problems on multiprocessor computers, developed            on Navier-Stokes equations) are usually taken into account
+in Russia at the Khristianovich Institute of Theoretical and
+Applied Mechanics (ITAM), which is an upgraded modifica-           through boundary conditions using the catalytic recombination
+tion of the well-known SMILE system (Ref. 51). An example
+of the flow around a blunt body under atmospheric reentry          coefficient , also referred to as the probability of recombina-
+conditions calculated with the use of the developed models
+of surface catalytic processes is considered at the end of the     tion. It is equal to the fraction of all particles incident onto
+paper.
+                                                                   the surface and participating in heterogeneous recombination
+II. HETEROGENEOUS PROCESSES
+                                                                   reactions, i.e.,       J reac
+     A necessary stage for heterogeneous catalysis is adsorp-                                  ,
+tion of particles (atoms or molecules) on surface sites (it can                        =  J                             (2)
+be various crystalline lattice defects). Adsorbed particles can
+spontaneously leave the surface (the so-called desorption) and     where J is the total flux of particles onto the surface and Jreac is
+react with each other or with gas-phase particles colliding
+                                                                   the flux of particles incident onto the surface and taking part in
+
+                                                                   recombination reactions, i.e., in the Eley-Rideal or Langmuir-
+
+                                                                   Hinshelwood recombination. This coefficient can be divided
+
+                                                                   into two parts defining the Eley-Rideal recombination coef-
+
+                                                                   ficient ER and the Langmuir-Hinshelwood recombination
+                                                                   coefficient LH , respectively (clearly,  = ER + LH ). Under
+                                                                   certain assumptions,  can be determined from the reaction
+
+                                                                   rate constants (1) of all processes involved in heterogeneous
+
+                                                                   catalysis.
+
+                                                                   Note that there are various options of reaction schemes
+
+                                                                   for heterogeneous catalytic processes, and only one example
+
+                                                                   is presented in Table I. In other schemes, some of these pro-
+
+                                                                   cesses can be neglected or included in a slightly different form;
+
+                                                                   for example, in the Langmuir-Hinshelwood or Eley-Rideal
+107105-3 Molchanova, Kashkovsky, and Bondar                                                         Phys. Fluids 30, 107105 (2018)
+
+                                             FIG. 1. Surface processes.
+
+recombination, the resulting molecule AB can remain adsorbed      particles nAS changes according to the equation
+on the surface after the reaction (i.e., ABS); another possible
+variant is the adsorption of both resulting atoms (i.e., a reac-                 dnAS     = -KPnR,                 (3)
+tion reverse to the Langmuir-Hinshelwood recombination is                         dt
+included) in the case of dissociative adsorption.
+                                                                  where KP is the reaction rate coefficient of the process P and    10 June 2026 04:54:07
+III. APPROACH TO THE DEVELOPMENT                                  nR is the surface number density of a reagent or reagents (the
+OF DSMC MODELS                                                    number of reagents depends on the reaction type under consid-
+                                                                  eration). The frequency of the process P can be determined
+     In sets of macroscopic surface reaction, it is necessary to  from this equation. Assuming that the elementary events of the
+specify the list of elementary surface processes and the cor-     process P follow the Poisson process and hence time tp until
+responding reaction rate coefficients. In the present work, we    the next elementary event follows the exponential distribution,
+propose to obtain all the parameters required for the DSMC        we can sample this time in the DSMC using the formula
+surface chemistry modeling (such as probabilities dependent
+on the properties of an individual particle) on the basis of                     tP    =  -  ln(Rn)  ,             (4)
+macroscopic data in the form of reaction rate coefficients for                                 P
+each surface process. Thus, we use the information contained
+in macroscopic surface reaction sets to develop DSMC surface      where Rn is a random number between 0 and 1. Such an
+chemistry models. The approach to the extraction of DSMC          approach is used in the null-collision (Refs. 52 and 53)
+parameters from macroscopic ones will be proposed in this
+section. The models described below are applicable to any         and majorant frequency schemes (Ref. 54) for Monte Carlo
+implementation of the DSMC method.
+                                                                  simulation of gases and plasmas.
+     In the procedure of obtaining the microscopic properties
+from the macroscopic ones, we assume the molecular veloc-         1. Desorption
+ity distribution function in the vicinity of the surface to be
+equilibrium. This assumption is similar to those made in the          Let us consider the desorption reaction
+total collsion energy model of gas-phase reactions. It also
+seems to be reasonable for the surface processes because the                     AS  A + S,                        (5)
+considered macroscopic models are applicable to the contin-
+uum flow regime where the distribution function is close to       where A is an arbitrary particle (an atom or a molecule).
+equilibrium.
+                                                                  Equation (3) characterizing a change in the number density of
+     We assume that the body surface is presented in the DSMC
+computations as a set of elements of a known area, which          adsorbed particles nAS is rewritten for the desorption process
+are small as compared to the macroscopic parameter gra-
+dient length scale (in the direction parallel to the surface).    as             dnAS
+The approach is different for surface and impact mechanisms;                      dt
+therefore, these processes will be considered separately.                              = -KdesnAS .                (6)
+
+A. Surface mechanisms                                             Desorption is an individual process, i.e., it does not involve
+
+     Surface mechanisms involve only particles adsorbed on        other adsorbed particles. The frequency of desorption per one
+the surface. Let us consider a certain process P that involves
+adsorbed particles AS. The surface number density of adsorbed     particle is
+
+                                                                                 des = Kdes.                       (7)
+
+                                                                  The characteristic time of desorption here is the mean lifetime
+
+                                                                  of a particle AS on the surface. The time spent by each adsorbed
+
+                                                                  particle on the surface can be sampled using the formula (4)
+
+                                                                  as              = - ln(Rn) .
+
+                                                                                             Kdes                  (8)
+
+                                                                      For each particle that appears on the surface in a DSMC
+
+                                                                  calculation after the adsorption process or after the Langmuir-
+
+                                                                  Hinshelwood recombination, the lifetime of this particle on
+
+                                                                  the surface is sampled with the formula (8). After this time,
+107105-4 Molchanova, Kashkovsky, and Bondar                                                           Phys. Fluids 30, 107105 (2018)
+
+the particle should be desorbed from the surface: desorption                    surface during the DSMC time step t are performed at the
+is performed at the end of each time step by checking the time                  end of each time step on each surface element consecutively.
+spent on the surface for each adsorbed particle. The desorbed
+particle that moved to the gas phase is assumed to be reflected                      The resulting molecule that is the product of the
+diffusely from the surface with the distribution corresponding                  Langmuir-Hinshelwood recombination can stay adsorbed on
+to the wall temperature T w.                                                    the surface or move to the gas phase after the reaction. In
+                                                                                the first case, the recombination energy Erecomb produced in
+2. Langmuir-Hinshelwood recombination                                           the reaction is completely accommodated by the surface, i.e.,
+                                                                                contributes to the heat flux to the surface. In the second case,
+      Let us consider the Langmuir-Hinshelwood recombina-                       different degrees of recombination energy accommodation can
+                                                                                be considered. In the case of complete accommodation, similar
+tion                                                                            to the first case, the entire energy contributes to the heat flux,
+                                                                                whereas the molecule that is the reaction product is diffusely
+                      AS + BS  AB + 2S,                                    (9)  reflected with the distribution of all energy modes correspond-
+                                                                                ing to the wall temperature T w. In the case of incomplete
+where A and B are arbitrary atoms (or molecules) and AB is a                    accommodation of recombination energy, some part of this
+corresponding molecule.                                                         energy contributes to the heat flux, whereas the remaining part
+                                                                                should be added to the energy of the reflected molecule that is
+     Equation (3) characterizing a change in the number den-                    the reaction product.
+sity of adsorbed particles is rewritten for the Langmuir-
+Hinshelwood recombination as                                                         The degree of accommodation of the chemical energy on
+                                                                                the surface has been addressed in several experimental and the-
+                  dnAS    =  dnBS    = -KLH nAS nBS .                  (10)     oretical studies (see, e.g., Refs. 55 and 56). It should be noted
+                   dt         dt                                                that the Larsen-Borgnakke approach (Ref. 57) can be naturally
+                                                                                used for the energy distribution between the translational, rota-
+     The frequency ~LH of real Langmuir-Hinshelwood reac-                       tional, and vibrational modes in the framework of the present
+tions, which is the number of reactions per unit time, can be                   approach. In the present paper, we consider only the case of
+derived from formula (10) in the following way:                                 complete accommodation of recombination energy. As it has
+                                                                                been pointed out above, the present DSMC approach is based
+                      ~LH = KLH nAS nBS Se.                            (11)     on a macroscopic finite-rate surface recombination models. As
+                                                                                was stated in the recent review (Ref. 58), these macroscopic
+Se is the area of the surface element, on which the reaction is                 models do not explicitly address energy accommodation. Nor-         10 June 2026 04:54:07
+considered. Particles on the surface interact with each other                   mally, the complete energy accommodation is assumed and
+independently of their location on the surface.                                 thus the predicted heating rate for a particular surface chem-
+                                                                                istry model is maximized. The present paper follows the same
+     Applying the standard majorant frequency scheme                            logic and one should consider the present DSMC results on the
+(Ref. 54) of the DSMC method and assuming equal recombi-                        heating rate as the maximum possible value for the particular
+nation probabilities for all the pairs of particles adsorbed on the             reaction mechanism. The question of incomplete accommoda-
+surface element with the area Se, we can rewrite the previous                   tion of the recombination energy within the proposed DSMC
+formula (11) in terms of model particles, i.e., obtain the fre-                 approach should be addressed in the further studies.
+quency LH of the Langmuir-Hinshelwood reactions between
+model particles
+
+LH    =  ~LH   1  =   KLH  NAS  NBS  FN 2  Se   1    =  KLH  NAS  NBS  FN  ,
+              FN                     Se2       FN                      Se
+
+                                                                       (12)
+
+where FN is the number of real particles represented by one                     B. Impact mechanisms
+model particle in the DSMC method and NAS and NBS are the
+number of model particles of respective species adsorbed on                          Impact mechanisms involve particles AS adsorbed on the
+                                                                                surface and gas-phase particles B colliding with this surface.
+the surface element with the area Se.
+     For the special case of the reagents of the same species                   Therefore, the DSMC model parameters of interest have to
+
+AS + AS  A2 + 2S, one obtains                                                   depend on the individual properties of the particle B that arrives
+
+         LH   =  ~LH   1  =  1             NAS - 1      FN 2  Se   1            from the gas phase as well as on the surface density nAS of
+                      FN     2 KLH NAS                  Se2       FN            adsorbed particles AS. For impact mechanisms, the micro-
+                                                                                scopic probabilities of the processes will be determined in this
+                 1                      FN .
+              =  2 KLH NAS   NAS - 1    Se                             (13)     section.
+
+      Applying formula (4), we can sample the time between                           Let us consider a certain impact process that involves a
+                                                                                gas-phase particle B with a velocity V colliding with the sur-
+
+the consecutive model Langmuir-Hinshelwood recombination                        face. The microscopic probability P of the process is assumed
+
+events from the exponential distribution                                        to depend on the velocity component V n normal to the sur-
+                                                                                face. Then the macroscopic probability of this process P¯ ,
+                                      ln(Rn    )
+                           tLH  =  -   LH         .                    (14)     which depends on the gas temperature T g, can be expressed as
+                                                                                the average of the microscopic probability P in the following
+
+      The frequency should be recalculated and the time                         manner:
+
+between the events should be resampled each time the num-                                           0 P(Vn)Vnf Vn, Tg dVn
+                                                                                                       0 Vnf Vn, Tg dVn .
+ber of adsorbed molecules of any reacting species is changed.                             P¯ Tg  =                         (15)
+
+The Langmuir-Hinshelwood reactions that occur on the
+107105-5 Molchanova, Kashkovsky, and Bondar                                                                                Phys. Fluids 30, 107105 (2018)
+
+Let us assume that the distribution function f (V n, T g) is at                 1. Adsorption
+equilibrium
+                                                                                Let us consider the process of adsorption,
+                                       1
+       f Vn, Tg        =        mB     2           - mBVn2       .        (16)                             A + S  AS.                                  (25)
+                              2kTg                      2kTg
+                                        exp
+
+Applying the change of variables                                                Equation (20) describing the change in the surface number
+                                                                                density of adsorbed particles nAS is rewritten as
+                       =   mB           Tg =       mB
+                          2kTg                     2k                                                   dnAS
+                                        Vn =               ,              (17)                           dt
+                                                        1                                                     = KadsnAnS,                              (26)
+                                                        2
+                = Vn2                                 
+                                       
+              
+
+we can rewrite formula (15) as                                                  where nS is the surface density of free surface sites.
+                                                                                     Using Eq. (24), we obtain the macroscopic probability of
+1      mB                     1                                     1
+       2k                     2                                     2           the adsorption process
+   P¯      =       P             exp(-)d = L                  P        ,  (18)
+
+              0
+
+where L is the Laplace transform, which converts the function                   P¯ ads =        JAreac  =  KadsnAnS         =    2mA   KadsnS
+                                                                                                 JA                               kTg
+depending on the variable  to a function depending on the                                                  1      8kTg  nA
+                                                                                                           4      mA
+variable . Therefore, the microscopic probability P of the
+
+process can be expressed through the macroscopic probability                                 =  2mA        KadsNS       FN  ,                          (27)
+P¯ using the inverse Laplace transform as follows:                                               kTg                    Se
+
+              P        1   = L-1       1   P¯  mB          .              (19)  where NS is the number of free model surface sites on the
+                       2                       2k                               surface element with the area Se, i.e., the number of vacant
+                                                                                surface sites on which the model particle can be adsorbed.
+     Thus, the next step is to define the macroscopic probability
+P¯ of the process using the known reaction rate constant spec-
+
+ified in the initial macroscopic mechanism. Then the micro-                     2. Eley-Rideal recombination
+
+scopic probability P for the DSMC method can be determined                      Let us consider the Eley-Rideal recombination
+
+analytically with the use of formula (19) and inverse Laplace
+
+transform properties.                                                                                   AS + B  AB + S.                                (28)  10 June 2026 04:54:07
+
+   The variation of the surface number density of adsorbed                      Equation (20) is rewritten as
+
+particles nAS is described by the equation
+
+                          dnAS   = -KnBnR,                                (20)                          dnAS  = -KERnBnAS .                            (29)
+                           dt                                                                            dt
+
+where K is the reaction rate coefficient of the process, nB is                  Therefore, Eq. (24) is transformed to
+the volume number density of particles B colliding with the
+                                                                                             2mB                           2mB           FN
+surface and taking part in the considered surface reaction, and                 P¯ ER =       kTg       KER  nAS  =         kTg  KERNAS  Se  .         (30)
+
+nR is the surface number density of other reagent if it exists                  3. Dissociative adsorption
+
+(the number of reagents depends on the reaction type). The
+macroscopic probability P¯ of the process is defined as
+
+                              P¯ = JBreac ,                               (21)  Let us consider the process of dissociative adsorption
+                                       JB
+
+where JB is the flux of particles B incident onto the surface                                           AB + S  AS + B.                                (31)
+and JBreac is the flux of particles B incident onto the surface
+and taking part in the reaction. The total flux of particles to the             Equation (20) is rewritten as
+
+surface in equilibrium can be written as (Ref. 2)                                               dnAS          = KdisadsnABnS.                          (32)
+                                                                                                 dt
+
+                       JB   =    1     8kTg    nB  ,                      (22)  Therefore, Eq. (24) is transformed to
+                                 4     mB
+
+and the flux of particles to the surface participating in the                   P¯ disads =  2mAB       Kdisads   nS    =      2mAB  KdisadsNS  FN  .
+reaction can be obtained from Eq. (20)                                                        kTg                               kTg             Se
+
+              JBreac      = - dnAS     = KnBnR.                           (23)                                                                         (33)
+                                dt
+                                                                                Thus, the macroscopic probability of the process for all impact
+Therefore, substituting Eqs. (22) and (23) into formula (21),                   mechanisms has the form
+
+we can obtain the required dependence of the macroscopic                                                P¯ = 2m K                                      (34)
+probability P¯ on the gas temperature T g
+
+       P¯ = JBreac = KnBnR =                          2mB                                                         kTg
+                                                       kTg
+              JB                                              K  nR.      (24)  where  is a parameter, which contains information about sur-
+                                                                                face occupation, i.e., the number of free surface sites or the
+                           1     8kTg  nB                                       number of adsorbed particles ( does not depend on the gas
+                           4     mB
+
+   Various impact mechanisms are considered below.
+107105-6 Molchanova, Kashkovsky, and Bondar                                                                                   Phys. Fluids 30, 107105 (2018)
+
+temperature T g) and K is the reaction rate constant of the pro-         P(V n) is determined as
+cess under consideration, which depends on the temperature
+T ; see Eq. (1). We can treat this temperature as the gas temper-           P(Vn) = P      1      = L-1        1  P¯    m
+ature T g or surface temperature T w. Indeed, under continuum                              2                           2k
+flow conditions, for which the reaction rate constants are typi-
+cally obtained and where they are applied, the gas temperature                   = L-1         1               (Tw)           =             (Tw)L-1        -  1
+can be considered to be equal to the surface temperature.                                           4K                            2 K                         2
+However, in the procedure described above, T g is the vari-
+able of integration, while T w is constant; therefore, the result                =2                         -  1
+of the procedure application depends on our treatment of the                            K (Tw )                2    H()
+temperature.                                                                                       
+                                                                                                               1
+     Let us consider two cases: T = T w and T = T g. In the first                                              2
+case, the reaction rate constant K is independent of the gas
+temperature T g, i.e., of the variable  defined by formula (17).                 =                (Tw  )      1       H    Vn2       =   2K (Tw )   1   ,     (35)
+It means that K is a constant in the inverse Laplace transform                      2 K                                                             Vn
+(19). In the second case, the opposite situation is observed: K
+is not a constant in the inverse Laplace transform.                                                           Vn
+
+     Thus, if we use T = T w in expression (1) for the reaction          where  is the gamma function and H is the Heaviside step
+rate constant K(T ) in Eq. (19), the microscopic probability             function. It is seen from Eq. (35) that the individual probabil-
+                                                                         ity of each impact process P(V n) is inversely proportional to
+                                                                         the normal to the surface component of the gas-phase particle
+                                                                         velocity and turns to infinity at the zero point [Fig. 2(a)].
+
+                                                                              However, if we use T = T g in expression (1) for the reac-
+                                                                         tion rate constant K(T ) in Eq. (19), the microscopic probability
+                                                                         P(V n) is determined in a different way
+
+P(Vn) = P    1  = L-1   1  P¯   m        = L-1       1                    m      = L-1     2-            1  A   m        b           - 2Ea      
+             2                 2k                         4K             2k                              2     2k
+                                                                                                                          exp
+                                                                                                                                         m
+
+                                                                                                          -    2Ea     b-  1
+                                                                                                                m          2
+                m   b                     - 2Ea H  - 2Ea                            m      b                                  H2  - 2Ea
+=2                             -  1  -b                                       =2 
+                     AL-1         2                                                         A
+                                                                                                                                                                    10 June 2026 04:54:07
+                2k                            m                          m          2k                       b+     1                       m
+                                                                                                                    2
+
+                                              b-  1                                   2m               mVn 2               b-  1         mVn 2
+                                                  2                                                      2                     2           2
+= 2                 m   b                2Ea                             2Ea                      A            - Ea               ,  if         > Ea .
+                    2k         Vn2 -      m          H2  Vn2          -   m   =    (b+  1  )k  b                                                              (36)
+                         A                                                              2
+                1                                                                                                                        mVn 2
+           b+   2                                                                                                              0,    if    2     Ea
+
+                                                                                 
+
+Note that the derivation of Eq. (36) is correct if Ea > 0. Thus, it      (ii) it is a step function (b = 1/2), or (iii) the probability
+is seen from Eq. (36) that the microscopic probability of each
+impact process P(V n) has a different character of the depen-            increases (b > 1/2).
+dence on the gas-phase particle normal velocity as compared
+to the previous case [see Figs. 2(b)­2(d)]: the probability is                It should be noted that the analytical formulas (35) and
+
+not equal to zero only if the kinetic energy of the gas-phase            (36) may yield probability values greater than unity, for exam-
+particle along the normal to the surface exceeds the energy Ea;
+depending on the value of b, the following options are possible:         ple, near V n = 0 in the case illustrated in Fig. 2(a), near
+(i) the probability has a threshold and turns to infinity (b < 1/2),
+                                                                         Vn =      2Ea  in     Fig.    2(b), and           near      Vn           in  Fig.  2(d).
+                                                                                    m
+
+                                                                         It is well known that a similar problem is inherent in phe-
+
+                                                                         nomenological models of gas-phase chemical reactions (see,
+
+                                                                         e.g., Ref. 59). Applying this probability formula directly in
+
+FIG. 2. Microscopic probability of impact processes P(V n): (a) formula (35); (b) formula (36), b < 1/2; (c) formula (36), b = 1/2; (d) formula (36), b > 1/2.
+107105-7 Molchanova, Kashkovsky, and Bondar                        Phys. Fluids 30, 107105 (2018)
+
+computations, where its values are compared with the val-          molecule can stay adsorbed on the surface or leave the sur-           10 June 2026 04:54:07
+ues of a pseudo-random variable uniformly distributed over         face after the Eley-Rideal reaction. The gas-phase product of
+the segment [0,1], one de facto uses a "truncated" probability     recombination is reflected from the surface diffusely with the
+function at the level of unity. This means that the probabil-      distribution corresponding to the wall temperature T w. It is also
+ity in those regions where the analytical formulas predict its     possible to consider the case on incomplete accommodation
+values greater than unity is assigned the unit value there. As     of recombination energy Erecomb similarly to the Langmuir-
+a result, the number of impact processes in simulations can        Hinshelwood case; in the present paper, however, only the
+be smaller than the number of these processes that could be        case of complete accommodation of recombination energy is
+expected from the initial reaction rates of these processes. The   analyzed. Hence, as it was stated in Sec. III C, the present
+size of error associated with probability values greater than      DSMC results provide the maximum value of the heating rate
+unity depends on the chosen shape of the functional depen-         for a particular finite-rate reaction mechanism, and the effect
+dence of the probability: Eq. (35) [see Fig. 2(a)] or Eq. (36)     of incomplete recombination energy accommodation should
+[see Figs. 2(b)­2(d)].                                             be addressed in the future.
+
+     The analysis shows that this error in the case of a thresh-        In the case of dissociative adsorption, the gas phase prod-
+old determined by Eq. (36) is appreciably higher than that in      uct of the reaction, if it exists, leaves the surface diffusely with
+the case of Eq. (35), which does not contain a threshold. In       the distribution corresponding to the wall temperature T w. The
+particular, for the model that describes surface reactions on      energy required to break the bonds of the incident molecule
+reaction cured glass (RCG) (see Sec. IV A), the reaction rates     in the course of surface dissociation is taken into account in
+predicted by the threshold-type equation for the probability are   calculating the heat flux (it makes a negative contribution to
+significantly lower than the initial value, even if each particle  the thermal energy flux to the surface).
+with a velocity greater than the threshold value reacted (i.e.,
+when the reaction probability is a stepwise function equal to      C. Implementation in the DSMC method
+unity for the particle velocity exceeding the threshold value).
+It should be also noted that, for gas temperatures near the wall        Let us consider a body surface approximated by a geo-
+typical for a continuum flow about a reentry vehicle (below        metrical model composed of flat elements, e.g., triangles in
+2000 K), this threshold is several times higher than the mean      the 3D case or line segments in the 2D case. In the SMILE++
+thermal velocity of molecules, i.e., only high-energy particles    software system which is used in the present study such flat sur-
+are involved into the Eley-Rideal recombination, which cannot      face elements are referred as "panels." All surface processes
+be clearly explained on the basis of the physics of the process    are modeled at each surface element separately. Figure 3(a)
+in our opinion. Based on the considerations discussed above,       illustrates the overall DSMC algorithm including surface pro-
+we chose formula (35) for further calculations.                    cesses: the impact mechanisms are modeled during each time
+                                                                   step at each event of the collision of a gas-phase particle
+     In the case of the Eley-Rideal recombination, as in the       with the surface, and the surface mechanisms are modeled
+case of Langmuir-Hinshelwood recombination, the resulting
+
+FIG. 3. (a) DSMC scheme including surface processes, (b) scheme of impact mechanisms.
+107105-8 Molchanova, Kashkovsky, and Bondar                                                                  Phys. Fluids 30, 107105 (2018)
+
+collectively at the end of each time step t on each surface            A sufficient condition for applying the approach to a surface
+element.                                                               reaction set can be formulated as follows: the reaction mech-
+                                                                       anism has to be presented as a set of elementary processes
+     The surface mechanisms (Langmuir-Hinshelwood recom-               considered in the Sec. III, and the reaction rate constants of
+bination and desorption) are performed in the following                these processes have to be presented in the Arrhenius form.
+iterative process:
+
+t = t                                                                  A. Catalysis on an RCG-surface, mechanism
+while t > 0 do :                                                       of Warnatz et al.
+
+  LH    -  recombination                                               Let us first consider the surface reaction set of Warnatz
+
+
+     =
+
+  t     t  -  tLH         .                  (37)                      et al. (Ref. 33) of chemical processes on an RCG-surface in
+
+
+                                                                       an air mixture. RCG (reaction cured glass, consists of SiO2 by
+                                                                       94%) is a low catalytic material frequently used for production
+for each AS
+
+if tpanel > tdes do :                                                  of the reusable spacecraft thermal protection system (TPS), for
+
+     Desorption of AS                                                  example, in the space shuttle surface coating. The following
+
+Here tLH is the time of one Langmuir-Hinshelwood recombi-              surface processes are taken into account (see Table II): adsorp-
+nation calculated by formula (14), tpanel is the time spent by
+the particle on the surface, and tdes is the lifetime of the particle  tion of N and O atoms on the surface, formation of N2, and
+on the surface calculated by formula (8).                              O2 molecules in the Eley-Rideal and Langmuir-Hinshelwood
+                                                                       recombination (formation of NO is neglected), and desorp-
+     The algorithm for the impact mechanisms (adsorption and
+Eley-Rideal recombination) is shown in Fig. 3(b). Each impact          tion of N and O atoms, and also N2 and O2 molecules that
+process is performed with a probability P(V n) depending on            remain adsorbed after the Langmuir-Hinshelwood recombi-
+the gas-phase particle energy and obtained in the Sec. III B. In
+the case of adsorption, as well as dissociative adsorption, the        nation from the surface. The reaction rate constants for des-
+gas-phase particle can be captured by the surface element if
+there is a free surface site on it; adsorbed particles are deleted     orption, Eley-Rideal, and Langmuir-Hinshelwood reactions
+from the gas phase and stored on the surface. In the case of dis-
+sociative adsorption, the non-adsorbed product of the reaction,        are defined in the Arrhenius form (1), b = 0; for adsorp-
+if it exists, is reflected from the surface (it is not shown in the
+figure). In the case of the Eley-Rideal recombination, the part-       tion reactions, a constant sticking coefficient S0 is specified.
+ner for the recombination for the gas-phase particle colliding         The parameters for the reaction rate constants and sticking
+with some surface element is chosen randomly from parti-
+cles adsorbed on the same surface element, and the resulting           coefficients are listed in Table II.                                      10 June 2026 04:54:07
+molecule is reflected from the surface.
+                                                                       Using the approach proposed above, we obtain the char-
+
+                                                                       acteristic times of the surface processes and the individual
+
+                                                                       probabilities of the impact processes in DSMC computations
+
+                                                                       from their reaction rate coefficients.
+
+                                                                       For desorption processes listed in Table II, we calculate
+
+                                                                       the lifetime of an adsorbed particle on the surface, after which
+
+                                                                       the particle should be desorbed to the gas phase, according to
+
+                                                                       Eq. (8)
+
+IV. DSMC SURFACE CHEMISTRY MODELS                                                             = - ln(Rn) .                     (38)
+                                                                                                  Kdes
+     The proposed approach for obtaining DSMC surface
+chemistry models was applied to two macroscopic surface                TABLE II. Parameters of reactions in macroscopic surface reaction set of
+reaction sets: the well-known mechanism of Warnatz et al.              Ref. 33. Reproduced with permission from Molchanova et al., AIP Conf.
+(Ref. 33) of chemical processes on a reaction cured glass              Proc. 1770, 040010 (2016). Copyright 2016 AIP Publishing LLC.
+(RCG)-surface in air and the recent mechanism of Kovalev
+et al. (Ref. 40) of chemical processes on an -Al2O3-surface            Reaction              S0                A           Ea
+in air. In these macroscopic mechanisms, a five-species mix-
+ture of gases (N, O, N2, O2, NO) is considered, and a detailed         Adsorption
+mechanism of heterogeneous catalytic reactions in dissoci-
+ated air is proposed. The reaction rate coefficients are speci-        N + S  NS             0.1
+fied for each considered surface process. These mechanisms
+differ not only in the material of the surface to which they           O + S  OS             0.1
+are applied, but also in the method of obtaining the reaction
+rate coefficients. In the first surface reaction set, the reac-        Desorption                                 (1/s)          (J)
+tion rate constants were obtained from experimental data,              NS  N + S                              7.3 × 1011   3.6 × 1019
+whereas the reaction rate constants in the second set were             OS  O + S                               5 × 1011    3.3 × 1019
+obtained on the basis of quantum-mechanical calculations.              N2S  N2 + S                             1 × 1012    0.17 × 1019
+The probabilities of the processes can be also obtained by the         O2S  O2 + S                             1 × 1012    0.17 × 1019
+method of Ref. 40; however, they were not presented in the
+paper.                                                                 Eley-Rideal                              (m3/s)           (J)
+                                                                       N + NS  N2 + S                        0.4 × 1016   0.66 × 1019
+     Note that the present approach can be also applied to             O + OS  O2 + S                         1 × 1016
+other macroscopic surface reaction sets in a similar manner.                                                                1 × 1019
+                                                                       Langmuir-Hinshelwood                     (m2/s)
+                                                                       NS + NS  N2S + S                      1.16 × 1010        (J)
+                                                                       OS + OS  O2S + S                       33 × 1010   2.16 × 1019
+                                                                                                                           2.66 × 1019
+107105-9 Molchanova, Kashkovsky, and Bondar                                                                          Phys. Fluids 30, 107105 (2018)
+
+     For each Langmuir-Hinshelwood recombination reaction                        The characteristic times of the surface processes and the indi-
+listed in Table II, the time between two consecutive reactions                   vidual probabilities of the impact processes for the DSMC
+is calculated according to Eqs. (14) and (13) by the formula                     computations are calculated almost in the same manner as in
+                                                                                 the previous case and are presented below. The lifetime of the
+tLH  =  -   ln(Rn  )  ,  where LH =      1                   NAS - 1  FN .       adsorbed particle on the surface for the desorption process is
+             LH                          2 KLH NAS                    Se
+
+                                                                           (39)                          = - ln(Rn) ,                    (43)
+
+     In the case of adsorption, a constant sticking coefficient                                                   Kdes
+S0 is specified. It means that formula (27) in the model under
+consideration has a simpler form                                                 and the time between two consecutive Langmuir-Hinshelwood
+
+                                                                                 recombination reactions is
+
+                         P¯ ads = S0 = 0.1.                               (40)   tLH  =  -  ln(Rn)  ,  where  LH  =  1          NAS - 1  FN .
+                                                                                             LH                      2 KLH NAS           Se
+
+Thus, using formula (19) and inverse Laplace transform                                                                                   (44)
+properties, we can find the microscopic probability Pads of
+adsorption for the DSMC method                                                   The microscopic probability of adsorption for the -Al2O3-
+                                                                                 model differs from the previous case and is calculated by
+Pads(Vn) = Pads            1     = L-1       1  P¯ ads  = L-1  1                 combining Eqs. (35) and (27) as
+                           2                                    S0
+
+            = S0L-1           1  = S0H() = S0,                             (41)               Pads(Vn)  =  2Kads(Tw)NS  FN  1            (45)
+                                                                                                                        Se     ,
+
+                                                                                                                            Vn
+
+                                                                                 and finally, the microscopic probability of Eley-Rideal recom-
+
+i.e., the microscopic probability for each gas-phase particle                    bination is
+colliding with the surface to be adsorbed is equal to the same
+given constant sticking coefficient S0.                                                       PER(Vn)   =  2KER(Tw)NAS  FN  1            (46)
+                                                                                                                        Se     .
+     For the Eley-Rideal recombination reaction, we can cal-
+culate the microscopic probability combining Eqs. (35) and                                                                  Vn
+(30). The resulting individual probability of the reaction is
+                                                                                 V. RESULTS OF DSMC COMPUTATIONS
+                PER(Vn)    =  2KER(Tw)NAS       FN      1                 (42)   AND DISCUSSION                                                      10 June 2026 04:54:07
+                                                Se         .
+                                                                                      The molecular models of catalytic processes on different
+                                                        Vn                       surfaces proposed above are similar in terms of the numeri-
+                                                                                 cal algorithm: the only difference between them is the values
+B. Catalysis on an -Al2O3-surface,                                               of the reaction rate coefficients. Therefore, these models can
+mechanism of Kovalev et al.                                                      be formulated in a general form. This general model was
+                                                                                 implemented in SMILE++, a robust DSMC software system
+     Let us consider the surface reaction set of Kovalev et al.                  developed at ITAM, which provides a full cycle of numeri-
+(Ref. 40) of chemical processes on an -Al2O3-surface in                          cal studies on multiprocessor computers, from definition of
+an air mixture. Adsorption of nitrogen is neglected in this                      a three-dimensional geometric model of the vehicle to the
+mechanism; therefore, only oxygen recombination, as well as                      visualization of computational results. The verification of the
+adsorption and desorption, are taken into account. The reac-                     implemented algorithm is presented below. Then the results
+tion rate constants for all processes are defined in the Arrhenius               of application of the model to assessing surface catalycity
+form (1). The full mechanism of surface processes, as well as                    effects on aerothermodynamics of bodies under reentry flow
+parameters for their reaction rate coefficients are presented in                 conditions are discussed.
+Table III.
+                                                                                 A. Verification
+     Applying the proposed approach to this macroscopic sur-
+face reaction set, we obtain the model of surface chemistry on                        The following series of computations were performed to
+an -Al2O3-surface in an air mixture for the DSMC method.                         compare the analytical values of the reaction rate constants
+                                                                                 with those numerically calculated by SMILE++ in the condi-
+TABLE III. Parameters of reactions in the macroscopic surface reaction set       tions of thermally equilibrium gas with temperature equal to
+of Ref. 40. Reproduced with permission from Molchanova et al., AIP Conf.         the surface one (both gas and surfaces gas temperature was
+Proc. 1770, 040010 (2016). Copyright 2016 AIP Publishing LLC.                    denoted here by T ). Due to the fact that the DSMC model
+                                                                                 parameters are obtained under these thermal equilibrium con-
+Reaction                              A                 b             Ea         ditions from the known macroscopic rates, one should expect
+                                                                                 almost exact agreement of the DSMC results with the theory if
+Adsorption                         (m3/s)                             (J)        the DSMC model was implemented correctly. The verification
+O + S  OS                        6.3 × 1021                                      was performed for the case of oxygen processes on an RCG
+                                                        1      6.2 × 1021      surface (in terms of the numerical algorithm, the cases of all
+                                                                                 gases and surface materials are similar). The DSMC calcula-
+Desorption                       (1/s)                                (J)        tions were performed for a 2D square computational domain
+OS  O + S                                                                        with three specular boundaries (left, top, and bottom) and
+                                 4.8 × 1011             0      2.7 × 1019
+
+Eley-Rideal                      (m3/s)                               (J)
+O + OS  O2 + S
+                              5.2 × 1018               1/2    0.69 × 1019
+
+Langmuir-Hinshelwood             (m2/s)                               (J)
+
+OS + OS  O2 + 2S                 2.7 × 107             0      4.0 × 1019
+107105-10 Molchanova, Kashkovsky, and Bondar                    Phys. Fluids 30, 107105 (2018)
+
+one diffuse wall (placed at the right of the domain) on which   Note that no other surface processes were modeled in compu-
+the considered RCG-surface processes (see Table II) were        tations, which means that new particles did not appear on the
+modeled. The computational domain was filled with atomic        surface by adsorption and did not disappear from the surface
+oxygen. The gas pressure was 4 Pa, and the temperature T        in the Eley-Rideal or Langmuir-Hinshelwood recombination
+was varied from the minimum (700 K) to maximum (2000 K)         reactions.
+value in steps of 100 K. A separate DSMC computation was
+carried out for each value of the temperature.                       The Langmuir-Hinshelwood recombination rate constant
+                                                                for the OS + OS  O2S + S reaction on an RCG-surface is
+     Figure 4(a) shows the desorption rate constant for atomic  presented in Fig. 4(b). In the DSMC calculations, only the
+oxygen. In this DSMC calculation, only the desorption pro-      Langmuir-Hinshelwood recombination was considered: the
+cess was modeled and the other three surface processes were     impact processes and desorption were not modeled. At the start
+neglected. At the start of each computation, a set of adsorbed  of each computation, a set of adsorbed particles was generated
+particles was generated on the surface. During the computa-     on the surface (NOS model particles). During the computation,
+tion, desorption of particles from the surface was performed    the number of accepted Langmuir-Hinshelwood recombina-
+after each time step, and the lifetime of each particle on the  tion events on the wall was sampled after each time step, but the
+surface was calculated. These values were sampled to calcu-     reactions were not modeled, i.e., the adsorbed particles gener-
+late the mean lifetime ¯ of particles on the surface and the    ated in the beginning of the calculation were not removed from
+frequency of desorption des, which is equal to the desorption   the surface and did not appear on the surface either because the
+rate constant Kdes [Eq. (7)],                                   adsorption process was neglected and, hence, NOS remained
+                                                                constant. At the end of each computation, the mean number
+Kdes  =  des  =  1                            (47)              N¯ LH of accepted recombination events per time step t was
+                 ¯ .
+
+                                                                                                                                                                     10 June 2026 04:54:07
+
+FIG. 4. Comparison of the calculated and analytical reaction rate constants for oxygen processes on the RCG-surface: (a) desorption rate coefficient; (b) Langmuir-
+Hinshelwood recombination rate coefficient; (c) adsorption-desorption equilibrium constant; (d) Eley-Rideal recombination rate coefficient. Reproduced with
+permission from Molchanova (Shumakova) et al., AIP Conf. Proc. 1628, 131 (2014). Copyright 2016 AIP Publishing LLC.
+107105-11 Molchanova, Kashkovsky, and Bondar                                                                        Phys. Fluids 30, 107105 (2018)
+
+calculated, and then the frequency of recombination LH and                  is seen that the DSMC method predicts the constants fairly
+the reaction rate constant KLH were obtained using Eq. (13):                well for the entire considered temperature range for all surface
+                                                                            processes.
+KLH = LH NOS        2           Swall = N¯ LH           2       Swall
+                   NOS - 1      FN         t NOS       NOS - 1   FN              For more comprehensive verification of code procedures
+                                                                            that involve surface chemistry, it is necessary to consider as
+                                                                      (48)  the test case with simultaneous simulations of all processes
+                                                                            considered above. The test case conditions were identical to
+(Swall is the surface area).                                                test conditions for the previous situations. Oxygen atoms inci-
+     The adsorption-desorption equilibrium constant KAD for                 dent onto the surface could be adsorbed and participate in
+                                                                            the Eley-Rideal recombination reactions with other adsorbed
+atomic oxygen is presented in Fig. 4(c). In the DSMC calcu-                 atoms of oxygen. In addition to participation in the Eley-Rideal
+lations, desorption and adsorption without any recombination                recombination, the adsorbed atoms could be desorbed and par-
+were modeled. In that case, the surface was empty at the begin-             ticipate in the Langmuir-Hinshelwood recombination reaction.
+ning of each DSMC computation, and the mean number of                       Oxygen molecules formed in the recombination reaction were
+model particles adsorbed on the surface N¯ OS was calculated                removed from the computation as soon as they left the surface.
+during the computation after reaching the steady state. The                 As a result, the recombination probabilities were calculated by
+analytical value of the equilibrium constant KAD is defined                 the formulas
+by formula (50) derived from the chemical kinetics equation
+(49) describing the equilibrium adsorption-desorption process                               LH  =  NLH ,         =  NLH + NER ,           (53)
+O + S OS with the use of the Arrhenius form of the                                                 Ncoll               Ncoll
+desorption constant
+
+dnOS  =  S0  1  8kT          -  Kdes nOS   =  KadsnO   -  Kdes nOS  =  0,   where  denotes the total probability of recombination, LH
+ dt          4  mO nO                                                       is the probability of only Langmuir-Hinshelwood recombina-
+                                                                            tion, Ncoll is the number of all collisions with the surface,
+                                                                      (49)  and NER and NLH are the numbers of all particles accepted
+                                                                            for Eley-Rideal and Langmuir-Hinshelwood recombination
+         Kads      S0  1     8kT  = S0          k1              Edes        reactions, respectively, which were sampled during the compu-
+         Kdes          4     mO      Ades     2mO T 2 exp       kT          tation. Verification was performed through comparisons with
+KAD   =         =                                                      .    analytical values of these variables for different values of
+                       Kdes                                                 temperature.
+                                                                                                                                                    10 June 2026 04:54:07
+                                                                      (50)       To obtain the analytical values of the total and Langmuir-
+                                                                            Hinshelwood probabilities of recombination, the following
+The numerical value of the equilibrium constant KAD in the                  differential chemical kinetics equation (54) defining the sur-
+                                                                            face number density of adsorbed atoms nOS in the macroscopic
+DSMC computations is calculated by (51), which follows                      surface reactions mechanism of Warnatz et al. was solved
+                                                                            analytically
+from Eq. (49), with the calculated mean number of adsorbed
+particles being N¯ OS
+
+                   KAD    =  nOS  =    N¯ OS  FN mO .                 (51)
+                             nO        nO     Swall
+
+     Figure 4(d) shows the Eley-Rideal recombination rate                   dnOS         1  8kT
+constant for the O + OS  O2 + S reaction on an RCG-surface.                  dt          4  mO nO - KdesnOS - KLH nOS nOS - KERnOS nO.
+In the DSMC calculations, all the surface processes except for
+                                                                                                                                              (54)
+the Eley-Rideal recombination were neglected. As in the first                     =  S0
+
+two series of computations, NOS adsorbed model particles were
+generated on the surface at the beginning of each computation.
+
+During the computation, the number of all collisions with the               Using the definitions of LH and ER and applying Eq. (2), we
+                                                                            transform the third and fourth terms in the right-hand side of
+surface Ncoll and the number of accepted Eley-Rideal recom-                 this equation
+bination events NER were sampled, but the reactions were not
+performed, i.e., adsorbed particles were not removed from the
+
+surface and gas-phase particles were reflected from the sur-
+
+face without any chemical changes according to the diffuse                  KLH nOS nOS     =  JOreac,LH  =  LH  JO  =  LH    1  8kT      (55)
+reflection law (it means that NOS remained constant). Using                                                                   4  mO nO,
+these data, the macroscopic probability P¯ ER of the Eley-Rideal
+recombination was calculated by Eq. (21), i.e., NER divided                 KERnOS nO       =  JOreac,R  =  ER  JO  =  ER  1     8kT      (56)
+by Ncoll, and the Eley-Rideal recombination rate constant was                                                              4     mO nO.
+obtained by using Eq. (30)
+
+KER =     kT       P¯ ER   1    Swall  =       kT  NER     1    Swall  .    Then, substituting the resultant expressions (55) and (56) to the
+         2mO              NOS    FN           2mO  Ncoll  NOS    FN         initial differential equation (54), we obtain the following linear
+                                                                            heterogeneous differential equation with constant coefficients,
+                                                                      (52)  which defines the surface population nOS (t)
+
+The results of verification are presented in Fig. 4. As
+
+it was mentioned above, in this section the proposed model
+
+was constructed in such a way that it must capture the reac-                dnOS     + KdesnOS  =            kT  nO(S0  -  LH    -  ER).  (57)
+                                                                             dt                             2mO
+tion rate constants under thermal equilibrium conditions. It
+107105-12 Molchanova, Kashkovsky, and Bondar                                                                   Phys. Fluids 30, 107105 (2018)
+
+The solution of this equation is the function                               population nOeqS
+                                                                              LH = KLH nOeqS 2
+nOS = C exp(-Kdest) +   kT      nO  (S0  -  LH -  ER)  ,  (58)                                   kT            = KLH  2mO nOeqS 2 , (60)
+                       2mO                  Kdes                                                2mO nO                 kT nO
+
+where C is an arbitrary constant. Passing in this solution to the           ER = KERnOeqS nO     kT            = KER  2mO      nOeqS  .  (61)
+limit as t  , we obtain the steady-state value of the surface                                   2mO nO                 kT
+population nOeqS
+                                                                            Substituting Eqs. (60) and (61) into Eq. (59), we obtain the
+nOeqS  =  lim  nOS  =   kT  nO  (S0  -   LH -  ER)  .     (59)              quadratic equation for nOeqS
+                       2mO               Kdes
+          t
+
+Using Eqs. (55) and (56), we can also obtain the formulas                   KLH nOeqS 2 + (Kdes + KERnO)nOeqS - S0     kT  nO  =  0,     (62)
+relating the steady-state values of the recombination proba-                                                          2mO
+bilities LH and ER to the steady-state value of the surface
+                                                                            whose positive solution is
+
+                               -(Kdes + KERnO) +          (Kdes + KERnO)2 + 4KLH S0               kT    nO
+                       nOeqS =                                 2KLH                             2mO
+
+                                                                                                            .                            (63)
+
+Thus, we can obtain the analytical steady-state values of                   dynamic (MD) calculations of Rutigliano et al. (Ref. 60). In       10 June 2026 04:54:07
+the recombination probabilities LH , ER, and  = LH                          Ref. 60, the calculations of the Eley-Rideal recombination of
++ ER by formulas (60) and (61), where nOeqS is determined by                oxygen on a -cristobalite surface were performed. The surface
+Eq. (63).                                                                   temperature was assumed to be T w = 1000 K. The probability
+                                                                            of an oxygen atom impinging normally onto the surface to be
+     The probabilities of the total and Langmuir-Hinshelwood                involved in the Eley-Rideal recombination on a small unit cell
+recombination  and LH obtained in the DSMC computations                     of the surface crystal lattice was given as a function of kinetic
+are compared with their analytical values in Fig. 5 for differ-             energy of the atom. However, the data on the reaction rate con-
+ent values of temperature (the gas temperature coincides with               stant as a function of temperature were not provided, and we
+the surface temperature). The calculated and analytical values              cannot apply the presented model to this case directly. Never-
+are denoted by the red points and blue lines, respectively. The             theless, the data of Ref. 60 can be used with some constraints
+values of the calculated probabilities are in good agreement                to validate the proposed approach for the Eley-Rideal recom-
+with the analytical results. Based on the data reported in this             bination of oxygen on an RCG surface (which consist of silica
+section, we can conclude that the general DSMC surface chem-                by 94%), as given by Eq. (42). In particular, these constraints
+istry model is implemented into the SMILE++ code correctly.                 are caused by significant differences in the materials despite
+                                                                            their similar chemical compositions: -cristobalite illustrates
+B. Comparison with ab initio calculation data                               an ideal case of a regular crystal lattice, whereas RCG has an
+                                                                            amorphous structure. The probabilities were compared with
+     The results obtained by using the developed DSMC model                 accuracy to a constant factor used for multiplying the reaction
+of heterogeneous processes were compared with molecular                     rate constant in the present model. Thus, we compared the gen-
+                                                                            eral character of the recombination probability dependence on
+                                                                            the impinging atom energy rather than its exact values. The
+                                                                            results of these comparisons are plotted in Fig. 6. We can con-
+                                                                            clude that the behavior of the recombination probability as a
+                                                                            function of the kinetic energy of the gas-phase atom computed
+                                                                            in the present work is in good agreement with the data obtained
+                                                                            in ab initio calculations for an ideal crystal surface. It should
+                                                                            be also noted that the results of probability comparisons offer
+                                                                            one more argument for choosing the thresholdless formula of
+                                                                            the recombination probability, which was discussed above in
+                                                                            Sec. III B.
+
+FIG. 5. Comparison of the calculated probability of recombination with the  C. 2D flow around a cylinder with surface
+analytical value.                                                           catalytic processes
+
+                                                                                 The proposed DSMC surface chemistry models were
+                                                                            used for estimating the surface catalycity effects on a reentry
+107105-13 Molchanova, Kashkovsky, and Bondar                            Phys. Fluids 30, 107105 (2018)
+
+FIG. 6. Comparison of the computed probability of ER-recombination for  size equal to the local mean free path was greater than unity           10 June 2026 04:54:07
+oxygen on silica with MD calculations of Ref. 60.                       in the whole computational domain which ensures numeri-
+                                                                        cally accurate results for the DSMC modeling (Ref. 64). The
+vehicle aerothermodynamics. A 2D flow over a cylinder with              computations with a larger time step and smaller number
+a radius of 1 m was simulated numerically for the condi-                of simulated molecules and collisional cells provided results
+tions, corresponding to the point of the atmospheric reen-              nearly identical to those obtained with the mentioned reference
+try trajectory at the altitude of approximately 85 km (see              parameters.
+Table IV). This test case was considered in Ref. 19. The
+Knudsen number, presented in Table IV, is based on the cylin-                The general flowfield structure is demonstrated by the
+der radius. The variable soft sphere model of Ref. 61 was               translational temperature flowfield presented in Fig. 7. The
+used for the elastic collisions. The Larsen--Borgnakke model            flow direction is from left to right, and the origin is located at
+(Ref. 57) with temperature-dependent vibrational collision              the stagnation point. To assess the effect of surface chemistry,
+number correction of Ref. 62 was employed for rotational-               four types of surfaces were considered:
+translational and vibrational-translational energy transfer. The
+kinetic mechanism of Ref. 63, which includes 19 dissocia-                    · Non-catalytic surface, where surface recombination
+tion and exchange reactions for 5 species: N, O, N2, NO, and                    does not occur at all;
+O2 and the total collision energy model (Ref. 2) was used to
+take into account gas-phase chemical reactions. The gas-phase                · Fully catalytic surface, on which all atoms colliding
+recombination was neglected which is a reasonable assump-                       with the surface take part in reactions of recombination
+tion for the low pressures typical of high-altitude reentry flows.              (the model Ref. 46 was employed);
+More details on the DSMC modeling of elastic and inelastic
+collisional processes and model parameters can be found in                   · Two types of partially catalytic surfaces, on which
+Ref. 19.                                                                        surface processes were modeled with the present
+                                                                                approach.
+     The parameters of the DSMC method have been chosen
+to provide numerically accurate results of the simulation. The               The fully catalytic surface was modeled by the simple
+chosen time step of 250 ns was significantly lower than the             surface chemistry model (Ref. 46) with a specified constant
+mean collision time in almost entire computational domain.              probability of recombination  = N = O = 1; in this model,
+The collisional grid was automatically adapted in the dense             the Eley-Rideal and Langmuir mechanism are not distin-
+regions of the flow to ensure that the flowfield is resolved to         guished, desorption is not modeled, and the adsorption process
+the length scales less than the local mean free path. About             is coupled with recombination. The fully catalytic surface,
+2.5 × 106 of simulated molecules and about 400 thousand col-            as well as the non-catalytic surface, is taken into account
+lisional cells were used in a typical computations. The number          to assess the maximum contribution of surface catalysis to
+of simulated molecules in a virtual volume with the linear              aerothermodynamics.
+
+                                                                             Two cases of partially catalytic surfaces represent real
+                                                                        materials, RCG and -Al2O3, which are usually used in ther-
+                                                                        mal protection systems. They were modeled by the proposed
+                                                                        DSMC surface chemistry models based on the macroscopic
+                                                                        surface reaction sets of Warnatz et al. (RCG-surface, Ref. 33)
+                                                                        and Kovalev et al. (-Al2O3-surface, Ref. 40).
+
+                                                                             A diffuse reflection law with full accommodation of
+                                                                        energy was used in all four cases for modeling the parti-
+                                                                        cle/surface interaction without any surface chemical conver-
+                                                                        sions. Full accommodation of reaction energy was assumed
+                                                                        in heterogeneous recombination simulations. The surface
+                                                                        temperature was assumed to be equal to 1000 K.
+
+TABLE IV. Free-stream conditions. Reproduced with permission from
+Molchanova et al., AIP Conf. Proc. 1770, 040010 (2016). Copyright 2016
+AIP Publishing LLC.
+
+Knudsen number                0.01                                      FIG. 7. Temperature flow field. Reproduced with permission from
+Velocity V (m/s)              7810                                      Molchanova et al., AIP Conf. Proc. 1770, 040010 (2016). Copyright 2016
+Density  (kg/m3)          5.66 × 106                                   AIP Publishing LLC.
+Flow temperature T g (K)     178.2
+Mole fraction of N2          0.775
+Mole fraction of O2          0.204
+Mole fraction of O           0.021
+107105-14 Molchanova, Kashkovsky, and Bondar                                                             Phys. Fluids 30, 107105 (2018)
+
+FIG. 8. Mass fraction of the components along the stagnation streamline: (a) N2; (b) O2. Reproduced with permission from Molchanova et al., AIP Conf. Proc.
+1770, 040010 (2016). Copyright 2016 AIP Publishing LLC.
+
+     The mass fractions of N2 and O2 along the stagnation           is considered, and the total probability of recombination is                             10 June 2026 04:54:07
+streamline for all types of surfaces are presented in Figs. 8(a)    approximately 4 times lower than that in the case of the
+and 8(b), respectively. The red lines are used in the case of the   RCG surface; almost all recombination events occur by the
+fully catalytic surface, the blue lines refer to the non-catalytic  Eley-Rideal mechanism.
+surface, and the black and green lines illustrate the cases of the
+RCG and -Al2O3 materials, respectively. The temperature in               The calculated heat transfer coefficients Ch for all four
+the shock wave (Fig. 7) increases above 10 000 K, which leads       types of surfaces are presented in Table VI. The table contains
+to reactions of dissociation in the gas phase. In turn, dissocia-   the total values of the heat transfer coefficients Ch in the second
+tion leads to a decrease in temperature behind the bow shock        column, their percentage values relative to the coefficient for
+front. It is seen in Fig. 8 that the mass fraction of N2 decreases  the fully catalytic surface Ch,FC in the third column, and the
+due to dissociation almost by 2 times, and the mass fraction        percentage values of the surface recombination contribution
+of O2 decreases to zero, i.e., O2 molecules totally dissociate.     to the heat flux Ch - Ch,FC relative to the maximum possible
+For the catalytic cases, the mass fraction starts to increase in    contribution Ch,FC - Ch,NC, where Ch,NC is the heat transfer
+the vicinity of the stagnation point because of surface recom-      coefficient for the non-catalytic surface, in the last column (the
+bination. A small increase in the N2 mass fraction near the         percentage value of the contribution is 0 for the non-catalytic
+stagnation point can be seen in the non-catalytic case as well.     surface and 100 for the fully catalytic surface). These data
+It can be explained by diffusion effects. The mass fraction of      also demonstrate the well-known fact (Ref. 4) of the nonlinear
+N2 increases almost up to its initial free-stream value in the      dependence of the heat flux on the recombination probability
+fully catalytic case, and the plots for the fully catalytic sur-    : even small values of the surface recombination probability
+face and the model for the RCG material are close to each           (  0.1 in the considered case) strongly affect the heat flux to
+other: the difference between the stagnation point values is        the surface--the contribution is 82% of the maximum possible
+about 5%. The plot for the - Al2O3 material is located in the       contribution in the RCG model and 25% of the maximum
+middle between these curves and the plot for the non-catalytic      possible contribution in the - Al2O3 model.
+surface. The difference between the plots of the O2 mass frac-
+tion for the fully catalytic case and the models proposed in the         Figure 9 shows the heat transfer coefficient distribution
+present work is greater and reaches 2 times at the stagnation       over the cylinder surface for all four cases: the fully catalytic
+point in the case of the RCG material and 10 times in the case      case is represented by the red line, the non-catalytic surface is
+of the - Al2O3 material.                                            shown by the blue line, and the RCG and - Al2O3 surfaces are
+
+     The probabilities of the Eley-Rideal and Langmuir-             TABLE V. Probabilities of recombination for different DSMC models.
+Hinshelwood recombination reactions (ER and LH , respec-            Reproduced with permission from Molchanova et al., AIP Conf. Proc. 1770,
+tively), as well as the total probabilities of recombination        040010 (2016). Copyright 2016 AIP Publishing LLC.
+calculated with the proposed DSMC models are presented for
+both N and O components in Table V. Under these free-stream                                              RCG            -Al2O3
+conditions, the total probability of recombination on the RCG
+material for both components is about 0.1, and the majority         Probability of recombination  N           O      N  O
+of recombination events occur by the Langmuir-Hinshelwood
+mechanism (about 75% for nitrogen and 83% for oxy-                                                0.118       0.109  0  0.027 572
+gen). For the -Al2O3 material, only oxygen recombination            LH                            0.080       0.084
+                                                                    ER                            0.038       0.025  0  1.3 × 106
+
+                                                                                                                     0  0.027 571
+107105-15 Molchanova, Kashkovsky, and Bondar                                  Phys. Fluids 30, 107105 (2018)
+
+TABLE VI. Heat transfer coefficient. Reproduced with permission from          close to the phenomenological approach of determining the
+Molchanova et al., AIP Conf. Proc. 1770, 040010 (2016). Copyright 2016        microscopic properties of molecular interaction on the basis of
+AIP Publishing LLC.                                                           input macroscopic data on finite rates of the processes, which
+                                                                              is used for modeling gas-phase processes in the DSMC method
+Type of surface   Ch      Ch   (%)              Ch -Ch,NC   (%)               (e.g., in the TCE model).
+                        Ch,FC                 Ch,FC -Ch,NC
+Fully catalytic  0.133                                                             The approach was applied to two macroscopic mecha-
+RCG              0.120  100                   100                             nisms of surface catalytic processes on bodies in an air mixture:
+-Al2O3           0.078  90                    82                              the surface reaction set of Warnatz et al. for the RCG mate-
+Non-catalytic    0.060  59                    25                              rial and the surface reaction set of Kovalev et al. for the
+                        45                     0                              -Al2O3 material. The microscopic parameters of the DSMC
+                                                                              model, such as the individual probabilities of the Eley-Rideal
+FIG. 9. Heat transfer coefficient along the surface. Reproduced with permis-  recombination and adsorption depending on the surface tem-          10 June 2026 04:54:07
+sion from Molchanova et al., AIP Conf. Proc. 1770, 040010 (2016). Copyright   perature, the surface density of adsorbed atoms, and the energy
+2016 AIP Publishing LLC.                                                      of gas-phase particles colliding with the surface, as well as
+                                                                              the frequencies of the Langmuir-Hinshelwood recombination
+illustrated by the black and green lines, respectively (l is the              and desorption depending only on the surface temperature and
+length along the cylinder surface measured from the stagnation                surface density of adsorbed atoms, were obtained analytically
+point). All graphs have a maximum at the stagnation point and                 from given macroscopic reaction rate constants. The devel-
+monotonically decrease. It is also seen that the graph for the                oped DSMC models were implemented into the SMILE++
+RCG material is close to the graph for the fully catalytic case,              software system, verified by analytical parameters, such as
+and the graph for the -Al2O3 material is located lower than                   given reaction rate coefficients and analytical solutions for
+both of them and closer to the non-catalytic case.                            thermal equilibrium conditions, and validated against ab ini-
+                                                                              tio results; reasonable agreement between the calculations and
+     Thus, the surface catalycity models developed on the                     the ab initio data was observed for the energy dependence of
+basis of the proposed approach can be easily implemented in                   the Eley-Rideal reaction probability.
+the DSMC code. Verification performed in the present study
+demonstrates that these models were correctly implemented                          The constructed DSMC surface chemistry models were
+in the SMILE++ software system. Comparisons with ab ini-                      applied to investigate aerothermodynamics of a 2D cylinder in
+tio calculations show that the proposed approach adequately                   real flight conditions, taking into account surface catalytic pro-
+predicts the functional dependence of the recombination prob-                 cesses. It was found that about 0.1 of all atoms colliding with
+ability on the incident atom energy for some particular cases.                the RCG surface participate in surface recombination reac-
+The results of test computations of the flow around a blunted                 tions, and most reactions occur by the Langmuir-Hinshelwood
+body under high-altitude reentry conditions show that surface                 mechanism for both nitrogen and oxygen atoms. For the
+catalytic processes can produce a significant effect on the ther-             -Al2O3 surface, the probability of recombination is about 4
+mal loads on the vehicle surface for TPS materials with low                   times smaller, and almost all recombination reactions occur by
+catalytic activity even for sufficiently high Knudsen numbers                 the Eley-Rideal mechanism. The mass fractions of molecular
+(Kn  0.01).                                                                   nitrogen and oxygen were considered. It was noticed that the
+                                                                              graphs for the fully catalytic surface and for the RCG model in
+VI. CONCLUSIONS                                                               the case of nitrogen are close to each other, and the difference
+                                                                              between them is about 5% at the stagnation point, whereas
+     A new approach was proposed for surface chemistry sim-                   this difference for the case of oxygen is more discernible and
+ulations within the framework of the DSMC method. On                          reaches 1.5 times at the stagnation point. The results for the
+the one hand, this method takes into account the large vari-                  -Al2O3 surface show a lower degree of recombination, and
+ety of surface processes (adsorption, desorption, dissociative                the mass fraction graphs are closer to the non-catalytic case.
+adsorption, Eley-Rideal and Langmuir-Hinshelwood recombi-                     The total heat flux to the surface was assessed. In the case of
+nation); on the other hand, the DSMC method is ideologically                  the RCG material, the total heat flux is twice greater than the
+                                                                              heat flux in the non-catalytic case and is 90% of the heat flux
+                                                                              in the case of the fully catalytic surface; however, in the case
+                                                                              of the -Al2O3 material, the total heat flux is lower: 59% of
+                                                                              the heat flux to the fully catalytic surface. Thus, the computed
+                                                                              data show that the contribution of surface catalytic processes
+                                                                              to the total heat flux at the surface and the mixture composi-
+                                                                              tion is significant even for small values of the recombination
+                                                                              probability.
+
+                                                                                   The proposed approach without any significant modifica-
+                                                                              tions can be used for constructing a DSMC surface chemistry
+                                                                              model on the basis of an arbitrary finite-rate surface reaction
+                                                                              set. For this reason, the approach is applicable to all mixtures
+                                                                              and surface materials for which surface reaction sets are avail-
+                                                                              able in the literature. Though the input reaction set can be
+107105-16 Molchanova, Kashkovsky, and Bondar                                  Phys. Fluids 30, 107105 (2018)
+
+obtained from experimental data in the continuum flow regime,                 13G. A. Bird, in 12th International Symposium on Rarefied Gas Dynamics           10 June 2026 04:54:07
+the corresponding DSMC surface chemistry model can be also
+used in strongly rarefied nonequilibrium gas flows.                             (RGD) (American Institute of Aeronautics and Astronautics, New York,
+
+     The approach is sufficiently simple for numerical imple-                   1981), p. 239.
+mentation; in particular, it was formulated as a set of analytical            14P. Nizenkov, M. Pfeiffer, A. Mirza, and S. Fasoulas, "Modeling of chem-
+formulas, which are common for various gases and surface
+materials. Thus, the proposed approach ensures a reasonable                     ical reactions between polyatomic molecules for atmospheric entry sim-
+compromise between the simplicity, generality, and level of
+detail necessary for real aerospace applications.                               ulations with direct simulation Monte Carlo," Phys. Fluids 29, 077104
+
+     An important feature of the approach should be noted:                      (2017).
+it allows one to develop DSMC surface chemistry mod-                          15I. Borges Sebastia~o and A. Alexeenko, "Consistent post-reaction vibra-
+els completely consistent with macroscopic data, which can
+be used in continuum computations. This feature ensures a                       tional energy redistribution in DSMC simulations using TCE model,"
+meaningful cross-verification between the DSMC and NS
+codes. Moreover, this consistency gives grounds to extend-                      Phys. Fluids 28, 107103 (2016).
+ing this approach for applications in DSMC/continuum hybrid                   16B. L. Haas and I. D. Boyd, "Models for direct Monte Carlo simulation of
+codes.
+                                                                                coupled vibration­dissociation," Phys. Fluids 5(2), 478 (1993).
+     The approach has some constraints because of its phe-                    17I. D. Boyd and T. E. Schwartzentruber, Nonequilibrium Gas Dynam-
+nomenological nature. The degree of reliability of the prob-
+ability dependences on energy used in this approach can be                      ics and Molecular Simulation (Cambridge University Press, Cambridge,
+evaluated only by using comparisons with results of experi-
+ments and ab initio calculations of such dependences, which                     2017).
+are usually unavailable. Therefore, further validation of the                 18Ye. A. Bondar and M. S. Ivanov, AIAA Paper 2007-614, 2007.
+approach with the use of the best available data is needed.                   19Ye. A. Bondar, A. A. Shevyrin, Y. S. Chen, A. N. Shumakova, A. V.
+The future studies should also address the effect of incom-
+plete recombination energy accommodation and application                        Kashkovsky, and M. S. Ivanov, "Direct Monte Carlo simulation of high-
+of the proposed approach to macroscopic models taking into
+account the heterogeneous production of NO, which may have                      temperature chemical reactions in air," Thermophys. Aeromech. 20(5),
+significant effect on the spacecraft aerothermodynamics (see,
+e.g., Refs. 65 and 66).                                                         553 (2013).
+                                                                              20B. S. Baikov, D. K. Bayalina, E. V. Kustova, and G. P. Oblapenko, "Inverse
+ACKNOWLEDGMENTS
+                                                                                Laplace transform as a tool for calculation of state-specific cross sections
+     The authors are deeply grateful to Dr. Anton Shershnev
+for his help with preparing the paper. The work was supported                   of inelastic collisions," AIP Conf. Proc. 1786, 090005 (2016).
+by the Russian Science Foundation (Grant No. 17-19-01375).                    21K. Koura, "A set of model cross sections for the Monte Carlo simulation
+This support is gratefully acknowledged.
+                                                                                of rarefied real gases: Atom­diatom collisions," Phys. Fluids A 6, 3473
+ 1W. E. Hammond, Design Methodologies for Space Transportation
+  Systems (American Institute of Aeronautics and Astronautics, Reston,          (1994).
+  Virginia, 2001).                                                            22D. C. Wadsworth and I. J. Wysong, "Vibrational favoring effect in DSMC
+ 2G. A. Bird, Molecular Gas Dynamics and the Direct Simulation of Gas
+  Flows (Oxford University Press, Oxford, 1994).                                dissociation models," Phys. Fluids 9, 3873 (1997).
+ 3L. A. Anderson, "Effect of surface catalytic activity on stagnation heat-   23S. Gimelshein and I. Wysong, "DSMC modeling of flows with recombina-
+  transfer rates," AIAA J. 11(5), 649 (1973).
+ 4V. L. Kovalev and A. F. Kolesnikov, "Experimental and theoretical simula-     tion reactions," Phys. Fluids 29, 067106 (2017).
+  tion of heterogeneous catalysis in aerothermochemistry," Fluid Dyn. 40(5),  24Ye. Bondar, G. Markelov, S. Gimelshein, and M. Ivanov, "Numerical
+  669 (2005).
+ 5G. V. Candler, H. B. Johnson, I. Nompelis, V. M. Gidzak, P. K. Subbareddy,    modeling of near-continuum flow over a wedge with real gas effects,"
+  and M. Barnhardt, AIAA Paper 2015-1893, 2015.
+ 6CFD-FASTRAN, Theory Manual, 2007.                                             J. Thermophys. Heat Transfer 20(4), 699 (2006).
+ 7P. A. Gnoffo, R. N. Gupra, and J. L. Shinn, NASA-TP-2867, 1989.             25I. Wysong, S. Gimelshein, Y. A. Bondar, and M. S. Ivanov, "Compar-
+ 8L. C. Scalabrin and I. D. Boyd, AIAA Paper 2005-5203, 2005.
+ 9L. Walpot, Ph.D. thesis, T.U. Delft University, 2002.                         ison of direct simulation Monte Carlo chemistry and vibrational mod-
+10S. T. Surzhikov, "Three-dimensional computer model of nonequilibrium
+  aerophysics of the spacecraft entering in the Martian atmosphere," Fluid      els applied to oxygen shock measurements," Phys. Fluids 26(4), 043101
+  Dyn. 46(3), 490 (2011).
+11G. V. Shoev, Ye. A. Bondar, G. P. Oblapenko, and E. V. Kustova, "Develop-     (2014).
+  ment and testing of a numerical simulation method for thermally nonequi-    26A. A. Shevyrin, Y. A. Bondar, S. T. Kalashnikov, V. I. Khlybov, and
+  librium dissociating flows in ANSYS Fluent," Thermophys. Aeromech.
+  23(2), 151 (2016).                                                            V. G. Degtyar, "Direct simulation of rarefied high-enthalpy flow around
+12C. Park, Nonequilibrium Hypersonic Aerothermodynamics (John Wiley
+  and Sons, New York, 1990).                                                    the RAM C-II capsule," High Temp. 54(3), 383 (2016).
+                                                                              27G. A. Bird, AIAA Paper No. 89­1882, 1989.
+                                                                              28I. D. Boyd, "Modeling of associative ionization reactions in hypersonic
+
+                                                                                rarefied flows," Phys. Fluids 19, 096102 (2007).
+                                                                              29G. A. Bird, "DSMC simulations of shock tube experiments for the
+
+                                                                                dissociation rate of nitrogen," AIP Conf. Proc. 1501, 595 (2012).
+                                                                              30S. Gimelshein, I. Wysong, Ye. Bondar, and M. Ivanov, "Accuracy analysis
+
+                                                                                of DSMC chemistry models applied to a normal shock wave," AIP Conf.
+
+                                                                                Proc. 1501, 637 (2012).
+                                                                              31I. D. Boyd, "Computation of hypersonic flows using the direct simulation
+
+                                                                                Monte Carlo method," J. Spacecr. Rockets 52(1), 38 (2015).
+                                                                              32I. B. Sebastiao, M. Kulakhmetov, and A. Alexeenko, "DSMC study
+
+                                                                                of oxygen shockwaves based on high-fidelity vibrational relaxation and
+
+                                                                                dissociation models," Phys. Fluids 29, 017102 (2017).
+                                                                              33O. Deutschmann, U. Riedel, and J. Warnatz, "Modeling of nitrogen and
+
+                                                                                oxygen recombination on partial catalytic surfaces," J. Heat Transfer 117,
+
+                                                                                495 (1995).
+                                                                              34M. Cacciatore, M. Rutigliano, and G. D. Billing, "Eley-Rideal and
+
+                                                                                Langmuir-Hinshelwood recombination coefficients for oxygen on silica,"
+
+                                                                                J. Thermophys. Heat Transfer 13(2), 195 (1999).
+                                                                              35V. L. Kovalev and M. Yu. Pogosbekyan, "Simulation of heterogeneous
+
+                                                                                atom recombination on spacecraft heat shield coatings using the methods
+
+                                                                                of molecular dynamics," Fluid Dyn. 42(4), 666 (2007).
+                                                                              36V. Guerra, "Analytical model of heterogeneous atomic recombination on
+
+                                                                                silicalike surfaces," IEEE Trans. Plasma Sci. 35(5), 1397 (2007).
+                                                                              37V. L. Kovalev, A. A. Krupnov, M. Yu. Pogosbekyan, and L. P. Sukhanov,
+
+                                                                                "Analysis of the heterogeneous recombination of oxygen atoms on alu-
+
+                                                                                minum oxide by methods of quantum mechanics and classical dynamics,"
+
+                                                                                Fluid Dyn. 45(2), 305 (2010).
+                                                                              38A. A. Buchachenko, V. L. Kovalev, and A. A. Krupnov, "Closed model of
+
+                                                                                oxygen recombination on an Al2O3 surface," Russ. J. Phys. Chem. B 7(1),
+                                                                                88 (2013).
+                                                                              39A. A. Buchachenko, V. L. Kovalev, and A. A. Krupnov, "Modeling of cat-
+
+                                                                                alytic activity on an Al2O3 surface on the basis of first principles," Moscow
+                                                                                Univ. Mech. Bull. 68(1), 8 (2013).
+107105-17 Molchanova, Kashkovsky, and Bondar                                    Phys. Fluids 30, 107105 (2018)
+
+40A. A. Buchachenko, V. L. Kovalev, and A. A. Krupnov, "Rate coeffi-            54M. S. Ivanov and S. V. Rogasinsky, "Analysis of numerical techniques of        10 June 2026 04:54:07
+
+  cients of the elementary stages of heterogeneous catalytic recombination        the direct simulation Monte Carlo method in the rarefied gas dynamics,"
+  of dissociated air on thermal-protective coatings," Fluid Dyn. 50(3), 453       Sov. J. Numer. Anal. Math. Model. 3(6), 453 (1988).
+                                                                                55K. L. Carleton and W. J. Marinelli, "Spacecraft thermal energy
+  (2015).
+41F. Bergemann, in Proceedings of the 19th International Symposium on             accommodation from atomic recombination," J. Thermophys. Heat
+                                                                                  Transfer 6(4), 650 (1992).
+  Rarefied Gas Dynamics (RGD) (Oxford University Press, Oxford, 1995),          56M. Balat-Pichelin, J. M. Badie, R. Berjoan, and P. Boubert, "Recombination
+
+  p. 947.                                                                         coefficient of atomic oxygen on ceramic materials under Earth re-entry
+42R. S. Simmons and R. G. Lord, in Proceedings of the 20th International          conditions by optical emission spectroscopy," Chem. Phys. 291(2), 181
+
+  Symposium on Rarefied Gas Dynamics (RGD) (Peking University Press,              (2003).
+                                                                                57C. Borgnakke and P. S. Larsen, "Statistical collision model for Monte
+  Beijing, 1997), p. 416.
+43I. Choquet, "A new approach to model and simulate numerically surface           Carlo simulation of polyatomic gas mixture," J. Comput. Phys. 18, 405
+
+  chemistry in rarefied flows," Phys. Fluids 11, 1650 (1999).                     (1975).
+44S. F. Gimelshein, D. A. Levin, and R. J. Collins, "Modeling of glow           58J. Marschall, M. MacLean, P. E. Norman, and T. E. Schwartzentruber, "Sur-
+
+  radiation in the rarefied flow about an orbiting spacecraft," J. Thermophys.    face chemistry in non-equilibrium flows," in Hypersonic Nonequilibrium
+  Heat Transfer 14, 471 (2000).
+45V. L. Kovalev, V. Yu. Sazonenko, and A. N. Yakunchikov, "Dynamic                Flows: Fundamentals and Recent Advances, edited by E. Josyula (Ameri-
+
+  Monte Carlo simulation of surface recombination," Moscow Univ. Mech.            can Institute of Aeronautics and Astronautics, Inc., Reston, Virginia, 2015),
+  Bull. 62(2), 53 (2007).
+46A. N. Shumakova, Ye. A. Bondar, A. V. Kashkovsky, A. A. Shevyrin, and           pp. 239­327.
+                                                                                59Ye. A. Bondar, N. E. Gimelshein, S. F. Gimelshein, M. S. Ivanov, and
+  M. S. Ivanov, AIAA Paper 2014­0699 (2014).
+47A. N. Molchanova (Shumakova), A. V. Kashkovsky, and Ye. A. Bondar,              I. J. Wysong, "On the accuracy of DSMC modeling of rarefied flows
+                                                                                  with real gas effects," AIP Conf. Proc. 762, 607 (2005).
+  "A Detailed DSMC surface chemistry model," AIP Conf. Proc. 1628, 131          60M. Rutigliano and M. Cacciatore, "Recombination of oxygen atoms on
+
+  (2014).                                                                         silica surface: New and more accurate results," J. Thermophys. Heat
+48A. N. Molchanova, A. V. Kashkovsky, and Ye. A. Bondar, "Effect of               Transfer 30(1), 247 (2016).
+                                                                                61K. Koura and H. Matsumoto, "Variable soft sphere molecular model for
+  surface catalycity on high-altitude aerothermodynamics of reentry vehi-         inverse-power-law or Lennard-Jones potential," Phys. Fluids A 3(10), 2459
+  cles," AIP Conf. Proc. 1770, 040010 (2016).
+49A. V. Kashkovsky, Ye. A. Bondar, G. A. Zhukova, M. S. Ivanov, and               (1991).
+                                                                                62N. E. Gimelshein, S. F. Gimelshein, and D. A. Levin, "Vibrational relaxation
+  S. F. Gimelshein, "Object-oriented software design of real gas effects for
+  the DSMC method," AIP Conf. Proc. 762, 583 (2005).                              rates in the direct simulation Monte Carlo method," Phys. Fluids 14(12),
+50M. S. Ivanov, A. V. Kashkovsky, P. V. Vashchenkov, and Ye. A. Bondar,
+                                                                                  4452 (2002).
+  "Parallel object-oriented software system for DSMC modeling of high-          63M. H. Bortner, "Suggested standard chemical kinetics for flow field
+  altitude aerothermodynamic problems," AIP Conf. Proc. 1333, 211 (2011).
+51M. Ivanov, A. Kashkovsky, S. Gimelshein, G. Markelov, A. Alexeenko,             calculations--A consensus opinion," in Automatic Meter Reading and
+
+  Y. Bondar, G. Zhukova, S. Nikiforov, and P. Vashenkov, in Proceed-              Control (AMRAC) Proceedings, Part I (Institute of Science and
+
+  ings of 25th International Symposium on Rarefied Gas Dynamics (RGD)             Technology, University of Michigan, 1966), Vol. XIV, pp. 569­581, Doc.
+
+  (Publishing House of the Siberian Branch of the Russian Academy of              No. 4613-135-X.
+                                                                                64A. A. Shevyrin, Ye. A. Bondar, and M. S. Ivanov, "Analysis of repeated
+  Sciences, Novosibirsk, 2006), p. 21.
+52H. R. Skullerud, "The stochastic computer simulation of ion motion in a         collisions in the DSMC method," AIP Conf. Proc. 762, 565 (2005).
+                                                                                65D. A. Pejakovic, J. Marschall, L. Duan, and M. P. Martin, "Direct
+  gas subjected to a constant electric field," J. Phys. D: Appl. Phys. 1, 1567
+                                                                                  detection of NO produced by high-temperature surface-catalyzed atom
+  (1968).                                                                         recombination," J. Thermophys. Heat Transfer 24(3), 603 (2010).
+53K. Koura, "Null-collision technique in the direct-simulation Monte Carlo      66J. M. Weisberger, M. G. MacLean, R. A. Parker, and P. DesJardin, AIAA
+
+  method ," Phys. Fluids 29, 3509 (1986).                                         Paper 2013-2643, 2013.
+

@@ -1,0 +1,113 @@
+============================================================
+SPARTA init_cover 关键词 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 在 surf_react adsorb 命令中新增 init_cover 关键词，
+         支持运行开始时所有表面位点被指定物种占据。
+         用于 Molchanova 2018 论文 Fig 4 验证算例的复现。
+============================================================
+
+一、修改文件
+-----------------
+1. src/surf_react_adsorb.h (L52-54)
+2. src/surf_react_adsorb.cpp 构造函数 (L147-160)
+3. src/surf_react_adsorb.cpp init() (L562-580, L669-686)
+
+二、修改详情
+-----------------
+
+[修改1] 头文件 — 新增成员变量
+  文件: src/surf_react_adsorb.h
+  位置: int schu_flag; 之后
+  新增:
+    int init_cover_flag;       // 0=空表面, 1=初始满覆盖
+    char *init_cover_name;     // 初始覆盖物种名（暂存）
+    int init_cover_index;      // 在 species_surf 中的索引
+
+[修改2] 构造函数 — 解析 init_cover 关键词
+  文件: src/surf_react_adsorb.cpp
+  位置: schu 解析之后，species_surf 初始化之前
+  新增:
+    init_cover_flag = 0;
+    init_cover_name = NULL;
+    init_cover_index = -1;
+    if (iarg < narg && strcmp(arg[iarg],"init_cover") == 0) {
+      iarg++;
+      init_cover_flag = 1;
+      int n = strlen(arg[iarg]) + 1;
+      init_cover_name = new char[n];
+      strcpy(init_cover_name, arg[iarg]);
+      iarg++;
+    }
+  说明: 此时 species_surf 尚未构建，先暂存物种名，在 init() 中解析索引。
+
+[修改3] init() — FACE 模式初始覆盖
+  文件: src/surf_react_adsorb.cpp
+  位置: 在 "one-time initialize of custom per-surf attributes" 注释之前
+  新增:
+    if (init_cover_flag) {
+      init_cover_index = find_surf_species(init_cover_name);
+      if (init_cover_index < 0)
+        error->all(FLERR,"...");
+      double fnum = update->fnum;
+      if (mode == FACE) {
+        for (int iface = 0; iface < nface; iface++) {
+          long int maxstick = ceil(max_cover * face_area[iface] /
+                                   (fnum * face_weight[iface]));
+          face_species_state[iface][init_cover_index] = maxstick;
+          face_total_state[iface] = maxstick;
+        }
+      }
+    }
+
+[修改4] init() — SURF 模式初始覆盖
+  文件: src/surf_react_adsorb.cpp
+  位置: spread_custom 和 local+ghost 指针设置之后
+  新增:
+    if (init_cover_flag && mode == SURF) {
+      double fnum = update->fnum;
+      int nall = surf->nlocal + surf->nghost;
+      for (int isurf = 0; isurf < nall; isurf++) {
+        long int maxstick = ceil(max_cover * area[isurf] /
+                                 (fnum * weight[isurf]));
+        species_state[isurf][init_cover_index] = maxstick;
+        total_state[isurf] = maxstick;
+      }
+    }
+
+三、maxstick 计算公式
+-----------------
+与 react_gs_finite_rate() 一致：
+  maxstick = ceil(max_cover * area / (fnum * weight))
+其中:
+  - max_cover: in 文件指定的最大覆盖度（实数，m^-2 量纲）
+  - area: 面元/表面单元面积
+  - fnum: update->fnum，每个模拟粒子代表的真实粒子数
+  - weight: 面元权重（通常为 1.0）
+
+FACE 模式使用 face_area/face_weight;
+SURF 模式使用 area/weight (custom attributes on surf elements)
+
+四、输入文件格式
+-----------------
+surf_react sr adsorb gs data.gs nsync 10 face 300 1.0 \
+  schu yes init_cover O(s) O(s) N(s)
+
+关键词顺序: max_cover → schu → init_cover → 物种列表
+init_cover 参数: 一个物种名（如 O(s)，必须在物种列表中）
+
+五、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译命令: wsl bash -c "cd /mnt/d/博一/气固相互作用/202607_src/src && make mpi -j16"
+编译结果: 成功，无错误、无警告
+生成文件: src/spa_mpi (2,290,184 bytes)
+  text:   2,167,904 (原: 2,166,896, +1,008 bytes)
+  data:     107,712 (不变)
+  bss:       14,568 (不变)
+  dec:    2,290,184
+
+六、后续工作
+-----------------
+- tally_only 关键词（仅统计不执行反应）
+- 用 Molchanova 2018 Fig 4 验证算例测试

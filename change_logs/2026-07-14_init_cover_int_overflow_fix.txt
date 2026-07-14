@@ -1,0 +1,61 @@
+============================================================
+SPARTA init_cover 整数溢出修复 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 修复 init_cover 关键字无法正确初始化表面覆盖的问题
+============================================================
+
+一、问题根源
+-----------------
+init_cover 设置 total_state[isurf] = maxstick 时发生 32 位整数溢出。
+
+- total_state 原始类型: int (32-bit), 最大值 ≈ 2.14×10^9
+- maxstick 典型值: ≈ 1.46×10^15 (max_cover=6.022e18, area=242m², fnum=1e6)
+- maxstick >> INT_MAX, 赋值时高位截断, 存入的是溢出后的垃圾值
+
+结果: react_gs_finite_rate 中 Gamma = (maxstick - total_state) * ms_inv
+      ≈ (1.46e15 - 垃圾值) / 1.46e15 ≈ 1.0
+      → 表面被当作"几乎空"处理, AA 反应正常发生
+
+二、修复方案
+-----------------
+将 total_state 和 species_state 的自定义 Surf 向量从 INT(32-bit) 改为 DOUBLE(64-bit)。
+
+Double 有 53 位尾数, 可精确表示 ≤ 9×10^15 的整数, 远大于 maxstick(≈2.2×10^15)。
+
+修改文件:
+1. src/surf_react_adsorb.h
+   - face_total_state:  int * → double *
+   - face_species_state: int ** → double **
+   - total_state:        int * → double *
+   - species_state:      int ** → double **
+
+2. src/surf_react_adsorb.cpp
+   - add_custom: INT → DOUBLE (total_state + species_state)
+   - surf->eivec → surf->edvec (total_state 现在为 DOUBLE 向量)
+   - surf->eivec_local → surf->edvec_local
+   - surf->eiarray → surf->edarray (species_state 现在为 DOUBLE 数组)
+   - surf->eiarray_local → surf->edarray_local
+   - init_cover SURF 模式: 同时设置 LOCAL 和 OWNED 数组
+     - LOCAL: react_gs_finite_rate 直接使用
+     - OWNED: update_state_surf 重新计算时使用
+     - 非分布式 round-robin 映射: OWNED[k] ↔ LOCAL[me + k*nprocs]
+     - 分布式直接映射: OWNED[k] ↔ LOCAL[k]
+
+三、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译结果: 成功, 零错误, 零警告
+
+四、运行验证
+-----------------
+测试用例: test/20260714_2/in.beam.surf.gs
+  - init_cover O (表面初始全被 O 原子覆盖)
+  - schu yes (Molchanova 有限速率模型)
+  - 4 MPI 进程, 1000 步
+
+修复前: Surf reactions = 116 (全是 O(g)→O(s) AA 反应)
+修复后: Surf reactions = 0   (AA 反应被正确抑制, 表面无空位)
+
+ER 反应也为 0: 因为 O(g)+O(s)→O2(g) 的 k_react=0.4E-16, Ea=7654K,
+              Twall=300K 时 K≈3.4e-28, 概率极低。

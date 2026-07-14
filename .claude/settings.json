@@ -25,10 +25,21 @@
       "Read(//d/claude/.claude/projects/d------------202607-src/memory/**)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(pdflatex gs_probabilities.tex)"
+      "Bash(pdflatex gs_probabilities.tex)",
+      "Bash(where pdftotext *)",
+      "Bash(pdftotext -layout \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" /tmp/molchanova2018.txt)",
+      "Read(//tmp/**)",
+      "Bash(pdftotext -layout \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\tmp_molchanova.txt\")",
+      "Bash(git stash *)",
+      "Read(//mnt/d/博一/气固相互作用/202607_src/**)",
+      "Bash(make clean-mpi *)",
+      "Bash(make mpi *)",
+      "Bash(cp /mnt/d/博一/气固相互作用/202607_src/spa_mpi /mnt/d/博一/气固相互作用/202607_src/test/20260714_2/spa_mpi && wsl bash -c \"cd /mnt/d/博一/气固相互作用/202607_src/test/20260714_2 && timeout 30 mpirun -np 4 ../spa_mpi < in.beam.surf.gs 2>&1\")",
+      "WebSearch"
     ],
     "additionalDirectories": [
-      "D:\\博一\\气固相互作用\\202607_src\\schu_2018"
+      "D:\\博一\\气固相互作用\\202607_src\\schu_2018",
+      "\\mnt\\d\\博一\\气固相互作用\\202607_src"
     ]
   }
 }

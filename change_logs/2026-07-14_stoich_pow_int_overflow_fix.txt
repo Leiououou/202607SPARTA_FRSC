@@ -1,0 +1,60 @@
+============================================================
+SPARTA stoich_pow 整数溢出修复 — 修改日志
+============================================================
+修改时间: 2026-07-14
+修改目的: 修复 stoich_pow(int, int) 中 state 值超过 INT_MAX 时溢出导致反应概率为 0
+============================================================
+
+一、问题根源
+-----------------
+staich_pow 函数签名原为 stoich_pow(int base, int pow)，但调用方传入的
+species_state[isurf][...] 和 total_state[isurf] 均为 double 类型，值为
+~1.46×10^15（远超 INT_MAX ≈ 2.14×10^9）。
+
+double → int 隐式转换导致溢出：
+- x86 上 cvttsd2si 指令将超范围 double 转为 0x80000000 (INT_MIN = -2147483648)
+- case 1: if (base >= pow) → INT_MIN >= 1 为 false → 返回 0.0
+- 结果: Gamma 因子 = 0，ER/LH1 等反应的表面覆盖度修正全部变为 0
+
+这是上一轮修复（total_state INT→DOUBLE）的连锁遗留问题：
+上次只改了数据存储类型，没改 stoich_pow 的参数类型。
+
+二、修复方案
+-----------------
+将 stoich_pow 的第一参数从 int 改为 double:
+
+  double stoich_pow(int, int)    →  double stoich_pow(double, int)
+
+修改文件:
+1. src/surf_react_adsorb.h (L254)
+   - 声明: int → double
+
+2. src/surf_react_adsorb.cpp (L4100)
+   - 定义: int base → double base
+   - case 2/3/4 中的整数运算自动提升为 double，同时避免了组合数计算溢出
+
+三、影响范围
+-----------------
+所有 stoich_pow 调用点均受益于此次修复：
+- 原始 GS 反应路径 (react, L979, L984)
+- 有限速率 GS 反应路径 (react_gs_finite_rate, L1413, L1418)
+- PS 反应路径 (L3462, L3464, L3476)
+
+特别地，case 2/3/4 中 base*(base-1) 等组合数计算在 int 下
+若 base > 46340 即溢出，改为 double 后彻底解决。
+
+四、编译验证
+-----------------
+编译环境: WSL Ubuntu-20.04, mpic++ (g++)
+编译结果: 成功, 零错误, 零警告
+
+五、运行验证
+-----------------
+测试用例: test/20260714_2/in.beam.surf.gs
+  - N frac 1 (100% N 原子来流)
+  - init_cover O (表面满覆盖 O)
+  - N(g)+O(s)→NO(g) ER S 1 (速率常数 1.0)
+  - schu yes
+
+修复前: Surf reactions = 0 (sum_prob=0, Gamma 因子溢出为 0)
+修复后: Surf reactions = 127 (sum_prob≈0.002, 2/Vn×Γ≈0.002)
