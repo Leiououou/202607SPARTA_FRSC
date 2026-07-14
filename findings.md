@@ -1,6 +1,26 @@
 # Findings: SPARTA GS Chemistry Analysis & Paper Comparison
 
-## 1. SPARTA's Current AA Implementation
+## 1. Γ ms_inv Bug (2026-07-14)
+
+**Location:** `surf_react_adsorb.cpp` L1324, `react_gs_finite_rate()`
+
+**Bug:**
+```cpp
+double factor = fnum * weight[isurf] / area[isurf];
+double ms_inv = factor / max_cover;  // ← 多除了 N_site!
+```
+
+**Root cause:** `max_cover` = N_site（表面位点密度，~6×10¹⁸ m⁻²），除以它使得：
+- Γ_code = state_count × ms_inv = state_count / N_site × factor = θ × factor
+- 即 Γ 变成覆盖度而非数密度
+
+**Impact:** 所有有限速率反应类型（AA, DA, LH1, LH3, ER, CD）概率偏小 ~6×10¹⁸ 倍
+
+**Fix:** `ms_inv = factor;` （不除 max_cover）
+
+**Note:** 原始 `react()` 中 L799 的 `ms_inv = factor / max_cover` 用于覆盖度计算（如 `surf_cover = total_state * ms_inv`），逻辑正确，**不修改**。
+
+## 2. SPARTA's Current AA Implementation
 
 **Location:** `surf_react_adsorb.cpp` lines 687-711
 
@@ -19,7 +39,7 @@ case AA:
 - k_react precomputed at file read time using Twall
 - Particle fate: ip = NULL (always adsorbed)
 
-## 2. SPARTA's Current ER Implementation
+## 3. SPARTA's Current ER Implementation
 
 **Location:** lines 804-817
 
@@ -35,7 +55,7 @@ case ER:
 - Particle fate: ip→ispecies = products[0] (becomes product gas particle)
 - Uses (Nmax - Ntot) factor for co-reactant surface species
 
-## 3. SPARTA's Current LH3 Implementation
+## 4. SPARTA's Current LH3 Implementation
 
 **Location:** lines 764-782
 
@@ -51,7 +71,7 @@ case LH3:
 - Same formula as AA but different particle fate and semantics
 - The reaction is: A(g) + B(s) → AB(g) or similar — gas particle recombines with adsorbed species
 
-## 4. Paper's Framework (Molchanova et al. 2018)
+## 5. Paper's Framework (Molchanova et al. 2018)
 
 ### Impact Mechanisms (AA, ER)
 - **Core formula (Eq.35):** P(Vn) = 2 × K(Tw) × ζ / Vn
@@ -71,7 +91,7 @@ case LH3:
 1. **RCG (Warnatz, Table II):** S0 = 0.1 for AA, Arrhenius for others
 2. **α-Al2O3 (Table III):** Full Arrhenius for all
 
-## 5. Critical Differences Summary
+## 6. Critical Differences Summary
 
 | Feature | SPARTA Current | Paper Method |
 |---------|---------------|--------------|
@@ -81,6 +101,7 @@ case LH3:
 | Coverage dependence | Explicit S(θ) function | Via ζ factor (NS or NAS) |
 | K(T) evaluation | Once at file read | Dynamic (could recompute with Tw) |
 
-## 6. Code Bugs Found
+## 7. Code Bugs Found
+- **L1324**: `ms_inv = factor / max_cover` — Γ 变成覆盖度（详见 §1）
 - **Line 806-807**: `dot` computed then immediately overwritten to 2.0 — actual normal velocity never used in ER
 - **Line 658**: `coeff_val` initialized to 1 but not reset in for-loop — if prior reaction is ARRHENIUS, subsequent SIMPLE reactions get coeff_val=3

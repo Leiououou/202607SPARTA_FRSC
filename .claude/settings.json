@@ -43,7 +43,10 @@
       "Bash(pdftotext -f 10 -l 12 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
       "Bash(pdftotext -f 7 -l 11 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
       "Bash(pdftotext -f 4 -l 8 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
-      "Bash(pdftotext -f 5 -l 6 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)"
+      "Bash(pdftotext -f 5 -l 6 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
+      "Skill(dataviz)",
+      "Skill(dataviz:*)",
+      "Bash(node scripts/validate_palette.js \"#2a78d6,#1baf7a,#eda100\" --mode light)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",

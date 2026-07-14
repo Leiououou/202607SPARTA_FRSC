@@ -1,5 +1,29 @@
 # Progress Log
 
+## Session 2026-07-14 (evening): Γ ms_inv Bug 修复 + K_ER 验证 ✅
+
+### K_ER Eq 52 对照验证 (test/20260715_5)
+- DSMC tally: 475,137 ER reactions (O+O(s)→O₂)
+- N_hits (解析): 4.79×10⁸, ⟨1/Vn⟩ = 1.738×10⁻³ s/m
+- K_DSMC = 4.73×10⁻²⁰ vs K_input = 4.74×10⁻²⁰ → **0.1% 偏差** ✓
+- 修复前: K_DSMC/K_input ≈ 14% (7× discrepancy)
+- HTML 报告: test/20260715_5/K_ER_validation.html
+- 更新 face-mode-er-ker-calculation 记忆文件
+
+## Session 2026-07-14 (evening): Γ ms_inv Bug 修复 ✅
+
+### Phase 1-6: 完整修复
+- L1324: `ms_inv = factor / max_cover` → `ms_inv = factor`
+- 全面搜索: 确认 react_gs_finite_rate() 内所有 ms_inv 引用自动修正
+- 编译: make mpi -j16 零错误零警告
+- 运行: beam test 结果一致 (41008 reactions, MIN(1.0) clamping)
+- 变更日志: change_logs/2026-07-14_gamma_ms_inv_fix.txt
+- 记忆文件: gamma-ms-inv-bug.md 标记为 fixed
+
+### 关键发现
+- 原始 react() L799 的 ms_inv 不受影响（独立局部变量，用于覆盖度）
+- 当前 surf 文件 k_react=1.0 使新旧代码概率均达截断 → 需调整参数才能观测差异
+
 ## Session 2026-07-14 (afternoon): tally_only 关键词
 
 ### Phase 1-8: 完整实现

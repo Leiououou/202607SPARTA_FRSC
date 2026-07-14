@@ -1321,7 +1321,7 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
   double fnum = update->fnum;
   long int maxstick = ceil(max_cover*area[isurf] / (fnum*weight[isurf]));
   double factor = fnum * weight[isurf] / area[isurf];
-  double ms_inv = factor / max_cover;
+  double ms_inv = factor;  // FIXED: no /max_cover, Gamma now = number density (m⁻²) not coverage
 
   // Vn = incident normal velocity magnitude for finite-rate formula
   double Vn = fabs(MathExtra::dot3(ip->v, norm));
