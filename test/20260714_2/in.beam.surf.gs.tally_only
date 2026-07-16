@@ -39,7 +39,7 @@ read_surf			base_plate.surf
 #surf_react        	 adsorb_test_gs1 adsorb gs sample-GS_1.surf nsync 1 surf 1000 6.022e18 O CO
 #surf_modify 		 all collide 1 react adsorb_test_gs1
 
-surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 surf 1000 6.022e18 schu yes init_cover O tally_only yes O CO N N2 O2 NO
+surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 surf 1000 6.022e18 schu yes init_cover O 1.0 tally_only yes O CO N N2 O2 NO
 surf_modify 		all collide 1 react adsorb_test_gs2
 
 ########################## BEAM ############################################################

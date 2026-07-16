@@ -1,12 +1,19 @@
 ################################################################################
-# Molchanova 图4.c验证算例
-#p=4 Pa T=700~100~2100K
-#O+O(s)———> O2(s)
-#只记数不发生
-#计算数据：nrho=4.138807e+20  lambda=3e-3 t=5e-6
+# Molchanova LH1 反应速率常数验证算例
+# O(g) + O(s) --> O2(g)
+# A=5.2e-39 b=0.5 Ea=5000K (非饱和, 无min(1,·)截断)
+# T=700~2000K, 壁温=气体温度, tally_only (仅计数不反应)
+# init_cover O 0.5 (50% 覆盖度)
+# 计算数据：nrho=4.138807e+20  lambda=3e-3 dt=1e-6 nsteps=10000
 ################################################################################
 
-seed	    	    123456
+variable        T index 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000
+
+label           loop
+
+clear
+
+seed    	    123456
 dimension   	    2
 global              gridcut 0.0 comm/sort yes
 
@@ -17,14 +24,14 @@ create_box          -3e-3 3e-3 -3e-3 3e-3 -0.5 0.5
 create_grid 	    10 10 1
 balance_grid        rcb cell
 
-global		    	nrho 4.138807e+20 fnum 1.4900e+11 temp 1000
+global		    	nrho 4.138807e+20 fnum 1.4900e+11 temp ${T}
 
 species		    	air.species O CO CO2 O2 C N N2 NO
 mixture		    	air O O2 N N2 vstream 0 0 0
 
 mixture             air O   frac 1
 mixture             air CO  frac 0.0
-mixture             air CO2 frac 0.0    
+mixture             air CO2 frac 0.0
 mixture             air C   frac 0.0
 mixture 			air O2 	frac 0.0
 mixture 			air N 	frac 0
@@ -33,14 +40,14 @@ mixture 			air NO 	frac 0.0
 
 create_particles    air n 0
 
-surf_collide        1 diffuse 1000 1
+surf_collide        1 diffuse ${T} 1
 
 ##################################### SURF REACT ADSORB ######################################
 ##################################### SURF OPTION ############################################
 
+shell           awk -v T=${T} -f gen_td.awk schu_gs_1.surf > schu_gs_1_${T}.surf
 
-
-surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 face 1000 6.022e18 schu yes init_cover O 1.0 O CO N N2 O2 NO
+surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1_${T}.surf nsync 1 face ${T} 6.022e18 schu yes init_cover O 0.5 tally_only yes O CO N N2 O2 NO
 
 bound_modify        xhi collide 1 react adsorb_test_gs2
 
@@ -48,4 +55,7 @@ timestep            1e-6
 
 stats		    	10
 stats_style	    	step cpu np nattempt ncoll nscoll nscheck nsreact
-run 		    	100000
+run 		    	5000
+
+next            T
+jump            in.LH1 loop

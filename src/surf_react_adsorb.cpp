@@ -145,17 +145,22 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
     iarg++;
   }
 
-  // init_cover = species name for initial full surface coverage
+  // init_cover = species name and coverage fraction (0~1)
 
   init_cover_flag = 0;
   init_cover_name = NULL;
   init_cover_index = -1;
+  init_cover_fraction = 1.0;
   if (iarg < narg && strcmp(arg[iarg],"init_cover") == 0) {
     iarg++;
     init_cover_flag = 1;
     int n = strlen(arg[iarg]) + 1;
     init_cover_name = new char[n];
     strcpy(init_cover_name, arg[iarg]);
+    iarg++;
+    init_cover_fraction = input->numeric(FLERR,arg[iarg]);
+    if (init_cover_fraction < 0.0 || init_cover_fraction > 1.0)
+      error->all(FLERR,"Init_cover fraction must be between 0 and 1");
     iarg++;
   }
 
@@ -599,14 +604,15 @@ void SurfReactAdsorb::init()
       for (int iface = 0; iface < nface; iface++) {
         long int maxstick = ceil(max_cover * face_area[iface] /
                                  (fnum * face_weight[iface]));
-        face_species_state[iface][init_cover_index] = maxstick;
-        face_total_state[iface] = maxstick;
+        long int cover_count = (long int) round(maxstick * init_cover_fraction);
+        face_species_state[iface][init_cover_index] = cover_count;
+        face_total_state[iface] = cover_count;
       }
       if (comm->me == 0) {
-        if (screen) fprintf(screen,"  Init_cover: all sites filled with %s\n",
-                            init_cover_name);
-        if (logfile) fprintf(logfile,"  Init_cover: all sites filled with %s\n",
-                             init_cover_name);
+        if (screen) fprintf(screen,"  Init_cover: %.0f%% sites filled with %s\n",
+                            init_cover_fraction * 100.0, init_cover_name);
+        if (logfile) fprintf(logfile,"  Init_cover: %.0f%% sites filled with %s\n",
+                             init_cover_fraction * 100.0, init_cover_name);
       }
     }
   }
@@ -707,8 +713,9 @@ void SurfReactAdsorb::init()
     for (int isurf = 0; isurf < nall; isurf++) {
       long int maxstick = ceil(max_cover * area[isurf] /
                                (fnum * weight[isurf]));
-      species_state[isurf][init_cover_index] = maxstick;
-      total_state[isurf] = maxstick;
+      long int cover_count = (long int) round(maxstick * init_cover_fraction);
+      species_state[isurf][init_cover_index] = cover_count;
+      total_state[isurf] = cover_count;
     }
 
     // also set owned arrays (so update_state_surf preserves init values)
@@ -723,24 +730,26 @@ void SurfReactAdsorb::init()
         int lidx = comm->me + k * nprocs;  // round-robin mapping
         long int maxstick = ceil(max_cover * area[lidx] /
                                  (fnum * weight[lidx]));
-        owned_species[k][init_cover_index] = maxstick;
-        owned_total[k] = maxstick;
+        long int cover_count = (long int) round(maxstick * init_cover_fraction);
+        owned_species[k][init_cover_index] = cover_count;
+        owned_total[k] = cover_count;
       }
     } else {
       for (int k = 0; k < nsown; k++) {
         long int maxstick = ceil(max_cover * area[k] /
                                  (fnum * weight[k]));
-        owned_species[k][init_cover_index] = maxstick;
-        owned_total[k] = maxstick;
+        long int cover_count = (long int) round(maxstick * init_cover_fraction);
+        owned_species[k][init_cover_index] = cover_count;
+        owned_total[k] = cover_count;
       }
     }
 
     // print info
     if (comm->me == 0) {
-      if (screen) fprintf(screen,"  Init_cover: all sites filled with %s\n",
-                          init_cover_name);
-      if (logfile) fprintf(logfile,"  Init_cover: all sites filled with %s\n",
-                           init_cover_name);
+      if (screen) fprintf(screen,"  Init_cover: %.0f%% sites filled with %s\n",
+                          init_cover_fraction * 100.0, init_cover_name);
+      if (logfile) fprintf(logfile,"  Init_cover: %.0f%% sites filled with %s\n",
+                           init_cover_fraction * 100.0, init_cover_name);
     }
   }
 

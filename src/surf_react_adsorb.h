@@ -52,6 +52,7 @@ class SurfReactAdsorb : public SurfReact {
   int init_cover_flag;             // 0=空表面, 1=初始满覆盖
   char *init_cover_name;           // 初始覆盖物种名（暂存）
   int init_cover_index;            // 初始覆盖物种在 species_surf 中的索引
+  double init_cover_fraction;      // 初始覆盖比例 (0~1), 默认1.0全满
   int tally_only_flag;             // 0=正常执行反应, 1=仅统计不执行
   int mode;                         // FACE or SURF
   int nsync;                        // synchronize surf state
