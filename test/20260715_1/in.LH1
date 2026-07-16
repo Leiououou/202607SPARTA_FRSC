@@ -1,0 +1,60 @@
+################################################################################
+# Molchanova 图4.c验证算例
+# p=4 Pa T=700~100~2000K (壁温=气体温度)
+# O+O(s) ———> O2(s)
+# 只记数不发生
+# 计算数据：nrho=4.138807e+20  lambda=3e-3 t=5e-6
+################################################################################
+
+variable        T index 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000
+
+label           loop
+
+clear
+
+seed    	    123456
+dimension   	    2
+global              gridcut 0.0 comm/sort yes
+
+boundary	    	rs r p
+
+
+create_box          -3e-3 3e-3 -3e-3 3e-3 -0.5 0.5
+create_grid 	    10 10 1
+balance_grid        rcb cell
+
+global		    	nrho 4.138807e+20 fnum 1.4900e+11 temp ${T}
+
+species		    	air.species O CO CO2 O2 C N N2 NO
+mixture		    	air O O2 N N2 vstream 0 0 0
+
+mixture             air O   frac 1
+mixture             air CO  frac 0.0
+mixture             air CO2 frac 0.0
+mixture             air C   frac 0.0
+mixture 			air O2 	frac 0.0
+mixture 			air N 	frac 0
+mixture 			air N2 	frac 0.0
+mixture 			air NO 	frac 0.0
+
+create_particles    air n 0
+
+surf_collide        1 diffuse ${T} 1
+
+##################################### SURF REACT ADSORB ######################################
+##################################### SURF OPTION ############################################
+
+shell           awk -v T=${T} -f gen_td.awk schu_gs_1.surf > schu_gs_1_${T}.surf
+
+surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1_${T}.surf nsync 1 face ${T} 6.022e18 schu yes init_cover O tally_only yes O CO N N2 O2 NO
+
+bound_modify        xhi collide 1 react adsorb_test_gs2
+
+timestep            1e-6
+
+stats		    	10
+stats_style	    	step cpu np nattempt ncoll nscoll nscheck nsreact
+run 		    	10000
+
+next            T
+jump            in.LH1 loop

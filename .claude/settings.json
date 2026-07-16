@@ -46,11 +46,45 @@
       "Bash(pdftotext -f 5 -l 6 \"D:\\\\博一\\\\气固相互作用\\\\202607_src\\\\107105_1_online.pdf\" -)",
       "Skill(dataviz)",
       "Skill(dataviz:*)",
-      "Bash(node scripts/validate_palette.js \"#2a78d6,#1baf7a,#eda100\" --mode light)"
+      "Bash(node scripts/validate_palette.js \"#2a78d6,#1baf7a,#eda100\" --mode light)",
+      "Bash(ls -la \"D:\\\\博一\\\\气固相互作用\\\\复合系数\\\\prob_set1/\")",
+      "Read(//d/博一/气固相互作用/复合系数/prob_set1/**)",
+      "Bash(ls -la \"\\\\\\\\wsl.localhost\\\\Ubuntu-20.04\\\\home\\\\pjsheng\\\\sparta_202601\\\\sparta-master\\\\\"\")",
+      "Read(//wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/**)",
+      "Read(//mnt/wsl/Ubuntu-20.04/home/pjsheng/sparta_202601/**)",
+      "Read(///wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/**)",
+      "Bash(wslpath \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu-20.04\\\\\\\\home\\\\\\\\pjsheng\\\\\\\\sparta_202601\\\\\\\\sparta-master\")",
+      "Bash(ls -la \"//wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/cmake/\")",
+      "Read(///wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/**)",
+      "Bash(ls -la \"//wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/lib/\")",
+      "Read(///wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/cmake/**)",
+      "Bash(rsync -av --progress \"//wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/\" \"/c/Users/DELL/OneDrive/Desktop/sparta_20260714/\")",
+      "Bash(ls -la \"/c/Users/DELL/OneDrive/Desktop/sparta_20260714/\")",
+      "Read(//c/Users/DELL/OneDrive/Desktop/sparta_20260714//**)",
+      "Read(///wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/tools/testing/**)",
+      "Bash(ls -la \"//wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/tools/testing/\")",
+      "Read(///wsl.localhost/Ubuntu-20.04/home/pjsheng/sparta_202601/sparta-master/tools/**)",
+      "Bash(ls /c/Users/DELL/.claude/file-history/ 2>/dev/null | head -20 && echo \"---\" && ls /c/Users/DELL/.claude/sessions/ 2>/dev/null | head -10)",
+      "Read(//c/Users/DELL/.claude/file-history//**)",
+      "Read(//c/Users/DELL/.claude/sessions//**)",
+      "Bash(python3 -c ' *)",
+      "Bash(apt list *)",
+      "Bash(ls -la \"D:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\\\\\\\\107105_1_online_decrypted.pdf\")",
+      "Bash(ls -la \"D:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\\\\\\\\test\\\\\\\\20260714_6\\\\\\\\\")",
+      "WebFetch(domain:www.sci-hub.ru)",
+      "WebFetch(domain:www.sciencedirect.com)",
+      "WebFetch(domain:sparta.github.io)",
+      "Bash(find \"d:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\" -path \"*/examples/*\" -name \"*.surf\" -o -path \"*/examples/*\" -name \"*react*\" -o -path \"*/examples/*\" -name \"*.gs\")",
+      "Bash(find \"d:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\" -name \"*.surf\" -o -name \"*reaction*\" -o -name \"*.gs\")",
+      "Bash(xelatex -interaction=nonstopmode literature_survey_surface_kinetics.tex)",
+      "Bash(cd \"d:/博一/气固相互作用/202607_src\" && rm -f literature_survey_surface_kinetics.aux literature_survey_surface_kinetics.log literature_survey_surface_kinetics.out && ls -lh literature_survey_surface_kinetics.pdf)",
+      "Bash(ls -la \"D:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\\\\\\\\test\\\\\\\\20260715_1\\\\\\\\\")",
+      "Bash(grep -v \" 0        0        0        0        0$\")"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",
-      "\\mnt\\d\\博一\\气固相互作用\\202607_src"
+      "\\mnt\\d\\博一\\气固相互作用\\202607_src",
+      "d:\\博一\\气固相互作用\\202607_src"
     ]
   }
 }

@@ -1348,29 +1348,23 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
         break;
       }
 
-    // AA: finite-rate, Gamma = N_S * FN/Se  (empty site number density)
+    // AA: finite-rate, base = 2K/Vn, Gamma from unified n(S) block below
     case AA:
       {
         if (Vn < 1.0e-10)
           prob_value[i] = 1.0;
-        else {
-          double Gamma = (maxstick - total_state[isurf]) * ms_inv;
-          prob_value[i] = 2.0 * r->k_react / Vn * Gamma;
-          prob_value[i] = MIN(prob_value[i], 1.0);
-        }
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
       }
 
-    // DA: finite-rate, Gamma = (N_S * FN/Se)^2  (two empty sites needed)
+    // DA: finite-rate, base = 2K/Vn, Gamma from unified n(S) block below
     case DA:
       {
         if (Vn < 1.0e-10)
           prob_value[i] = 1.0;
-        else {
-          double Gamma = (maxstick - total_state[isurf]) * ms_inv;
-          prob_value[i] = 2.0 * r->k_react / Vn * Gamma * Gamma;
-          prob_value[i] = MIN(prob_value[i], 1.0);
-        }
+        else
+          prob_value[i] = 2.0 * r->k_react / Vn;
         break;
       }
 
@@ -1432,6 +1426,16 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
       }
     }
 
+    // multiply by implicit empty site factors n(S)^n_adsorb
+    // AA, DA, LH1, LH3, CD are adsorption-mediated: consume n_adsorb empty sites
+    // n_adsorb = coeff[3] from input file (last number on parameter line)
+    if (r->type == AA || r->type == DA || r->type == LH1 ||
+        r->type == LH3 || r->type == CD) {
+      int n_adsorb = (int)r->coeff[3];
+      prob_value[i] *= stoich_pow(maxstick - total_state[isurf], n_adsorb) *
+                       pow(ms_inv, n_adsorb);
+    }
+
     // multiply by surface co-reactant factors Gamma_j (j >= 1)
     // skip bulk-phase (b) species: Gamma_j = 1 (constant)
     for (int j = 1; j < r->nreactant; j++) {
@@ -1452,9 +1456,9 @@ int SurfReactAdsorb::react_gs_finite_rate(Particle::OnePart *&ip, int isurf,
     }
 
     // finite-rate unified formula: P = min(1, 2K*Gamma/Vn)
-    // AA, DA already clamped in their cases above
+    // D, E, R use constant probability, not clamped
     if (r->type != DISSOCIATION && r->type != EXCHANGE &&
-        r->type != RECOMBINATION && r->type != AA && r->type != DA) {
+        r->type != RECOMBINATION) {
       prob_value[i] = MIN(prob_value[i], 1.0);
     }
 
