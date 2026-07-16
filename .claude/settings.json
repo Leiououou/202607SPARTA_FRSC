@@ -79,7 +79,10 @@
       "Bash(xelatex -interaction=nonstopmode literature_survey_surface_kinetics.tex)",
       "Bash(cd \"d:/博一/气固相互作用/202607_src\" && rm -f literature_survey_surface_kinetics.aux literature_survey_surface_kinetics.log literature_survey_surface_kinetics.out && ls -lh literature_survey_surface_kinetics.pdf)",
       "Bash(ls -la \"D:\\\\\\\\博一\\\\\\\\气固相互作用\\\\\\\\202607_src\\\\\\\\test\\\\\\\\20260715_1\\\\\\\\\")",
-      "Bash(grep -v \" 0        0        0        0        0$\")"
+      "Bash(grep -v \" 0        0        0        0        0$\")",
+      "Bash(awk 'BEGIN{ *)",
+      "Bash(awk '{print $3}')",
+      "Bash(awk '{print $4}')"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",
