@@ -82,7 +82,8 @@
       "Bash(grep -v \" 0        0        0        0        0$\")",
       "Bash(awk 'BEGIN{ *)",
       "Bash(awk '{print $3}')",
-      "Bash(awk '{print $4}')"
+      "Bash(awk '{print $4}')",
+      "Bash(pdftotext -layout \"d:/博一/气固相互作用/Molchanova/107105_1_online.pdf\" /tmp/molchanova2018.txt)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",

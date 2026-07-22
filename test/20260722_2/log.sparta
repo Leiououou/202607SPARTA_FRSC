@@ -1,0 +1,229 @@
+SPARTA (24 Sep 2025)
+Running on 4 MPI task(s)
+################################################################################
+# Molchanova 图4.c验证算例
+#p=4 Pa T=700~100~2100K
+#O+O(s)———> O2(s)
+#只记数不发生
+#计算数据：nrho=4.138807e+20  lambda=3e-3 t=5e-6
+################################################################################
+
+seed	    	    123456
+dimension   	    2
+global              gridcut 0.0 comm/sort yes
+
+boundary	    	rs r p
+
+
+create_box          -3e-3 3e-3 -3e-3 3e-3 -0.5 0.5
+Created orthogonal box = (-0.003 -0.003 -0.5) to (0.003 0.003 0.5)
+create_grid 	    10 10 1
+WARNING: Could not acquire nearby ghost cells b/c grid partition is not clumped (../grid.cpp:473)
+Created 100 child grid cells
+  CPU time = 0.00037545 secs
+  create/ghost percent = 92.0653 7.93474
+balance_grid        rcb cell
+Balance grid migrated 74 cells
+  CPU time = 0.00472092 secs
+  reassign/sort/migrate/ghost percent = 91.1715 0.0281513 0.877901 7.92242
+
+global		    	nrho 4.138807e+20 fnum 1.4900e+11 temp 1000
+
+species		    	air.species O CO CO2 O2 C N N2 NO
+mixture		    	air O O2 N N2 vstream 0 0 0
+
+mixture             air O   frac 1
+mixture             air CO  frac 0.0
+mixture             air CO2 frac 0.0
+mixture             air C   frac 0.0
+mixture 			air O2 	frac 0.0
+mixture 			air N 	frac 0
+mixture 			air N2 	frac 0.0
+mixture 			air NO 	frac 0.0
+
+create_particles    air n 0
+Created 99998 particles
+  CPU time = 0.00246807 secs
+
+surf_collide        1 diffuse 1000 1
+
+##################################### SURF REACT ADSORB ######################################
+##################################### SURF OPTION ############################################
+
+
+
+surf_react        	adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 face 1000 6.022e18 schu yes   O CO N N2 O2 NO
+
+bound_modify        xhi collide 1 react adsorb_test_gs2
+
+timestep            1e-6
+
+compute         1 boundary all n nflux ke erot evib etot echem
+fix             2 ave/time 1 1 1 c_1[*] mode vector ave running file boundary.dat
+
+stats		    	10
+stats_style	    	step cpu np nattempt ncoll nscoll nscheck nsreact
+run 		    	1000
+  Wall chemistry model: Molchanova finite-rate (schu)
+Memory usage per proc in Mbytes:
+  particles (ave,min,max) = 3.125 3.125 3.125
+  grid      (ave,min,max) = 1.51379 1.51379 1.51379
+  surf      (ave,min,max) = 0 0 0
+  total     (ave,min,max) = 4.63879 4.63879 4.63879
+Step CPU Np Natt Ncoll Nscoll Nscheck Nsreact 
+       0            0    99998        0        0        0        0        0 
+      10  0.011485772    54262        0        0        0        0     3757 
+      20  0.017051827    31205        0        0        0        0     1460 
+      30  0.020020776    21494        0        0        0        0      702 
+      40   0.02273897    16391        0        0        0        0      412 
+      50  0.025542328    13138        0        0        0        0      279 
+      60  0.027421884    11003        0        0        0        0      186 
+      70  0.029099599     9412        0        0        0        0      131 
+      80  0.031178126     8242        0        0        0        0      103 
+      90  0.032709706     7338        0        0        0        0       60 
+     100  0.034088926     6629        0        0        0        0       68 
+     110  0.035464898     6041        0        0        0        0       59 
+     120  0.036781685     5520        0        0        0        0       50 
+     130  0.038059459     5102        0        0        0        0       38 
+     140  0.040259909     4743        0        0        0        0       31 
+     150  0.041476471     4429        0        0        0        0       19 
+     160  0.042784511     4149        0        0        0        0       27 
+     170  0.044095253     3905        0        0        0        0       23 
+     180  0.045470313     3683        0        0        0        0       13 
+     190  0.046862962     3503        0        0        0        0       17 
+     200  0.048279757     3336        0        0        0        0       23 
+     210  0.049437808     3203        0        0        0        0       13 
+     220   0.05081056     3083        0        0        0        0       13 
+     230  0.051963634     2930        0        0        0        0       16 
+     240  0.053214768     2809        0        0        0        0       13 
+     250  0.054354495     2695        0        0        0        0        8 
+     260  0.056443503     2615        0        0        0        0        9 
+     270  0.058952973     2527        0        0        0        0        9 
+     280  0.060141365     2428        0        0        0        0        5 
+     290  0.061178257     2344        0        0        0        0       10 
+     300  0.062330914     2260        0        0        0        0        4 
+     310  0.063904125     2195        0        0        0        0        2 
+     320  0.065474402     2119        0        0        0        0       10 
+     330  0.067218004     2067        0        0        0        0        4 
+     340  0.068288182     2000        0        0        0        0        4 
+     350  0.069394561     1940        0        0        0        0        6 
+     360  0.070660152     1888        0        0        0        0        5 
+     370  0.072544652     1833        0        0        0        0        4 
+     380  0.073735607     1778        0        0        0        0        3 
+     390  0.074856192     1733        0        0        0        0        6 
+     400  0.076182495     1681        0        0        0        0        5 
+     410  0.077298892     1647        0        0        0        0        5 
+     420  0.078380118     1615        0        0        0        0        6 
+     430  0.079738071     1584        0        0        0        0        2 
+     440  0.081057555     1553        0        0        0        0        3 
+     450  0.082557098     1520        0        0        0        0        5 
+     460  0.083662595     1478        0        0        0        0        3 
+     470  0.084741714     1454        0        0        0        0        3 
+     480  0.085828075     1436        0        0        0        0        2 
+     490  0.087140065     1417        0        0        0        0        4 
+     500  0.088304455     1392        0        0        0        0        1 
+     510    0.0893289     1368        0        0        0        0        2 
+     520   0.09042813     1345        0        0        0        0        4 
+     530  0.091477702     1328        0        0        0        0        1 
+     540   0.09271271     1304        0        0        0        0        3 
+     550  0.093824043     1280        0        0        0        0        2 
+     560  0.094913095     1260        0        0        0        0        1 
+     570  0.096089404     1240        0        0        0        0        4 
+     580  0.097388234     1225        0        0        0        0        2 
+     590  0.098697205     1207        0        0        0        0        4 
+     600  0.099723855     1187        0        0        0        0        1 
+     610   0.10080111     1165        0        0        0        0        2 
+     620   0.10238041     1145        0        0        0        0        3 
+     630   0.10335338     1125        0        0        0        0        2 
+     640    0.1044056     1114        0        0        0        0        1 
+     650    0.1054014     1092        0        0        0        0        2 
+     660   0.10643679     1080        0        0        0        0        1 
+     670   0.10747483     1072        0        0        0        0        0 
+     680   0.10943789     1055        0        0        0        0        1 
+     690   0.11040444     1044        0        0        0        0        1 
+     700   0.11139243     1030        0        0        0        0        1 
+     710   0.11282733     1017        0        0        0        0        0 
+     720    0.1144395     1006        0        0        0        0        1 
+     730   0.11738876      995        0        0        0        0        1 
+     740   0.11859035      982        0        0        0        0        1 
+     750   0.11964349      968        0        0        0        0        1 
+     760   0.12062915      958        0        0        0        0        3 
+     770     0.122177      954        0        0        0        0        0 
+     780   0.12329859      947        0        0        0        0        0 
+     790   0.12429436      934        0        0        0        0        3 
+     800   0.12696549      921        0        0        0        0        2 
+     810   0.12793685      914        0        0        0        0        1 
+     820   0.12890939      906        0        0        0        0        0 
+     830   0.13049498      900        0        0        0        0        1 
+     840   0.13330691      892        0        0        0        0        1 
+     850   0.13530857      880        0        0        0        0        3 
+     860    0.1367753      866        0        0        0        0        3 
+     870   0.13804174      857        0        0        0        0        1 
+     880   0.13941533      847        0        0        0        0        2 
+     890   0.14088299      833        0        0        0        0        1 
+     900   0.14221235      826        0        0        0        0        1 
+     910   0.14397027      822        0        0        0        0        0 
+     920   0.14529936      813        0        0        0        0        1 
+     930   0.14702735      803        0        0        0        0        0 
+     940   0.14840444      797        0        0        0        0        1 
+     950   0.14993817      794        0        0        0        0        1 
+     960   0.15115153      785        0        0        0        0        3 
+     970   0.15252836      778        0        0        0        0        0 
+     980   0.15380584      775        0        0        0        0        0 
+     990   0.15509516      769        0        0        0        0        1 
+    1000   0.15643008      766        0        0        0        0        0 
+Loop time of 0.156444 on 4 procs for 1000 steps with 766 particles
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Move    | 0.022499   | 0.024052   | 0.024948   |   0.6 | 15.37
+Coll    | 0          | 0          | 0          |   0.0 |  0.00
+Sort    | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.012245   | 0.013032   | 0.013589   |   0.4 |  8.33
+Modify  | 0.002122   | 0.029901   | 0.11304    |  27.8 | 19.11
+Output  | 0.0020218  | 0.0095332  | 0.012041   |   4.4 |  6.09
+Other   |            | 0.07993    |            |       | 51.09
+
+Particle moves    = 3756585 (3.76M)
+Cells touched     = 8039264 (8.04M)
+Particle comms    = 464876 (0.465M)
+Boundary collides = 415086 (0.415M)
+Boundary exits    = 0 (0K)
+SurfColl checks   = 0 (0K)
+SurfColl occurs   = 0 (0K)
+Surf reactions    = 99325 (99.3K)
+Collide attempts  = 0 (0K)
+Collide occurs    = 0 (0K)
+Reactions         = 0 (0K)
+Particles stuck   = 0
+Axisymm bad moves = 0
+
+Particle-moves/CPUsec/proc: 6.00306e+06
+Particle-moves/step: 3756.59
+Cell-touches/particle/step: 2.14005
+Particle comm iterations/step: 2.514
+Particle fraction communicated: 0.12375
+Particle fraction colliding with boundary: 0.110496
+Particle fraction exiting boundary: 0
+Surface-checks/particle/step: 0
+Surface-collisions/particle/step: 0
+Surf-reactions/particle/step: 0.0264402
+Collision-attempts/particle/step: 0
+Collisions/particle/step: 0
+Reactions/particle/step: 0
+
+Surface reaction tallies:
+  id adsorb_test_gs2 style adsorb #-of-reactions 4, model: Molchanova finite-rate (schu)
+    reaction all: 99325
+    reaction O(g) --> O(s): 99232
+    reaction O(g) + O(s) --> O2(g): 93
+
+Particles: 191.5 ave 209 max 177 min
+Histogram: 1 1 0 0 0 0 1 0 0 1
+Cells:      25 ave 25 max 25 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+GhostCell: 11 ave 11 max 11 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+EmptyCell: 11 ave 11 max 11 min
+Histogram: 4 0 0 0 0 0 0 0 0 0

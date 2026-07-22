@@ -1,62 +1,36 @@
 # Progress Log
 
-## Session 2026-07-14 (evening): Γ ms_inv Bug 修复 + K_ER 验证 ✅
+## 2026-07-22
+- 追踪 `schu` 分支、`surf_react adsorb` 反应后处理、产物碰撞模型与 `compute surf` 能量统计。
+- 确认当前 adsorb/schu 没有显式反应热输入或释放能分配；`reaction_coeff()` 固定为 0，壁面 `etot` 仅反映粒子平动/内能的净变化。
+- 复核 Molchanova 2018 PDF 第 107105-4 和 107105-7 页；确认该文对 LH/ER 复合采用完全化学能适应，将全部复合能计入壁面热流，而产物按壁温漫反射。
+- 按用户要求仅审查了 adsorb GS 反应第二行解析、反应数据结构、反应编号和 `compute surf` 能量统计路径；未修改求解器源码，等待用户批准实施计划。
 
-### K_ER Eq 52 对照验证 (test/20260715_5)
-- DSMC tally: 475,137 ER reactions (O+O(s)→O₂)
-- N_hits (解析): 4.79×10⁸, ⟨1/Vn⟩ = 1.738×10⁻³ s/m
-- K_DSMC = 4.73×10⁻²⁰ vs K_input = 4.74×10⁻²⁰ → **0.1% 偏差** ✓
-- 修复前: K_DSMC/K_input ≈ 14% (7× discrepancy)
-- HTML 报告: test/20260715_5/K_ER_validation.html
-- 更新 face-mode-er-ker-calculation 记忆文件
+## 2026-07-21
+- 启动“常复合系数 gamma 计算与 SPARTA 接入设计”。
+- 恢复并阅读历史规划资料；确认已有 schu 有限速率框架、数密度修复和 ER 验证基础。
+- 正在检查源码入口、输入语法和现有测试。
+- 阅读本地 `aas0505004.pdf`，提取 Zuppardi 2018 年 DS2V 表面催化设置。
+- 检索 Zuppardi 其他相关论文、DS2V 用户手册及 2017 年飞行器研究，确认其常概率模型的事件级含义。
+- 未修改任何源代码或算例。
+- 逐页渲染并视觉核查本地 DS2V Version 3.8 手册的表面反应相关页（25、26、35），确认手册未公开竞争反应的抽样算法。
+- 检索竞争性常 gamma DSMC 文献；确认纯常 gamma 多用于物种独立复合，公开且严谨的多通道竞争处理主要出现在有限速率表面化学框架中。
+## 2026-07-22 adsorb GS reaction energy implementation
+- Added mandatory per-reaction energy after GS kinetic coefficients.
+- Sign convention: positive exothermic, negative endothermic; J per real event.
+- Connected the value to `compute surf` ECHEM/ETOT through `reaction_coeff()`.
+- Fixed ECHEM column advancement for non-reacting surface collisions.
+- Updated one representative reaction file and the GS format documentation.
+- Targeted modified translation units compile successfully with MinGW g++.
+- Full serial build is blocked by pre-existing POSIX-only memory.cpp calls on MinGW.
 
-## Session 2026-07-14 (evening): Γ ms_inv Bug 修复 ✅
-
-### Phase 1-6: 完整修复
-- L1324: `ms_inv = factor / max_cover` → `ms_inv = factor`
-- 全面搜索: 确认 react_gs_finite_rate() 内所有 ms_inv 引用自动修正
-- 编译: make mpi -j16 零错误零警告
-- 运行: beam test 结果一致 (41008 reactions, MIN(1.0) clamping)
-- 变更日志: change_logs/2026-07-14_gamma_ms_inv_fix.txt
-- 记忆文件: gamma-ms-inv-bug.md 标记为 fixed
-
-### 关键发现
-- 原始 react() L799 的 ms_inv 不受影响（独立局部变量，用于覆盖度）
-- 当前 surf 文件 k_react=1.0 使新旧代码概率均达截断 → 需调整参数才能观测差异
-
-## Session 2026-07-14 (afternoon): tally_only 关键词
-
-### Phase 1-8: 完整实现
-- surf_react_adsorb.h: 添加 `int tally_only_flag;`
-- 构造函数: tally_only yes/no 解析
-- react() + react_gs_finite_rate(): tally_only 跳过逻辑
-- gs_model(): 追加 [TALLY-ONLY] 标注
-- init(): 启动警告消息
-- 编译通过，零错误零警告
-- 运行验证: 无tally_only→11反应, 有tally_only→tally=11/Surf reactions=0 ✓
-
-## Session 2026-07-13: schu 有限速率框架搭建
-
-### Phase 1-4: 基础框架实现
-- 头文件 surf_react_adsorb.h: 添加 `int schu_flag;` 和 `react_gs_finite_rate()` 声明
-- 构造函数: 添加 schu 关键词解析（在 iarg+=5 之后）
-- react(): 顶部添加 schu 派发逻辑
-- 新建 react_gs_finite_rate(): 复制 react() 全部代码（L1157-1677），去掉派发行
-- 编译验证: g++ -std=c++11 -I. -ISTUBS 通过
-
-### 修复的问题
-- schu 解析初始放在 iarg+=5 之前，arg[iarg] 实际指向 nsync 而非 schu；修正为 iarg+=5 之后检测
-
-### 输入文件格式
-```
-surf_react sr adsorb gs data.gs nsync 10 face 300 1.0 schu yes O(s) N(s)
-```
-- schu 默认 no（不写即走原 react）
-- 写 schu yes 则走 react_gs_finite_rate（当前与原逻辑相同）
-
-## Session 2026-07-09
-
-### Phase 1: Planning Files & Code Analysis
-- Created task_plan.md, findings.md, progress.md
-- Reading: surf_react_adsorb.h (full), surf_react_adsorb.cpp react() (lines 620-1137)
-- In progress: Reading PS_chemistry, PS_react, readfile_gs continuation
+## 2026-07-22 compute boundary reaction heat
+- Confirmed `Domain::surf_react[iface]` identifies the reaction model assigned to each box face.
+- Confirmed `Update` passes the per-collision reaction number into `ComputeBoundary::boundary_tally()`.
+- Planned new `echem` tally and inclusion of the same term in `etot`; implementation in progress.
+- First validation pass used `tally_only yes`; it confirmed candidate-only reactions do not reach boundary heat tallies. Switched the controlled test to executed adsorption reactions.
+- Single-rank positive/negative/zero tests passed exactly. Initial two-rank attempt failed because the test had only one grid cell; changed the test grid to two cells before retrying.
+- The two-cell retry still lacked a clumped partition; added `balance_grid rcb cell` before the final MPI retry.
+- Final single-rank comparison at step 10 (950 reactions): positive `echem=570`, zero `echem=0`, negative `echem=-570`; `etot` shifted by exactly the same amounts.
+- Final two-rank run passed with 9,998 executed reactions; step-10 `echem=561` for 935 reactions, matching the analytical normalization.
+- Rebuilt Linux ELF `src/spa_mpi`; SHA-256 `61a242340a1b36733ff72a46ce290986c9c8c27c1f44bd246c84fb6597c5f4c1`.

@@ -1,0 +1,99 @@
+SPARTA (24 Sep 2025)
+Running on 2 MPI task(s)
+seed                24681357
+dimension           2
+global              gridcut 0.0 comm/sort yes nrho 1.0e18 fnum 1.0e10 temp 300
+boundary            os p p
+
+create_box           0.0 0.01 0.0 0.01 -0.5 0.5
+Created orthogonal box = (0 0 -0.5) to (0.01 0.01 0.5)
+create_grid          2 1 1
+WARNING: Could not acquire nearby ghost cells b/c grid partition is not clumped (../grid.cpp:473)
+Created 2 child grid cells
+  CPU time = 0.000378115 secs
+  create/ghost percent = 93.3986 6.60143
+balance_grid         rcb cell
+Balance grid migrated 0 cells
+  CPU time = 0.0118467 secs
+  reassign/sort/migrate/ghost percent = 0.803022 0.00502248 82.4886 16.7033
+
+species              ../../test/20260714_3/air.species O
+mixture              beam O frac 1.0 vstream 1000.0 0.0 0.0 temp 1.0
+create_particles     beam n 10000
+Created 10000 particles
+  CPU time = 0.000802447 secs
+
+surf_collide         wall diffuse 300.0 1.0
+surf_react           chemistry adsorb gs ${rxn} nsync 1 face 300.0 1.0e20 O
+surf_react           chemistry adsorb gs positive.surf nsync 1 face 300.0 1.0e20 O
+bound_modify         xhi collide wall react chemistry
+
+compute              heat boundary beam echem etot
+timestep             1.0e-6
+stats                10
+stats_style          step np nsreact c_heat[2][1] c_heat[2][2]
+run                  20
+  Wall chemistry model: SPARTA
+Memory usage per proc in Mbytes:
+  particles (ave,min,max) = 1.5625 1.5625 1.5625
+  grid      (ave,min,max) = 1.51379 1.51379 1.51379
+  surf      (ave,min,max) = 0 0 0
+  total     (ave,min,max) = 3.07629 3.07629 3.07629
+Step Np Nsreact c_heat[2][1] c_heat[2][2] 
+       0    10000        0            0            0 
+      10       99      935          561     573.3508 
+      20        2        0            0            0 
+Loop time of 0.00096504 on 2 procs for 20 steps with 2 particles
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Move    | 0.00014295 | 0.00041204 | 0.00068113 |   0.0 | 42.70
+Coll    | 0          | 0          | 0          |   0.0 |  0.00
+Sort    | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.00023891 | 0.00024163 | 0.00024436 |   0.0 | 25.04
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 5.774e-06  | 1.4497e-05 | 2.322e-05  |   0.0 |  1.50
+Other   |            | 0.0002969  |            |       | 30.76
+
+Particle moves    = 49145 (49.1K)
+Cells touched     = 60235 (60.2K)
+Particle comms    = 5001 (5K)
+Boundary collides = 2 (0.002K)
+Boundary exits    = 0 (0K)
+SurfColl checks   = 0 (0K)
+SurfColl occurs   = 0 (0K)
+Surf reactions    = 9998 (10K)
+Collide attempts  = 0 (0K)
+Collide occurs    = 0 (0K)
+Reactions         = 0 (0K)
+Particles stuck   = 0
+Axisymm bad moves = 0
+
+Particle-moves/CPUsec/proc: 2.54627e+07
+Particle-moves/step: 2457.25
+Cell-touches/particle/step: 1.22566
+Particle comm iterations/step: 1.35
+Particle fraction communicated: 0.10176
+Particle fraction colliding with boundary: 4.06959e-05
+Particle fraction exiting boundary: 0
+Surface-checks/particle/step: 0
+Surface-collisions/particle/step: 0
+Surf-reactions/particle/step: 0.203439
+Collision-attempts/particle/step: 0
+Collisions/particle/step: 0
+Reactions/particle/step: 0
+
+Surface reaction tallies:
+  id chemistry style adsorb #-of-reactions 1, model: SPARTA
+    reaction all: 9998
+    reaction O(g) --> O(s): 9998
+
+Particles: 1 ave 1 max 1 min
+Histogram: 2 0 0 0 0 0 0 0 0 0
+Cells:      1 ave 1 max 1 min
+Histogram: 2 0 0 0 0 0 0 0 0 0
+GhostCell: 1 ave 1 max 1 min
+Histogram: 2 0 0 0 0 0 0 0 0 0
+EmptyCell: 1 ave 1 max 1 min
+Histogram: 2 0 0 0 0 0 0 0 0 0

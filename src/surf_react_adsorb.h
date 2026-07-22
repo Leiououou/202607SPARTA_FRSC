@@ -36,7 +36,7 @@ class SurfReactAdsorb : public SurfReact {
   const char *gs_model();
 
   char *reactionID(int);
-  double reaction_coeff(int) {return 0.0;};
+  double reaction_coeff(int);
   int match_reactant(char *, int);
   int match_product(char *, int);
 
@@ -130,6 +130,7 @@ class SurfReactAdsorb : public SurfReact {
     int *reactants,*products;      // species indices of reactants/products
     int *reactants_ad_index,*products_ad_index;
     double *coeff;                 // numerical coeffs for reaction
+    double reaction_energy;        // reaction energy, positive = exothermic (J/event)
     double k_react;
     int kisliuk_flag, energy_flag;
     double kisliuk_coeff[3], energy_coeff[2];

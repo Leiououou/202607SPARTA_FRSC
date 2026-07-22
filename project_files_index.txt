@@ -1,0 +1,128 @@
+================================================================================
+        202607_src 项目文件索引
+        生成日期: 2026-07-21
+================================================================================
+
+一、Claude 记忆文件 (Memory)
+   目录: C:\Users\DELL\.claude\projects\d------------202607-src\memory\
+
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\MEMORY.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\sparta-adsorb-code-learning.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\molchanova-gs-modification-plan.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\detailed-change-log-policy.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\sparta-build-command.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\bulk-phase-species-density.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\sparta-runtime-errors-and-fixes.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\stoich-pow-int-overflow-fix.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\face-mode-er-ker-calculation.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\tally-only-keyword.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\gamma-ms-inv-bug.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\data-integrity-principle.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\sparta-temperature-scan-setup.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\K_ER_validation_results.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\ns-adsorb-fix.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\init-cover-fraction.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\lh1-k-verification-setup.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\lh3-k-verification-setup.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\bulk-phase-gamma-b-verification.md
+   C:\Users\DELL\.claude\projects\d------------202607-src\memory\adsorb-heat-flux-gap.md
+
+
+二、修改日志 (Change Logs)
+   目录: d:\博一\气固相互作用\202607_src\change_logs\
+
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-13_schu_framework.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-13_gs_model_print.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_bulk_phase_rule.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_finite_rate_formulas.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_init_cover_keyword.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_gs_collision_model_fix.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_init_cover_int_overflow_fix.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_stoich_pow_int_overflow_fix.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_tally_only_keyword.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-14_gamma_ms_inv_fix.txt
+   d:\博一\气固相互作用\202607_src\change_logs\2026-07-16_nS_adsorb_fix.txt
+   d:\博一\气固相互作用\202607_src\change_logs\20260716_init_cover_fraction.txt
+   d:\博一\气固相互作用\202607_src\change_logs\20260716_LH3_verify_script.txt
+   d:\博一\气固相互作用\202607_src\change_logs\20260716_LH3_bulk_phase_verify.txt
+   d:\博一\气固相互作用\202607_src\change_logs\20260716_LH1_bulk_phase_verify.txt
+
+
+三、项目根目录 MD 文件
+
+   d:\博一\气固相互作用\202607_src\findings.md
+   d:\博一\气固相互作用\202607_src\task_plan.md
+   d:\博一\气固相互作用\202607_src\progress.md
+   d:\博一\气固相互作用\202607_src\literature_survey_surface_kinetics.md
+
+
+四、计划文件 (Planning .md)
+   目录: d:\博一\气固相互作用\202607_src\.planning\
+
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-ns-adsorb-fix\findings.md
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-ns-adsorb-fix\progress.md
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-ns-adsorb-fix\task_plan.md
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-init-cover-fraction\findings.md
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-init-cover-fraction\progress.md
+   d:\博一\气固相互作用\202607_src\.planning\2026-07-16-init-cover-fraction\task_plan.md
+
+
+五、项目根目录 TXT 文件
+
+   d:\博一\气固相互作用\202607_src\readme.txt
+   d:\博一\气固相互作用\202607_src\test.txt
+   d:\博一\气固相互作用\202607_src\tmp_molchanova.txt
+   d:\博一\气固相互作用\202607_src\107105_1_text.txt
+
+
+六、MATLAB 验证脚本 (.m)
+   目录: d:\博一\气固相互作用\202607_src\test\
+
+   d:\博一\气固相互作用\202607_src\test\20260714_6\K_ER_validation.m
+   d:\博一\气固相互作用\202607_src\test\20260715_2\verify_K_LH1.m
+   d:\博一\气固相互作用\202607_src\test\20260715_3\verify_K_LH3.m
+   d:\博一\气固相互作用\202607_src\test\20260715_4\verify_K_LH3b.m
+   d:\博一\气固相互作用\202607_src\test\20260715_5\verify_K_LH1b.m
+
+
+七、测试目录 Readme 文件
+
+   d:\博一\气固相互作用\202607_src\test\20260713\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260713_2\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714_2\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714_3\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714_4\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714_5\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260714_6\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260715_1\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260715_2\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260715_3\readme.txt
+   d:\博一\气固相互作用\202607_src\test\20260715_4\readme.txt
+
+
+八、配置文件
+
+   d:\博一\气固相互作用\202607_src\.claude\settings.json
+   d:\博一\气固相互作用\202607_src\.claude\settings.local.json
+
+
+九、CMakeLists.txt 文件
+
+   d:\博一\气固相互作用\202607_src\src\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\src\FFT\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\src\KOKKOS\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\src\STUBS\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\src\PYTHON\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\SPARTA_2026\src\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\SPARTA_2026\src\FFT\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\SPARTA_2026\src\KOKKOS\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\SPARTA_2026\src\STUBS\CMakeLists.txt
+   d:\博一\气固相互作用\202607_src\src\MAKE\Makefile.png.txt
+
+================================================================================
+  共计: 20 个记忆文件 + 15 个修改日志 + 4 个根目录 MD + 6 个计划 MD
+        + 4 个根目录 TXT + 5 个 MATLAB 脚本 + 12 个测试 readme
+        + 2 个配置文件 + 10 个 CMakeLists
+        = 78 个文件
+================================================================================

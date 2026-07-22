@@ -2262,6 +2262,7 @@ void SurfReactAdsorb::readfile_gs(char *fname)
         r->reactants_ad_index = new int[MAXREACTANT_GS];
         r->products_ad_index = new int[MAXPRODUCT_GS];
         r->coeff = new double[MAXCOEFF_GS];
+        r->reaction_energy = 0.0;
         r->cmodel_ip = NOMODEL;
         r->cmodel_ip_flags = NULL;
         r->cmodel_ip_coeffs = NULL;
@@ -2481,6 +2482,16 @@ void SurfReactAdsorb::readfile_gs(char *fname)
       }
       r->coeff[i] = input->numeric(FLERR,word);
     }
+
+    // required reaction energy after rate coefficients:
+    // positive = exothermic, negative = endothermic (J/real event)
+
+    word = strtok(NULL," \t\n");
+    if (!word) {
+      print_reaction(copy1,copy2);
+      error->all(FLERR,"Missing reaction energy in adsorb GS reaction");
+    }
+    r->reaction_energy = input->numeric(FLERR,word);
 
     r->kisliuk_flag = 0;
     r->energy_flag = 0;
@@ -2879,6 +2890,17 @@ char *SurfReactAdsorb::reactionID(int m)
 {
   if (m < nlist_gs) return rlist_gs[m].id;
   return rlist_ps[m-nlist_gs].id;
+}
+
+/* ----------------------------------------------------------------------
+   return reaction energy for a GS reaction
+   positive = exothermic, negative = endothermic (J per real event)
+------------------------------------------------------------------------- */
+
+double SurfReactAdsorb::reaction_coeff(int m)
+{
+  if (m < 0 || m >= nlist_gs) return 0.0;
+  return rlist_gs[m].reaction_energy;
 }
 
 /* ---------------------------------------------------------------------- */

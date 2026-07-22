@@ -1,51 +1,38 @@
-# Task Plan: Γ ms_inv Bug 修复 — ✅ 已完成
+# Task Plan: 常复合系数 gamma 计算与 SPARTA 接入设计
 
 ## Goal
-修复 `react_gs_finite_rate()` 中 Γ（表面物种数密度）被错误计算为覆盖度的 bug：
-`ms_inv = factor / max_cover` → 改为 `ms_inv = factor`（不除 N_site）
+基于当前 SPARTA 分支，确定常复合系数 gamma 的定义、计算输入输出、代码落点、验证方法，并形成可实施方案。
 
-## 背景
-- **文件**: `src/surf_react_adsorb.cpp`
-- **函数**: `SurfReactAdsorb::react_gs_finite_rate()`
-- **bug 行**: L1324 `double ms_inv = factor / max_cover;`
-- **根因**: `max_cover` 即 N_site（表面位点密度），多除使数密度变成覆盖度
+## Phases
+- [complete] 1. 盘点现有表面反应、schu、输入文件与测试结构
+- [complete] 2. 明确 Zuppardi/DS2V 中 gamma 与事件概率的关系
+- [pending] 3. 设计独立计算模块及 SPARTA 输入接口
+- [pending] 4. 设计验证算例、守恒检查与实施顺序
+- [pending] 5. 经用户批准后，为 adsorb GS 反应文件增加必填的逐反应化学能（J/真实反应，吸热为正），并接入 `compute surf echem/etot`
 
-## 完成状态：全部 6 个 Phase 均已完成
+## Scope
+本轮以架构分析和实施建议为主，不修改求解器行为。
 
-| Phase | 内容 | 状态 |
-|-------|------|:--:|
-| 1 | 代码修复 — ms_inv = factor | ✅ |
-| 2 | 全面搜索验证 — 所有引用正确 | ✅ |
-| 3 | WSL 编译 — 零错误零警告 | ✅ |
-| 4 | 运行验证 — 结果一致（clamping 效应） | ✅ |
-| 5 | 变更日志 + 记忆文件更新 | ✅ |
-| 6 | surf 文件参数调整指导 | ✅ |
+## Errors
+- 无
+## Adsorb reaction-energy implementation (2026-07-22)
+- [completed] Parse a mandatory GS reaction energy after kinetic coefficients.
+- [completed] Use positive-exothermic/negative-endothermic convention in `compute surf echem/etot`.
+- [completed] Compile the modified translation units and validate representative input syntax.
+- [blocked] Full MinGW serial link: existing `memory.cpp` requires POSIX allocation APIs unavailable in this toolchain.
 
-## 修改内容
+## Compute boundary adsorb reaction heat (2026-07-22)
+- [completed] 1. Add an `echem` value to `compute boundary`.
+- [completed] 2. Resolve the face reaction model and read the current GS reaction energy.
+- [completed] 3. Add reaction heat to `echem` and `etot` with positive-exothermic convention.
+- [completed] 4. Verify zero/no-reaction behavior and output-column indexing.
+- [completed] 5. Run positive, negative, and zero reaction-energy face tests.
+- [completed] 6. Rebuild and validate Linux MPI `spa_mpi` under Ubuntu 20.04.
 
-**单行修改** (`src/surf_react_adsorb.cpp:1324`):
-```cpp
-// 修复前: double ms_inv = factor / max_cover;
-// 修复后: double ms_inv = factor;  // FIXED
-```
+### Scope
+- Only boundary heat tallies for already-read GS reaction energy.
+- No changes to reaction probability, coverage evolution, product energy allocation, or PS chemistry.
 
-## 验证结果
-
-| 项目 | 修复前 | 修复后 |
-|------|--------|--------|
-| ms_inv | factor / N_site | factor |
-| Γ (AA) | θ_empty（覆盖度） | N_S·FN/Se（m⁻²）✓ |
-| 编译 | — | 零错误零警告 ✓ |
-| 运行 (beam test) | 41008 reactions | 41008 reactions (一致，因clamping) ✓ |
-
-## surf 文件参数注意事项
-
-修复后 k_react 有效量纲从 m/s 恢复为 m³/s：
-- 方案 A: A_new = A_old / N_site（补偿效应）
-- 方案 B: 从论文 K 值反算（推荐）
-
----
-
-## 后续任务
-- PS 反应中 L3449 ms_inv 的评估（是否也需要修复）
-- surf 文件参数重新拟合
+### Errors
+- Two-rank test with a one-cell grid: `Run command before grid ghost cells are defined`; corrected the test to use two grid cells.
+- Two cells with the default partition still produced no usable ghost layout; added RCB balancing for a clumped two-rank partition.

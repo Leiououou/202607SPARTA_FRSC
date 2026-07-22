@@ -1,0 +1,22 @@
+seed                24681357
+dimension           2
+global              gridcut 0.0 comm/sort yes nrho 1.0e18 fnum 1.0e10 temp 300
+boundary            os p p
+
+create_box           0.0 0.01 0.0 0.01 -0.5 0.5
+create_grid          2 1 1
+balance_grid         rcb cell
+
+species              ../../test/20260714_3/air.species O
+mixture              beam O frac 1.0 vstream 1000.0 0.0 0.0 temp 1.0
+create_particles     beam n 10000
+
+surf_collide         wall diffuse 300.0 1.0
+surf_react           chemistry adsorb gs ${rxn} nsync 1 face 300.0 1.0e20 O
+bound_modify         xhi collide wall react chemistry
+
+compute              heat boundary beam echem etot
+timestep             1.0e-6
+stats                10
+stats_style          step np nsreact c_heat[2][1] c_heat[2][2]
+run                  20

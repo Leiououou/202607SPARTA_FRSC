@@ -18,6 +18,7 @@
 #include "mixture.h"
 #include "grid.h"
 #include "surf.h"
+#include "surf_react.h"
 #include "update.h"
 #include "domain.h"
 #include "modify.h"
@@ -31,7 +32,7 @@ using namespace MathConst;
 
 enum{XLO,XHI,YLO,YHI,ZLO,ZHI,INTERIOR};         // same as Domain
 enum{PERIODIC,OUTFLOW,REFLECT,SURFACE,AXISYM};  // same as Domain
-enum{NUM,NUMWT,NFLUX,MFLUX,PRESS,XSHEAR,YSHEAR,ZSHEAR,KE,EROT,EVIB,ETOT};
+enum{NUM,NUMWT,NFLUX,MFLUX,PRESS,XSHEAR,YSHEAR,ZSHEAR,KE,EROT,EVIB,ECHEM,ETOT};
 
 /* ---------------------------------------------------------------------- */
 
@@ -60,6 +61,7 @@ ComputeBoundary::ComputeBoundary(SPARTA *sparta, int narg, char **arg) :
     else if (strcmp(arg[iarg],"ke") == 0) which[nvalue++] = KE;
     else if (strcmp(arg[iarg],"erot") == 0) which[nvalue++] = EROT;
     else if (strcmp(arg[iarg],"evib") == 0) which[nvalue++] = EVIB;
+    else if (strcmp(arg[iarg],"echem") == 0) which[nvalue++] = ECHEM;
     else if (strcmp(arg[iarg],"etot") == 0) which[nvalue++] = ETOT;
     else error->all(FLERR,"Illegal compute boundary command");
     iarg++;
@@ -204,6 +206,16 @@ void ComputeBoundary::boundary_tally(double dtremain,
   double *vorig = iorig->v;
   double mvv2e = update->mvv2e;
 
+  // chemical energy for a reaction on this box face
+  // positive = exothermic wall heating, negative = endothermic wall cooling
+
+  double reaction_energy = 0.0;
+  if (reaction) {
+    int isr = domain->surf_react[iface];
+    if (isr >= 0)
+      reaction_energy = surf->sr[isr]->reaction_coeff(reaction-1);
+  }
+
   double *vec = myarray[iface];
   int k = igroup*nvalue;
   int nflag = 0;
@@ -271,6 +283,9 @@ void ComputeBoundary::boundary_tally(double dtremain,
         break;
       case EVIB:
         vec[k++] += weight * iorig->evib;
+        break;
+      case ECHEM:
+        k++;
         break;
       case ETOT:
         vsqpre = MathExtra::lensq3(vorig);
@@ -362,6 +377,9 @@ void ComputeBoundary::boundary_tally(double dtremain,
         else jevib = 0.0;
         vec[k++] -= weight * (ievib + jevib - iorig->evib);
         break;
+      case ECHEM:
+        vec[k++] += weight * reaction_energy;
+        break;
       case ETOT:
         vsqpre = origmass * MathExtra::lensq3(vorig);
         otherpre = iorig->erot + iorig->evib;
@@ -373,8 +391,9 @@ void ComputeBoundary::boundary_tally(double dtremain,
           jvsqpost = jmass * MathExtra::lensq3(jp->v);
           jother = jp->erot + jp->evib;
         } else jvsqpost = jother = 0.0;
-        vec[k++] -= 0.5*mvv2e*(ivsqpost + jvsqpost - vsqpre) +
+        vec[k] -= 0.5*mvv2e*(ivsqpost + jvsqpost - vsqpre) +
           weight * (iother + jother - otherpre);
+        vec[k++] += weight * reaction_energy;
         break;
       }
     }

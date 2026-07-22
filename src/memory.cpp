@@ -41,12 +41,20 @@ void *Memory::smalloc(bigint nbytes, const char *name, int align)
 
   void *ptr;
 
+#if defined(_WIN32)
+  // The MinGW C runtime does not provide posix_memalign().  The current
+  // non-Kokkos Windows build does not request explicit alignment, so use
+  // the standard allocator while preserving the POSIX path on other OSes.
+  (void) align;
+  ptr = malloc(nbytes);
+#else
   if (align) {
     int retval = posix_memalign(&ptr, align, nbytes);
     if (retval) ptr = NULL;
   } else {
     ptr = malloc(nbytes);
   }
+#endif
 
   if (ptr == NULL) {
     char str[128];
@@ -68,6 +76,10 @@ void *Memory::srealloc(void *ptr, bigint nbytes, const char *name, int align)
     return NULL;
   }
 
+#if defined(_WIN32)
+  (void) align;
+  ptr = realloc(ptr,nbytes);
+#else
   if (align) {
     ptr = realloc(ptr, nbytes);
     uintptr_t offset = ((uintptr_t)(const void *)(ptr)) % align;
@@ -83,6 +95,7 @@ void *Memory::srealloc(void *ptr, bigint nbytes, const char *name, int align)
     }
   } else
     ptr = realloc(ptr,nbytes);
+#endif
 
   if (ptr == NULL) {
     char str[128];

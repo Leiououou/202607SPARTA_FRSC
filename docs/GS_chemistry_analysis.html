@@ -724,11 +724,12 @@ A(s) + B(s) --> AB(g)              # LH1 + 表面共反应物 (ER 也可)
 A(s) + B(s) --> C(s)               # LH3
 A(s) + 2B(s) --> AB2(g)            # LH2 型（由 PS 化学处理）
 
-# 第2行: 类型 风格 [系数...] [可选选项]
-AA S 0.8 2                          # SIMPLE: prob=0.8, 覆盖度阶数n=2
-DA A 1e-2 0.5 3000 1               # ARRHENIUS: A=0.01, b=0.5, Ea=3000K, n=1
-DA S 0.5 1 kisliuk 0.1 0 1000      # SIMPLE + Kisliuk
-CI S 0.3 energy 0.5 1.0             # CI + 能量依赖
+# 第2行: 类型 风格 [速率系数...] 反应能 [可选选项]
+# 反应能单位为 J/真实反应事件；放热为正，吸热为负
+AA S 0.8 2 0.0                       # SIMPLE: prob=0.8, 覆盖度阶数n=2
+DA A 1e-2 0.5 3000 1 0.0            # ARRHENIUS: A=0.01, b=0.5, Ea=3000K, n=1
+DA S 0.5 1 0.0 kisliuk 0.1 0 1000   # SIMPLE + Kisliuk
+CI S 0.3 0.0 energy 0.5 1.0          # CI + 能量依赖
 
 # 可选第3行（1个气相产物时）: SurfCollide模型
 diffuse 300.0
