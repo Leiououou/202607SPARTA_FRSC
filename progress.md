@@ -34,3 +34,4 @@
 - Final single-rank comparison at step 10 (950 reactions): positive `echem=570`, zero `echem=0`, negative `echem=-570`; `etot` shifted by exactly the same amounts.
 - Final two-rank run passed with 9,998 executed reactions; step-10 `echem=561` for 935 reactions, matching the analytical normalization.
 - Rebuilt Linux ELF `src/spa_mpi`; SHA-256 `61a242340a1b36733ff72a46ce290986c9c8c27c1f44bd246c84fb6597c5f4c1`.
+- Added detailed persistent modification log: `change_logs/2026-07-22_adsorb_reaction_heat_compute_surf_boundary.txt`.

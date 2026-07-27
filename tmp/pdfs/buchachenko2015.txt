@@ -1,0 +1,453 @@
+ISSN 0015-4628, Fluid Dynamics, 2015, Vol. 50, No. 3, pp. 453–462. © Pleiades Publishing, Ltd., 2015.
+Original Russian Text © A.A. Buchachenko, V.L. Kovalev, A.A. Krupnov, 2015, published in Izvestiya Rossiiskoi Akademii Nauk, Mekhanika
+Zhidkosti i Gaza, 2015, Vol. 50, No. 3, pp. 160–170.
+
+
+
+
+   Rate Coefficients of the Elementary Stages of Heterogeneous
+          Catalytic Recombination of Dissociated Air
+                 on Thermal-Protective Coatings
+                           A. A. Buchachenko, V. L. Kovalev, and A. A. Krupnov
+           Lomonosov Moscow State University, Chemical Faculty, Faculty of Mechanics and Mathematics,
+                       Institute of Mechanics, Leninskiye Gory 1, Moscow, 119991 Russia
+                                        e-mail: valerykovalev@yandex.ru
+                                                      Received June 11, 2014
+
+
+
+       Abstract—On the basis of quantum-mechanical calculations within the framework of the cluster models
+       and the literature data the rate coefficients of the elementary stages of the complete system of heteroge-
+       nous catalytic recombination of dissociated air on the surfaces of thermal-protective β -cristobalite and
+       α -Al2 O3 ceramic coatings are determined. The processes of impact and associative recombination of
+       adsorbed oxygen and nitrogen atoms are taken into account.
+       Keywords: reusable thermal-protective coatings of spacecraft, heterogenous catalytic reactions, cluster,
+       quantum mechanics, density functional method.
+       DOI: 10.1134/S001546281503014X
+
+    Great interest in an investigation of the interaction between multicomponent gas mixtures and low-
+catalytic materials is due to the development of reusable spacecraft and promising hypersonic flight ve-
+hicles. In high-heat regions of the atmospheric flight trajectory these vehicles are in nonequilibrium flow
+and the use of low-catalytic coatings reduces severalfold the heating at the expense of heterogeneous cat-
+alytic recombination of atoms. The considerable reduction of heat fluxes makes it possible to diminish the
+heat-shielding weight and to increase the payload [1–3].
+    In mathematically formulating this problem the catalytic activity of the surface enters in the boundary
+conditions for the system of equations governing multicomponent, chemically reacting flow past the surface.
+The heterogeneous catalytic recombination effects are usually described by introducing the recombination
+coefficients γi which show the fraction of the atoms which take part in recombination on the surface. The
+coefficients γi depend on both the surface properties and the gas phase conditions. These dependences
+include a great many parameters.
+    The very important quantities determining the temperature dependence of the coefficients γi are the rate
+coefficients of the elementary stages of heterogeneous catalytic recombination. At an appropriate choice
+of the rate coefficients of the elementary stages the kinetic models allowing for the detailed mechanism of
+heterogeneous catalytic reactions and based on Langmuir’s theory of adsorbed layers [4] make it possible
+to satisfactorily describe the aerodynamic heating of the windward surface of reusable spacecraft along the
+entire re-entry trajectory in the Earth atmosphere [1, 3, 5, 6]. However, these coefficients include several
+parameters determined from the comparison with the experimental data on the heat fluxes; in the case of a
+multiparameter dependence this approach can be ambiguous [7].
+    The new approaches based on the methods of quantum mechanics and molecular dynamics allow one to
+better understand the mechanism of heterogeneous catalytic processes and to determine the rate coefficients
+of elementary processes without invoking the experimental data. In studies [8, 9] the coefficients of oxy-
+gen atom recombination and recombination energy accommodation on silicon thermal-protective coatings
+
+                                                                453
+454                                           BUCHACHENKO et al.
+
+(β -cristobalite and SiC) were calculated within the framework of classical molecular dynamics using the
+potentials of the interaction between oxygen and material atoms available in the literature.
+    In [10, 11] heterogenous recombination of oxygen atoms on an aluminum oxide surface was investi-
+gated using a semi-classical approach. In this approach the quantum mechanics methods, together with
+the density functional theory [12], were applied to determine the potential energy surface corresponding
+to the interactions of O(3 P) atoms with a cluster modeling the α -Al2 O3 surface which was then used in
+molecular-dynamic calculations.
+    In this study, the interaction between dissociated air and thermal-protective β -cristobalite (111) and
+α -Al2 O3 ceramic coatings is investigated on the basis of quantum-mechanical calculations. The rate coeffi-
+cients of the complete system of the elementary stages of heterogenous catalytic recombination of dissoci-
+ated air atoms on these materials are determined with account of adsorption/desorption and the impact and
+associative recombination of oxygen and nitrogen atoms.
+
+                            1. MODELING OF THE MATERIAL STRUCTURE
+                                  AND ADSORPTION PROCESSES
+   In dissociated air on materials under study the detailed mechanism of heterogenous catalytic processes
+presented below was taken into account and the rate coefficients of the corresponding elementary stages
+were calculated.
+   Adsorption/desorption of atoms
+                                  kaO , kdO                            kaN , kdN
+                      O + (S) ← −− → (O − S),              N + (S) ← −− → (N − S),
+
+   impact recombination of atoms (Eley–Rideal mechanism)
+                                    kerO                                       kerN
+                  O + (O − S) −− → O2 + (S),               N + (N − S) −− → N2 + (S),
+   and associative atom recombination (Langmuire–Hinshelwood mechanism)
+                                    klhO                               klhN
+                       2(O − S) −−→ O2 + 2(S),             2(N − S) −−→ N2 + 2(S).
+    Since heterogenous catalytic reactions on surfaces involve hemosorbed particles, whose bonds with the
+surface are due to short-range forces, it is the cluster approach that is rather effective in describing local
+interactions. The cluster is a comparatively small fragment of the solid body lattice composed of a finite
+number of atoms of the surface layer and near-surface layers. Investigating the interactions with the clus-
+ter opens up possibilities for the direct use in calculations of quantum mechanics methods dealing with
+molecular systems of restricted dimensions.
+    1. The crystal α -Al2 O3 surface was modeled by an Al4 O6 cluster reproducing the crystal stoichiometry
+and the valent state of the Al atoms lying on the surface (Fig. 1). To model the adsorption of the oxygen
+and nitrogen atoms in the main state (O(3 P), N(4 S)) on the α -Al2 O3 surface the oxygen atoms of the lower
+surface of the material were fixed in their positions occupied in the Al4 O6 cluster. The positions of the
+other atoms were optimized at given coordinates R, θ , and ϕ of the adsorbed atom (Fig. 1). This model
+allows for surface monolayer relaxation due to the interaction between the adsorbent and the adsorbate.
+The calculations show the importance of the processes of the structural relaxation of surface atoms. In the
+calculations we used the B3LYP functional [13, 14] with the valent-split 6-31G* Pople basis [15]; this choice
+was confirmed by the comparison with the experimental data from the earlier authors’ studies [10, 11].
+    2. β -cristobalite surface was modeled by the Si-terminated edge (111) of the β -cristobalite under the
+assumption of the edge-centered symmetry lattice Fd3m for its ideal crystal, as shown in Fig. 2. It consists
+of equilateral triangles united in a hexagon with other Si atoms located on the outer layer of the surface, while
+the Si atoms of the second layer occupy the centers of each triangle. To describe adsorption of an outer atom
+
+                                                                FLUID DYNAMICS         Vol. 50   No. 3   2015
+                              RATE COEFFICIENTS OF THE ELEMENTARY STAGES                                                   455
+
+
+
+
+       Fig. 1. Cluster model of oxygen atom adsorption on the Al2 O3 surface; I are the Al atoms and II are the O atoms.
+
+
+we take bridge Si–O–Si structures with Si atoms of the second layer and three bridges to the second-layer
+silicon with two Si–O bonds per atom. The structure thus obtained is shown in Fig. 3. It consists of 10 Si
+atoms, 12 O atoms, and 15 H atoms which are used for saturating the free surfaces of the cluster. The cluster
+possesses the point symmetry C3v and one non-paired electron (total spin of the cluster Sc = 1/2).
+    All the calculations were performed within the framework of the method of the density functional theory
+with the functional and the basis described below. For an isolated Si10 O12 H15 cluster we considered two
+configurations, namely, the “crystalline” one optimized with the constraint of equal lengths of the Si–O
+bonds and the “surface” one, in which for inner (Si, O, Si, O) planes were frozen. The second Si surface
+and the upper silicon atoms could move along the z direction perpendicular to the surface, while the oxygen
+atoms belonging to the first plane were able to consistently move in the z direction and in the vertical
+planes of symmetry of the C3v group. The fixed parameters were taken on the basis of crystalline cluster
+optimization. The lengths and directions of the artificial Si–H bonds were optimized for the crystalline
+cluster and frozen in all last calculations. In the process of adsorption an atom from the gas phase approached
+the vertex (Si atom) of the z direction. The cluster optimization in the process of adsorption was made under
+the same constraints as for the surface cluster.
+    The tests of the accuracy and performance of different gradient-corrected and hybrid functionals were
+made on diatomic molecules pertinent to the problem discussed. The O2 , N2 , and NO molecules are the
+heterogeneous recombination products, while the SiO molecule qualitatively characterizes the description
+of the material structure. A preliminary analysis showed that in using the basis of the same or higher quality
+compared with 6-31G* the results much more strongly depend on the choice of the functional than on the
+further extension of the basis. Moreover, the calculations showed that the B3LYP functional ensures the
+greatest mean accuracy on the molecule and atom set under consideration.
+
+
+                              2. CALCULATION OF THE RATE COEFFICIENTS
+                                     OF THE ELEMENTARY STAGES
+   The quantum mechanical calculations gave the necessary information (activation energies and oscillation
+frequencies) for using the transitional state theory adapted to the surface reactions [16] in determining the
+coefficients of the elementary stages in the Arrhenius form.
+
+   FLUID DYNAMICS           Vol. 50    No. 3     2015
+456                                                 BUCHACHENKO et al.
+
+
+
+
+   Fig. 2. Cell of an ideal crystal of β -cristobalite of the Fd3m symmetry (a) and side (111) (b); I are the Si atoms and II are
+   the O atoms.
+
+                                                 Hemosorption/Desorption
+   The hemosorption rate coefficient can be represented in the form:
+                                                              (      )
+                                                       s0 (T ) kB T 1/2
+                                                   ka = 0               ,
+                                                         S      2π m
+
+where S0 is the number of possible adsorption sites on the surface in the units of the inverse area, s0 is the
+adhesion coefficient, kB is the Boltzmann constant, and m is the adsorbed atom mass.
+    The parameter S0 was calculated from the geometric considerations for a single adsorption cell on the
+surface. The adhesion coefficient s0 was estimated statistically under the assumption of direct nonactivated
+adsorption [16].
+    An analysis of the earlier-made calculations [10, 11] showed that on the α -Al2 O3 surface the oxygen
+atom adsorption occurs without a barrier, while its mobility on the cluster-modeled cell is small, owing to a
+fairly high diffusion barrier. Therefore, we have
+
+                                                                     qxy
+                                                                      a
+                                                        s0 (T ) =          .
+                                                                    q0 qy0
+                                                                     x
+
+
+                                                                               FLUID DYNAMICS         Vol. 50     No. 3    2015
+                               RATE COEFFICIENTS OF THE ELEMENTARY STAGES                                                            457
+
+
+
+
+    Fig. 3. Structure of the β -cristobalite surface (side view); I are the Si atoms, II are the O atoms, and III are the H atoms.
+
+
+   Here, qxy                                                                                    x       y
+            a is the statistical sum of the surface oscillations of the adsorption complex and q0 and q0 are
+the statistical sums of the two-dimensional translational motion of a free atom on the cell. The Cartesian
+coordinates x and y correspond to the plane passing through the first-layer atoms of neighboring clusters and
+z corresponds to the normal to this plane.
+   The expressions for the statistical sums are as follows:
+                              2π
+                       qx0 qy0 =  s0 mkB T,
+                              h̄2
+                                 (                       )        (                   )
+                                      h̄ωx + h̄ωy + h̄ωz            h̄ωx vx + h̄ωy vy
+                       qa = exp −
+                        xy
+                                            2kB T           ∑ exp −       2kB T
+                                                                                        ,
+                                                           vx ,vy
+
+where ωα are three vibrational frequencies of an oxygen atom adsorbed on the oxygen atom cluster. The
+first multiplier allows for the zero oscillation energy, while in the second multiplier the summation is over
+all states, whose energy does not exceed the adsorption energy εa0 per molecule.
+    Under the assumption of the local equilibrium between the surface and the gas phase the desorption rate
+coefficient kd can be expressed in terms of the equilibrium constant of the adsorption/desorption process
+                                                     (     )
+                                           ka          εa0      qa (T )
+                                  K(T ) =      = exp                       NAV,
+                                           kd          kB T qS (T )q0 (T )
+where qa , qS , and q0 are the total statistical sums of the adsorption complex, the surface, and a free oxygen
+atom, respectively, NA is the Avogadro number, and V is the specific volume of the gas phase. In view of the
+periodic structure of the surface and the explicit expressions for the translational statistical sums of an atom
+[17], we obtain
+                                           (      )(           )−1/2
+                                              εa0    2π                  qa (T )    NA
+                             K(T ) = exp                 mkB T                         ,
+                                             kB T    h2              qS (T )q0 (T ) S0
+                                                                             el
+
+where qel                                                                                               2S + 1 Lσ
+         0 is the electronic statistical sum of an atom calculated in the nonrelativistic approximation
+(S and L are the values of the electron spin and orbital angular moments) from the reference data [18] with
+account of the statistical weight (2S + 1)(2L + 1).
+    Under the assumption that in the interaction with an atom from the gas phase the surface deformation
+is local, the ratio qa /qS can be estimated as the ratio of the statistical sums of the two above-mentioned
+clusters qC–O /qC . In these clusters the oscillational components are important; these were estimated by
+direct summation but with account of the frequencies of all 57 and 54 normal oscillations and a constraint
+on the states lying below the desorption limit εa0 .
+
+   FLUID DYNAMICS             Vol. 50    No. 3     2015
+458                                           BUCHACHENKO et al.
+
+   From an analysis of the numerical investigations performed it follows that in the case of the α -Al2 O3
+surface the heterogeneous processes connected with an adsorbed nitrogen atom do not play any considerable
+role owing to the negligibly small adsorption energy (0.074 eV). The comparison of the calculated equilib-
+rium constants of the absorption of oxygen on α -Al2 O3 and nitrogen on the β -cristobalite surface showed
+that for α -Al2 O3 throughout the entire temperature range under consideration the equilibrium is displaced
+toward desorption and is controlled by the pre-exponential factor, rather than by the exponential factor itself,
+while the equilibrium constant is about ten orders smaller than in the case of true hemosorption. Thus, in
+the case of the α -Al2 O3 surface the heterogeneous processes connected with an adsorbed nitrogen atom can
+be completely excluded from consideration.
+
+                               Impact Recombination (Eley–Rideal Reaction)
+   The rate coefficients of impact heterogeneous atom recombination on the β -cristobalite surface were
+calculated on the basis of the molecular- dynamic calculations from the literature [19], where the method of
+classical trajectories was used.
+   The rate coefficient of the heterogeneous recombination on the Eley–Rideal surface ker can be repre-
+sented in the form:                               (      )
+                                                    kB T 1/2 p(T )
+                                       ker (T ) =                  NA .
+                                                    2π m      S0
+   The writing in the Arrhenius form
+                                                                     (       )
+                                                                   Eer
+                                           ker (T ) = Aer (T ) exp
+                                                                   kB T
+
+makes it possible to separate out the pre-exponential factor Aer (T ).
+    In [19] on the basis of an investigation of the polymorphic model of the β -cristobalite (100) surface
+using the density functional method analytical approximations of the pairwise potentials of the nitrogen
+atom interaction with the surface were derived and used to determine the value of the energy barrier of
+the Eley–Rideal recombination reaction (0.1 eV) and to perform the molecular-dynamic calculations of
+the recombination probability. The check showed that the potentials presented in [19] fairly adequately
+approximate the cluster model data and give a very close value of the activation energy for the β -cristobalite
+(111) surface. Since in estimating the energy barriers both the approximation accuracy and that of the density
+functional method are within a few tenths of an electron-volt, in the calculations the energy activation value
+was taken to be Eer = 0.1 eV.
+    In [19] the recombination probabilities P(vz ) are given as functions of the velocity vz of an atom nor-
+mally incident on the surface. The temperature dependence of these quantities is determined by the integral
+transformation with the Maxwellian distribution
+                                       (             )1/2 ∫∞             (          )
+                                             m                               mv2z
+                             P(T ) =                           P(vz ) exp −             dvz ,
+                                           2π kB T                          2kB T
+                                                          0
+
+where m is the atom mass and kB is the Boltzmann constant.
+    The calculations using the density functional method showed that the activation energies of the Eley–Rideal
+reaction for nitrogen and oxygen are similar in value. The normalization of the pre-exponential factor by
+the atom mass makes it possible to obtain a set of the nitrogen and oxygen recombination rate coefficients
+on the β -cristobalite surface.
+    The results of the calculations presented in Fig. 4 indicate that the nitrogen recombination is somewhat
+more effective than the oxygen recombination, while the effective recombination coefficients on the sides
+of the β -cristobalite (100) and (111) almost coincide at the expense of the Eley–Rideal mechanism. In the
+figure the rate constant of the oxygen recombination on the (100) surface calculated in [20] on the basis of
+
+                                                                      FLUID DYNAMICS            Vol. 50   No. 3   2015
+                             RATE COEFFICIENTS OF THE ELEMENTARY STAGES                                                 459
+
+
+
+
+   Fig. 4. Rate coefficients [cm3 (s mole)−1 ] of heterogeneous oxygen and nitrogen recombination in accordance with the
+   Eley–Rideal mechanism for two β -cristobalite surfaces: (1) N(111); (2) O(111); (3) N(100); (4) O(100); and (5) O(100)
+   from [22].
+
+the periodic model of the surface is also presented. The agreement accurate to the factor of three seems
+quite acceptable for the kinetic modeling.
+    On the α -Al2 O3 surface the oxygen recombination rate in the Eley–Rideal reaction was calculated in
+[10, 11] using the molecular-dynamic method on the basis of the surface of the potential energy of the
+interaction between an O atom and the Al8 O12 cluster as a function of the distance between the oxygen
+atom and an Al(1) atom and two polar angles Θ and ϕ . In this case, the cluster geometry and the potential
+curve of the interaction between an O2 molecule with the Al4 O6 cluster as a function of the distance from the
+molecule to the central Al atom were partially optimized. Here, the angle Θ corresponds to the deviation of
+the O–Al(1) vector from the normal to the z surface and the angle ϕ describes the position of the projection
+of this vector on the xy plane.
+
+                                            Associative Recombination
+                                        (Langmuire–Hinshelwood Reaction)
+   Assuming that the activation energy of recombination of two atoms with simultaneous desorption of a
+molecule is independent of the way of delivering the reactant to the reaction center the recombination rate
+coefficient in the Langmuire–Hinshelwood reaction can be written in the form:
+                                              (      )
+                               vdiff (T )       Eer
+                         klh =            exp          , vdiff (T ) = 4S0 NA D(T ),
+                                  S0            kB T
+
+where vdiff is the frequency of the oxygen atom jumps between the neighboring adsorption sites.
+   In calculating the diffusion coefficient D(T ) we used the empirical scheme in which four clusters are
+united into a “rhombus” shown in Fig. 5, while the surface of the potential energy of an oxygen atom was
+approximated by the sum of four surfaces of the potential energy of its interaction with each of these clusters
+and the Lennard–Jones potentials of its interaction with the O(2) second-layer oxygen atoms [21]. On this
+surface the reaction path connecting two nearest Al(1) atoms with the geometric distance between them ρ =
+4.529 Å was optimized and the energy at the maximum point was determined, together with its derivatives.
+The derivatives correspond to one imaginary and two real frequencies. In view of the symmetry of the
+problem, there exist two equivalent paths with maxima at the points (x, y, z) = (2.355, ±1.185, 1.579). The
+values of D(T ) were calculated within the framework of activated complex theory [22] using the expression
+                                                            ∕=          ( )
+                                                    2 kB T q (T )    ED0
+                                         D(T ) = ρ               exp       ,
+                                                   2π h̄ qq (T )     kB T
+   FLUID DYNAMICS           Vol. 50    No. 3    2015
+460                                                BUCHACHENKO et al.
+
+
+
+
+   Fig. 5. Model of the α -Al2 O3 (0001) surface; top (a) and side (b) views on a structural element of the surface obtained by
+   fourfold translation of the Al8 O12 cluster; I are the Al atoms and II are the O atoms.
+
+
+
+where q∕= (T ) is the statistical sum of the transitional state corresponding to a maximum on the reaction path
+and ED0 is the diffusion activation energy with account of the zero oscillation energy per one molecule.
+Since the model does not take account of surface relaxation in the process of diffusion, in the statistical sum
+ratio only the contributions connected with the degrees of freedom of an oxygen atom are not cancelled.
+They include two real vibrational frequencies w∕=     i in the directions orthogonal to the reaction path in the
+transitional state and three vibrational frequencies ωα introduced above in the adsorption complex. The
+corresponding contributions were calculated by direct summation with a constraint on the adsorption energy.
+   In modeling the associative recombination processes the data [20] were used for determining the cor-
+responding reaction rate for oxygen recombination on the β -cristobalite surface. Their approximation on
+the temperature range from 700 to 1700 K gave the values of the pre-exponential factor 1.0 × 108 cm2 /(s
+mole) and the reaction activation energy 4.24 eV. The rate coefficient of the associative atom recombination
+was calculated using an algorithm of extrapolation in the mass under the assumption that for a particular
+surface the diffusion activation energy is determined by the difference of the adsorption energies of atomic
+components.
+    The recommended values of the rate constants of the elementary stages of the interaction between disso-
+ciated air and thermal-protective β -cristobalite and α -Al2 O3 coatings are gathered in the table.
+
+                                                                          FLUID DYNAMICS             Vol. 50    No. 3    2015
+                              RATE COEFFICIENTS OF THE ELEMENTARY STAGES                                        461
+
+Table
+
+                                                    β -cristobalite,                        α -Al2 O3 ,
+          Rate coefficient                       k = A exp(−E/RT )                     k = A exp(−E/RT )
+                                             A                    E, eV            A                  E, eV
+   kaN , cm3 (s mole)−1                1.57 × 108T 1.1            0.0      0                          0
+   kdN   , s−1                         6.0 × 1010                 3.472    0                          0
+   kaO   , cm3 (s mole)−1              1.05 × 108T 1.1            0.0      3.778 × 109T               −0.039
+   kdO   , s−1                         2.0 × 1011                 5.051    4.826 × 1011               1.666
+   kerN   , cm3 (s mole)−1             1.6 × 1012                 0.047    0                          0
+                        −1
+                                                                                       √
+                 3
+   kerO , cm (s mole)                  1.48 × 10   12
+                                                                  0.046    3.1061 × 10  T12
+                                                                                                      0.43
+   klhO , cm2 s−1                      1.0 × 108                  4.24     1.614 × 1021               2.51
+   klhN , cm2 s−1                      1.1 × 108                  2.7      0                          0
+
+
+    Summary. It is shown that under the re-entry conditions the α -Al2 O3 material is a considerably weaker
+adsorbate of oxygen and nitrogen atoms, as compared with β -cristobalite. Its surface does not almost keep
+nitrogen atoms and weakly adsorbs oxygen atoms. The difference in the atom adsorption energies on the
+α -Al2 O3 and β -cristobalite surfaces is greater than 3 eV and is almost independent (within the limits of
+0.1 eV) of the adsorbed atom nature.
+    On the basis of the quantum-chemical investigations and an analysis and processing of the experimental
+and calculated data available in the literature we can recommend the given values of the reaction rates of the
+elementary stages of the process of interaction between dissociated air and thermal-protective α -Al2 O3 and
+β -cristobalite coatings.
+    We note that the energy of oxygen atom desorption from the β -cristobalite surface determined in the
+quantum-mechanical calculations is considerably greater than the data available in the literature. By halving
+this value good agreement with the experimental data can be obtained.
+
+   The study was carried out with the support of the Russian Foundation for Basic Research (project No. 14-
+01-00310).
+
+                                                        REFERENCES
+ 1. V.L. Kovalev, Heterogeneous Catalytic Processes in Aerothermodynamics [in Russian], Fizmatlit, Moscow (2002).
+ 2. R. Goulard, “On Catalytic Recombination Rates in Hypersonic Stagnation Heat Transfer,” Jet Propulsion 28, 737
+    (1958).
+ 3. V.L. Kovalev and A.F. Kolesnikov, “Experimental and Theoretical Simulation of Heterogeneous Catalysis in
+    Aerothermochemistry. A Review,” Fluid Dynamics 40 (5), 669 (2005).
+ 4. I. Langmuir, “Monolayers on Solids,” J. Chem. Soc. 4, 511 (1940).
+ 5. V.L. Kovalev, A.F. Kolesnikov, A.A. Krupnov, and M.I. Yakushin, “Analysis of Phenomenological Models De-
+    scribing the Catalytic Properties of High-Temperature Reusable Coatings,” Fluid Dynamics 31 (6), 910 (1996).
+ 6. G.N. Zalogin and V.V. Lunev, “Catalytic Properties of Materials in a Nonequilibrium Dissociated Air Flow,” Fluid
+    Dynamics 32 (5), 654 (1997).
+ 7. V.L. Kovalev and A.A. Krupnov, “Effect of Nitrogen Oxide Formation in Heterogeneous Catalytic Reactions on
+    the Heat Fluxes to the Reusable Spacecraft Surfaces,” Vestn. Mosk. Un-ta. Ser. 1. Mat. Mekh. No. 1, 31 (2004).
+ 8. V.L. Kovalev and M.Yu. Pogosbekyan, “Simulation of Heterogeneous Atom Recombination on Spacecraft Heat
+    Shield Coatings Using the Methods of Molecular Dynamics,” Fluid Dynamics 42 (4), 666 (2007).
+ 9. V.L. Kovalev and M.Yu. Pogosbekyan, “Analysis of the Catalytic Properties of Thermal-Protective β -Cristobalite
+    and SIC Coatings,” Vestn. Mosk. Un-ta. Ser. 1. Mat. Mekh. No. 2, 44 (2009).
+
+   FLUID DYNAMICS            Vol. 50    No. 3      2015
+462                                          BUCHACHENKO et al.
+
+10. V.L. Kovalev, A.A. Krupnov, M.Yu. Pogosbekyan, and L.P. Sukhanov, “Modeling the Oxygen Atom Adsorption
+    on the Al2 O3 Surface Using the Density Functional Method,” Vestn. Mosk. Un-ta. Ser. 1. Mat. Mekh. No. 4, 58
+    (2010).
+11. V.L. Kovalev, A.A. Krupnov, M.Yu. Pogosbekyan, and L.P. Sukhanov, “Analysis of Heterogeneous Recombination
+    of Oxygen Atoms on Aluminum Oxide by Methods of Quantum Mechanics and Classical Dynamics,” Fluid
+    Dynamics 45 (2), 308 (2010).
+12. W. Kohn and L.J. Sham, “Self-Consistent Equations Including Exchange and Correlation Effects,” Phys. Rev. A
+    140, 1133 (1965).
+13. A.D. Becke, “Density-Functional Exchange-Energy Approximation with Correct Asymptotic Behavior,” Phys.
+    Rev. A 38, 3098 (1988).
+14. C. Lee, W. Yang, and R.G. Parr, “Development of the Colle–Salvetti Correlation Energy Formula into a Functional
+    of the Electron Density,” Phys. Rev. B 37, 785 (1988).
+15. P.C. Hariharan and J.A. Pople, “The Influence of Polarization Functions on Molecular Orbital Hydrogenation
+    Energies,” Theor. Chem. Acta 28, 213 (1973).
+16. I. Chorkendorf and J.W. Niemantsverdriert, Concepts of Modern Analysis and Kinetics, Wiley-VCH, Weinheim
+    (2007).
+17. S. Glasstone, K.J. Laidler, and H. Eyring, The Theory of Rate Processes, McGraw-Hill, New York (1941).
+18. Y. Radchenko, A.E. Kramida, J. Reader, and N.A. Team, “NIST Atomic Spectra Database (ver. 4.0.1),
+    http://physics.nist.gov/asd (2011).
+19. M. Rutigliano, A. Pieretti, M. Cacciatore, N. Sanna, and V. Barone, “N Atoms Recombination on Silica Surface:
+    A Global Theoretical Approach,” Surf. Sci. 600, 4239 (2006).
+20. V. Moron, P. Gamallo. L. Martin-Gondre, C. Crespos, P. Larregarayd, and R. Sayos, “Recombination and Chem-
+    ical Energy Accommodation Coefficients from Chemical Dynamics Simulations: O/O2 Mixtures Reacting over a
+    Beta-Cristobalite (001) Surface,” Phys. Chem. Chem. Phys. 13, 17494 (2011).
+21. B. Halpern and D.E. Rosner, “Chemical Energy Accommodation at Catalytic Surfaces,” Chem. Soc, Farad. Trans.
+    J. 74, 1833 (1978).
+22. G.A. Melin and G.J. Madix, “Energy Accommodation during Oxygen Atom Recombination on Metal Surfaces,”
+    Trans. Far. Soc. 67, 198 (1971).
+
+
+
+
+                                                                 FLUID DYNAMICS         Vol. 50   No. 3    2015
+

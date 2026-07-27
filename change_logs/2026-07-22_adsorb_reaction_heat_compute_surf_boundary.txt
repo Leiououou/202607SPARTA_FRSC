@@ -1,0 +1,479 @@
+======================================================================
+SPARTA adsorb GS 反应热读取及 compute surf / compute boundary 接入 — 修改日志
+======================================================================
+修改日期: 2026-07-22
+修改目的:
+  1. 在 adsorb GS 反应文件中为每条反应增加必填的单事件反应热。
+  2. 采用与现有气相化学一致的符号约定：放热为正，吸热为负。
+  3. 使显式表面的 compute surf echem/etot 能读取该反应热。
+  4. 使盒子边界面的 compute boundary echem/etot 能读取该反应热。
+  5. 在 Ubuntu 20.04 下重新生成 Linux MPI 可执行文件 src/spa_mpi。
+
+重要范围说明:
+  - 单位为 J/真实反应事件，不是 J/mol，也不是 K。
+  - 本轮只为同步发生的 GS 碰撞反应提供反应热。
+  - 未修改反应概率、schu 有限速率公式、覆盖度演化和反应物/产物更新。
+  - 未把反应热重新分配到产物的平动、转动或振动能。
+  - 未给 PS 异步表面反应增加反应热字段。
+======================================================================
+
+一、最终符号约定
+----------------
+
+反应文件中输入的 reaction_energy 采用以下约定：
+
+  reaction_energy > 0 : 放热，壁面获得能量，echem 增加
+  reaction_energy < 0 : 吸热，壁面失去能量，echem 减少
+  reaction_energy = 0 : 不计化学反应热
+
+示例：
+
+  O(g) --> O(s)
+  AA A 1.0 0 0 1 -6.0E-19
+
+表示每发生一次真实反应，壁面热量减少 6.0E-19 J。
+
+注意：最初讨论时曾考虑“吸热为正”，随后用户明确要求与气相化学保持
+一致，最终实现和本文档均以“放热为正、吸热为负”为准。
+
+
+二、GS 反应文件新格式
+--------------------
+
+每条 GS 反应的第二行格式改为：
+
+  反应类型 速率风格 [原有动力学参数...] reaction_energy [可选关键词...]
+
+reaction_energy 是必填的位置参数，放在全部原有动力学参数之后，
+kisliuk 或 CI 的 energy 可选关键词之前。
+
+示例 1：AA + Arrhenius
+
+  N(g) --> N(s)
+  AA A 1.0 0 0 1 -1.6E-20
+
+其中：
+  1.0 0 0  : Arrhenius 参数
+  1        : AA 反应原有的位点/覆盖度参数
+  -1.6E-20: 新增反应热，J/真实反应事件
+
+示例 2：ER + Arrhenius
+
+  O(g) + O(s) --> O2(g)
+  ER A 1.0E-16 0 7654 8.20E-19
+  td 1000
+
+示例 3：带 Kisliuk 可选项
+
+  A(g) --> A(s)
+  AA S 0.8 1 0.0 kisliuk 0.1 0 1000
+
+示例 4：CI 的 energy 速率可选项
+
+  A(g) --> B(g)
+  CI S 0.3 0.0 energy 0.5 1.0
+
+这里紧随原动力学参数的 0.0 是反应热；后面的 energy 仍是 CI 原有的
+入射能量依赖速率选项，二者含义不同。
+
+若缺少 reaction_energy，程序报错：
+
+  Missing reaction energy in adsorb GS reaction
+
+旧的 GS 反应文件必须补充该字段；若希望保持原结果，可统一补 0.0。
+
+
+三、修改文件清单
+----------------
+
+1. src/surf_react_adsorb.h
+   - 为 OneReaction_GS 增加 double reaction_energy。
+   - 将原先固定返回 0.0 的 reaction_coeff(int) 改为函数声明。
+
+2. src/surf_react_adsorb.cpp
+   - 初始化每条 GS 反应的 reaction_energy。
+   - 在原动力学参数之后读取必填反应热。
+   - 实现 reaction_coeff(int)，按 GS 反应编号返回 reaction_energy。
+
+3. src/compute_surf.cpp
+   - compute surf echem 使用 adsorb 返回的 reaction_energy。
+   - compute surf etot 加入同一化学反应热项。
+   - 修复 ECHEM 在无反应事件中没有推进输出列索引的问题。
+
+4. src/compute_boundary.cpp
+   - 新增 compute boundary 的 echem 关键词。
+   - 通过 domain->surf_react[iface] 找到当前 face 的反应模型。
+   - 根据本次 reaction 编号读取 reaction_coeff(reaction-1)。
+   - echem 单独累计化学反应热。
+   - etot 在原粒子能量交换基础上加入化学反应热。
+
+5. src/memory.cpp
+   - 为本机 MinGW 串行编译增加 _WIN32 malloc/realloc 兼容分支。
+   - Linux/Ubuntu 仍使用原 posix_memalign/malloc_usable_size 路径。
+   - 此项仅用于构建兼容，不涉及反应热物理模型。
+
+6. docs/GS_chemistry_analysis.html
+   - 更新 GS 第二行格式和反应热符号、单位说明。
+
+7. test/20260714/schu_gs_1.surf
+   - 为代表性旧反应补充 0.0，以维持原有热流行为。
+
+8. tmp/boundary_heat_test/
+   - 建立正、负、零反应热及双 MPI 进程对照测试。
+
+
+四、surf_react_adsorb 数据结构与读取逻辑
+----------------------------------------
+
+在 OneReaction_GS 中新增：
+
+  double reaction_energy;
+
+含义：
+  - 一次真实反应传给壁面的化学能，单位 J/event。
+  - 不放入 coeff[]，避免改变原动力学参数数量和索引。
+  - MAXCOEFF_GS 无需修改。
+
+读取顺序：
+
+  1. 读取反应类型，如 AA、ER、LH1、CI。
+  2. 读取速率风格，如 S 或 A。
+  3. 按原 ncoeff 读取动力学参数。
+  4. 再读取一个必填数值，保存到 reaction_energy。
+  5. 继续解析 kisliuk、energy 等可选关键词。
+
+reaction_coeff(int m) 的最终逻辑：
+
+  - m 在 [0,nlist_gs) 内：返回 rlist_gs[m].reaction_energy。
+  - 非法索引：返回 0.0。
+  - 不进行正负号转换。
+
+
+五、compute surf 接入
+--------------------
+
+适用对象：read_surf/create_surf 创建的显式线段或三角形表面。
+
+反应模型分配方式：
+
+  surf_react  chemistry adsorb gs chemistry.surf ... surf ...
+  surf_modify all collide wall
+  surf_modify all react chemistry
+
+计算命令格式：
+
+  compute cs surf surface-group mixture-ID n nflux ke erot evib etot echem
+
+示例：
+
+  compute 1 surf all all n nflux ke erot evib etot echem
+  fix 1 ave/surf all 1 1 1 c_1[*] ave running
+  dump 1 surf all 100 surf.*.dat id v1x v1y v2x v2y f_1[*]
+
+二维表面 dump 使用 v1x v1y v2x v2y；三维三角形可使用
+v1x/v1y/v1z、v2x/v2y/v2z、v3x/v3y/v3z。
+
+ECHEM 逻辑：
+
+  echem += particle_weight * reaction_energy * fluxscale
+
+ETOT 逻辑：
+
+  etot = 原有的入射/出射粒子平动、转动、振动能净交换
+         + particle_weight * reaction_energy
+
+随后沿用 compute surf 原有的时间步、fnum 和表面面积归一化。
+
+同时修复了一个原有列索引问题：ECHEM 在没有反应时也必须执行 k++，
+否则 echem 后面的输出列可能写入错误位置。
+
+
+六、compute boundary 接入
+------------------------
+
+适用对象：boundary 命令定义的全局盒子 face，并通过 bound_modify 分配
+surf_collide/surf_react 模型的边界面。
+
+反应模型分配示例：
+
+  boundary os p p
+  surf_collide wall diffuse 300 1
+  surf_react chemistry adsorb gs chemistry.surf ... face ...
+  bound_modify xhi collide wall react chemistry
+
+新增命令格式：
+
+  compute cb boundary mixture-ID n nflux ke erot evib etot echem
+
+实现路径：
+
+  1. Update 在边界碰撞后向 boundary_tally() 传入 iface 和 reaction。
+  2. domain->surf_react[iface] 给出该 face 使用的 SurfReact 模型索引。
+  3. reaction_coeff(reaction-1) 返回本次 GS 反应的 reaction_energy。
+  4. echem += particle_weight * reaction_energy。
+  5. etot 在原粒子能量净交换上再加同一项。
+  6. compute_boundary 统一除以 A*dt/fnum，形成边界热流。
+
+无反应、周期边界、流出边界或没有反应模型时，reaction_energy 为 0。
+
+官方在线文档当前不会列出 compute boundary 的 echem，因为该关键词是
+本项目分支新增功能。
+
+
+七、compute boundary 输出到 .dat
+--------------------------------
+
+compute boundary 产生的是全局 face 数组，不能直接交给 fix ave/surf 或
+dump surf。正确的数据流是：
+
+  compute 1 boundary all n nflux ke erot evib etot echem
+  fix 2 ave/time 1 1 1 c_1[*] mode vector ave running file boundary.dat
+
+不再需要 dump 和 dump_modify。
+
+二维输出每个时间块有 4 行：
+
+  1 = xlo
+  2 = xhi
+  3 = ylo
+  4 = yhi
+
+三维再增加：
+
+  5 = zlo
+  6 = zhi
+
+当 mixture 只有一个 group 时，以上 compute 的列顺序为：
+
+  c_1[1] = n
+  c_1[2] = nflux
+  c_1[3] = ke
+  c_1[4] = erot
+  c_1[5] = evib
+  c_1[6] = etot
+  c_1[7] = echem
+
+ave running 输出从 fix 启用至当前时刻的累计平均；若需各输出时刻的独立
+结果，使用 ave one。
+
+
+八、tally_only 的重要语义
+-------------------------
+
+当 surf_react adsorb 使用：
+
+  tally_only yes
+
+模型会计算概率并累计候选反应计数，但不修改粒子和表面状态，并向外部
+碰撞计量接口返回 reaction=0。因此：
+
+  - Surface reaction tallies 可显示候选反应数量。
+  - 全局 Surf reactions 仍为 0。
+  - compute surf echem 和 compute boundary echem 均不计候选反应热。
+
+这是刻意保留的物理语义：未实际执行的反应不产生真实壁面热流。
+
+
+九、数值验证：compute boundary
+------------------------------
+
+测试目录：tmp/boundary_heat_test
+
+控制条件：
+  - O(g) -> O(s) 必然吸附。
+  - 正、负、零三组只改变 reaction_energy。
+  - 相同 seed、粒子数、几何、时间步和动力学参数。
+
+第 10 步有 950 个实际反应，结果：
+
+  reaction_energy     echem       etot
+  +6.0E-19 J          +570        582.52282
+   0                   0           12.522824
+  -6.0E-19 J          -570       -557.47718
+
+严格满足：
+
+  etot(正) = etot(零) + 570
+  etot(负) = etot(零) - 570
+
+归一化复核：
+
+  950 * 6.0E-19 / (0.01 * 1.0E-6 / 1.0E10) = 570
+
+证明以下因素均被正确计入：
+  - 单事件反应热
+  - 模拟粒子权重/真实粒子换算
+  - face 面积
+  - 时间步
+  - fnum
+  - 正负号
+
+双 MPI 进程验证：
+  - 运行成功，Running on 2 MPI task(s)。
+  - 第 10 步 935 次反应，echem=561。
+  - 935 * 6.0E-19 / (0.01 * 1.0E-6 / 1.0E10) = 561。
+  - 全程实际反应 9998 次。
+
+
+十、test/20260722_2 负 echem 解释
+--------------------------------
+
+该算例 schu_gs_1.surf 中所有反应热均写为 -1.6E-20 J，因此 xhi 面
+echem 为负是预期结果。
+
+算例参数：
+
+  face 长度 = 6.0E-3
+  dt          = 1.0E-6
+  fnum        = 1.49E11
+
+归一化因子：
+
+  A*dt/fnum = 4.0268456376E-20
+
+每个模拟反应的归一化化学热贡献：
+
+  -1.6E-20 / 4.0268456376E-20 = -0.3973333333
+
+第 1 步 xhi 面 2393 次反应：
+
+  2393 * -0.3973333333 = -950.819
+
+与 boundary.dat 完全一致。该步同时满足：
+
+  etot ≈ ke + erot + evib + echem
+       ≈ 1647.58 + 0 + 0 - 950.819
+       ≈ 696.759
+
+
+十一、test/20260722_3 显式表面设置复核
+--------------------------------------
+
+最终复核结论：
+
+  - read_surf scale 1e-3 后圆柱半径为 5e-4 m，可放入半宽 3e-3 m 的盒子。
+  - surf_modify all collide 1 是独立物理行，没有被前一行中文注释吞掉。
+  - surf_modify all react adsorb_test_gs2 已正确分配反应模型。
+  - compute 1 surf all all ... 中，第一个 all 是表面组，第二个 all 是 mixture。
+  - fix ave/surf -> dump surf 的数据类型匹配。
+  - create_particles air n 0 并非创建零粒子；SPARTA 将 n=0 解释为按
+    nrho*flow_volume/fnum 自动计算粒子数。
+
+输出规模提醒：
+
+  data.cylinder 有 10000 个 line 元素；若 dump every=1、run=1000，
+  将输出约 1000 万行表面数据，文件可能很大并明显拖慢计算。
+
+曾出现一次检查误判：PowerShell 显示中文乱码时把第 35、36 行连在一起，
+误以为 surf_modify 被注释。随后通过 ReadAllLines 和原始字节检查确认两行
+之间存在 LF，surf_modify 实际未被注释。以后判断输入文件物理行时应优先
+使用行号或原始换行检查，避免依据乱码后的终端排版。
+
+
+十二、编译流程与最终产物
+------------------------
+
+Windows 当前普通自动化账户无法直接看到用户注册的 WSL 发行版；通过
+宿主用户环境确认已有：
+
+  Ubuntu 20.04.6 LTS
+  用户 pjsheng
+  /usr/bin/mpic++
+  /usr/bin/make
+  /usr/bin/g++
+
+完整 Linux MPI 构建命令：
+
+  wsl.exe -d Ubuntu-20.04 -- bash -lc \
+    'cd /mnt/d/博一/气固相互作用/202607_src/src && make clean-mpi && make mpi -j4'
+
+修改 compute boundary 后增量重编译：
+
+  cd /mnt/d/博一/气固相互作用/202607_src/src
+  make mpi -j4
+
+最终产物：
+
+  src/spa_mpi
+
+文件格式验证：
+
+  ELF 64-bit LSB, x86-64, dynamically linked, GNU/Linux
+
+MPI 依赖：
+
+  libmpi_cxx.so.40
+  libmpi.so.40
+
+最终 SHA-256：
+
+  61a242340a1b36733ff72a46ce290986c9c8c27c1f44bd246c84fb6597c5f4c1
+
+
+十三、曾遇到的问题
+------------------
+
+1. Windows MinGW 完整编译最初失败
+   原因：memory.cpp 无条件使用 posix_memalign 和 malloc_usable_size。
+   处理：增加 _WIN32 普通 malloc/realloc 分支；之后 Windows 串行版可构建。
+
+2. 最初未识别用户已有 Ubuntu 20.04
+   原因：自动化终端运行在 codexsandboxoffline 隔离账户，而发行版注册在
+   用户 DELL 环境中。
+   处理：通过提升后的宿主用户上下文调用现有 Ubuntu-20.04；没有重复安装。
+
+3. tally_only 测试的 echem 为 0
+   原因：tally_only 只统计候选事件，不返回实际 reaction 编号。
+   处理：数值热流测试关闭 tally_only，使用实际执行的吸附反应。
+
+4. 双 MPI 测试首次失败
+   原因：测试最初只有一个网格单元，无法在两个 rank 上建立 ghost cells。
+   第二次仅改为两个单元仍不是聚簇分区。
+   处理：使用两个单元并增加 balance_grid rcb cell，双进程测试通过。
+
+5. compute boundary 的 ECHEM 数据类型
+   compute boundary 返回全局 face 数组，不能用 fix ave/surf/dump surf。
+   处理：使用 fix ave/time mode vector file 输出。
+
+
+十四、当前已知限制与后续边界
+----------------------------
+
+1. PS 反应
+   reaction_coeff() 当前只对同步 GS 反应编号返回能量；异步 PS 化学未接入。
+
+2. 产物能量分配
+   反应热只进入壁面 echem/etot 统计，不改变产物速度、转动能或振动能。
+
+3. tally_only
+   候选反应不产生 echem；若未来需要“假想热流”，应单独设计新的诊断量，
+   不应混入真实 echem。
+
+4. Kokkos
+   adsorb 风格本身不属于当前 Kokkos 表面反应实现范围；本轮验证使用标准
+   MPI 构建，不声称 compute boundary/kk 支持新增 echem。
+
+5. 旧反应文件兼容性
+   reaction_energy 是必填字段，旧 GS 文件必须补值；本轮没有实现自动默认为0。
+
+
+十五、最终状态
+--------------
+
+已完成：
+  [完成] adsorb GS 逐反应反应热读取
+  [完成] 正放热、负吸热的最终符号约定
+  [完成] compute surf echem/etot 接入
+  [完成] compute boundary echem/etot 接入
+  [完成] compute boundary 的正/负/零数值验证
+  [完成] 双 MPI 进程验证
+  [完成] Ubuntu 20.04 Linux MPI 可执行文件编译
+  [完成] boundary.dat 和 surf dump 输出路径说明
+
+未实施：
+  [未实施] PS 反应热
+  [未实施] 反应热向产物能量模态分配
+  [未实施] tally_only 假想反应热输出
+  [未实施] Kokkos 版本新增 echem
+
+======================================================================
