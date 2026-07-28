@@ -1,0 +1,24 @@
+seed 123456
+dimension 3
+boundary oo oo so
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species ../20260722_2/air.species O N NO
+mixture air O N NO
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+surf_react grxn gamma gamma_no.surf face 300.0 10.0 init_cover O 1.0 N 1.0
+bound_modify zlo react grxn
+
+create_particles air single N 0.5 0.5 0.099 0.0 0.0 -100.0
+dump p particle air 1 particle_hetero_n.dat id type x y z vx vy vz erot evib
+
+timestep 0.001
+stats 1
+stats_style step time np nsreact sr_grxn[1] sr_grxn[2] sr_grxn[3] sr_grxn[4]
+run 1

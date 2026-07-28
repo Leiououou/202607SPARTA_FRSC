@@ -1,0 +1,29 @@
+seed 24681357
+dimension 3
+boundary pp pp ss
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0 temp 300.0
+species ../20260727_ps_schu/air.species O O2
+mixture air O O2
+mixture air O frac 1.0
+mixture air O2 frac 0.0
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+bound_modify zhi collide wall
+
+# tally_only keeps every face at fixed full O coverage, so the ratio of
+# candidates to all wall impacts directly tests the constant gamma gate.
+surf_react grxn gamma gamma_oo.surf face 300.0 1000000.0 init_cover O 1.0 tally_only yes O 0.5
+bound_modify zlo react grxn
+bound_modify zhi react grxn
+
+create_particles air n 10000
+
+timestep 1.0e-5
+stats 100
+stats_style step time np nsreact sr_grxn[1] sr_grxn[2]
+run 100

@@ -1,0 +1,24 @@
+seed 123456
+dimension 3
+boundary oo oo so
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species air.species O O2
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# The surface initially contains 50 O particles.  With tally_only=no,
+# first-order desorption can execute at most 50 times.  With tally_only=yes,
+# the unchanged state remains at 50 O particles and hypothetical events
+# continue to be counted, but no gas products may be created.
+surf_react dsrxn adsorb ps ps_ds.surf nsync 1 face 300.0 100.0 schu yes init_cover O 0.5 tally_only ${TALLY} O
+bound_modify zlo react dsrxn
+
+timestep 0.01
+stats 1000
+stats_style step time np nsreact
+run 1000

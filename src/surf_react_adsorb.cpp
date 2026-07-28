@@ -134,7 +134,7 @@ SurfReactAdsorb::SurfReactAdsorb(SPARTA *sparta, int narg, char **arg) :
 
   iarg += 5;
 
-  // schu = yes/no for finite-rate GS model
+  // schu = yes/no for finite-rate GS and PS models
 
   schu_flag = 0;
   if (iarg < narg && strcmp(arg[iarg],"schu") == 0) {
@@ -558,7 +558,7 @@ void SurfReactAdsorb::init()
 
   // print wall chemistry model info
 
-  if (gsflag && comm->me == 0) {
+  if ((gsflag || psflag) && comm->me == 0) {
     if (screen) fprintf(screen,"  Wall chemistry model: %s\n",gs_model());
     if (logfile) fprintf(logfile,"  Wall chemistry model: %s\n",gs_model());
     if (tally_only_flag) {
@@ -3481,7 +3481,8 @@ void SurfReactAdsorb::PS_react(int isurf, int isc, double *norm)
 
   double fnum = update->fnum;
   double factor = fnum * weight[isurf] / area[isurf];
-  double ms_inv = factor/max_cover;
+  double coverage_factor = factor/max_cover;
+  double ps_reactant_factor = schu_flag ? factor : coverage_factor;
 
   int pid;
   Particle::OnePart *p;
@@ -3518,7 +3519,8 @@ void SurfReactAdsorb::PS_react(int isurf, int isc, double *norm)
         nu_react[i] = r->k_react;
 
         if (r->type == SB) {
-          double surf_cover = total_state[isurf] * ms_inv;
+          // vacant-site fraction is always defined from surface coverage
+          double surf_cover = total_state[isurf] * coverage_factor;
           nu_react[i] *= pow((1-surf_cover),r->stoich_reactants[0]);
         } else {
           int factor_pow = -1;
@@ -3533,8 +3535,9 @@ void SurfReactAdsorb::PS_react(int isurf, int isc, double *norm)
           }
         }
 
-
-        nu_react[i] *= pow(ms_inv,factor_pow);
+        // legacy PS kinetics use coverage; schu PS kinetics use
+        // Molchanova's surface-number-density formulation
+        nu_react[i] *= pow(ps_reactant_factor,factor_pow);
         }
 
         /*
@@ -3588,6 +3591,11 @@ void SurfReactAdsorb::PS_react(int isurf, int isc, double *norm)
         double t = -log(random->uniform())/nu_react[i];
         //tau[isurf][react_num] -= t;
         tau[isurf][i] -= t;
+
+        // tally-only PS events consume their sampled waiting time so the
+        // event loop progresses, but do not modify state or create products
+
+        if (tally_only_flag) break;
 
         for (int j=0;j<r->nreactant;j++) {
           if (r->part_reactants[j] == 1) {

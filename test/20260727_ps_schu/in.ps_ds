@@ -1,0 +1,22 @@
+seed 123456
+dimension 3
+boundary oo oo so
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species air.species O O2
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# First-order desorption has factor_pow=0 and must be identical for
+# schu yes and schu no when run with the same seed.
+surf_react dsrxn adsorb ps ps_ds.surf nsync 1 face 300.0 100.0 schu ${SCHU} init_cover O 0.5 O
+bound_modify zlo react dsrxn
+
+timestep 0.01
+stats 100
+stats_style step time np nsreact
+run 100

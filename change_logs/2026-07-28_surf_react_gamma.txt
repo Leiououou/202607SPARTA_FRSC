@@ -1,0 +1,47 @@
+2026-07-28: independent constant-gamma surface reaction style
+
+Source:
+- Added src/surf_react_gamma.h and src/surf_react_gamma.cpp.
+- Registered SurfReactStyle(gamma,SurfReactGamma) through the normal generated
+  style-surf-react include mechanism.
+- Did not modify surf_react_adsorb.cpp or surf_react_adsorb.h for this work.
+
+Command:
+  surf_react ID gamma file surf|face Tw n_site
+    [init_cover species fraction]...
+    [tally_only yes|no]
+    [species gamma]...
+
+Behavior:
+- Exactly two unordered reactants and one gas product per file reaction.
+- Missing species coefficients default to zero.
+- Gamma-gated vacancy samples adsorb the incident species.
+- Gamma-gated occupied matches consume one surface species and diffusely emit
+  the sole product at Tw.
+- Adsorption is not a reaction tally.
+- tally_only counts occupied-site matches but does not execute chemistry.
+- h is J per physical reaction; reaction heat and particle energy difference
+  enter existing compute boundary/surf echem and etot paths.
+- No PS clock and no nsync keyword.
+
+Parallel state:
+- Face deltas use MPI_Allreduce every timestep.
+- Explicit-surface deltas use Surf collate/spread operations.
+- Replicated and explicit/distributed surface storage are supported.
+- Explicit custom attributes are namespaced by reaction ID.
+
+Validation:
+- Windows MinGW serial build linked src/spa_serial.exe.
+- WSL MPI build linked src/spa_mpi.
+- Deterministic face adsorption, recombination, tally-only, default-zero, and
+  heteronuclear order-symmetry cases passed.
+- gamma=0.5 gave 1557/3174 = 0.4905 candidates in serial.
+- Positive, zero, and negative h shifted echem and etot with the expected sign.
+- Replicated explicit surf converted 992/1000 O to exactly 992 O2.
+- Two-rank split-grid face gamma=0.5 gave 1514/3134 = 0.4831 candidates.
+- Two-rank mutating face produced exactly 3120 O2 for 3120 reactions.
+- Two-rank replicated explicit surf produced 990 O2 for 990 reactions.
+- Two-rank distributed explicit surf produced 991 O2 for 991 reactions.
+- Comment handling passed; duplicate unordered pairs, missing heat, and
+  multi-product formulas were rejected.
+- Existing adsorb GS/PS tally-only parser/runtime regression passed.

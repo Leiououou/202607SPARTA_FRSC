@@ -1,0 +1,238 @@
+SPARTA (24 Sep 2025)
+Running on 4 MPI task(s)
+################################################################################
+# Molchanova 图4.c验证算例
+#p=4 Pa T=700~100~2100K
+#O+O(s)———> O2(s)
+#只记数不发生
+#计算数据：nrho=4.138807e+20  lambda=3e-3 t=5e-6
+################################################################################
+
+seed	    	    123456
+dimension   	    2
+global              gridcut 0.0 comm/sort yes
+
+boundary	    	rs r p
+
+
+create_box          -3e-3 3e-3 -3e-3 3e-3 -0.5 0.5
+Created orthogonal box = (-0.003 -0.003 -0.5) to (0.003 0.003 0.5)
+create_grid 	    10 10 1
+WARNING: Could not acquire nearby ghost cells b/c grid partition is not clumped (../grid.cpp:473)
+Created 100 child grid cells
+  CPU time = 0.000675048 secs
+  create/ghost percent = 60.5366 39.4634
+balance_grid        rcb cell
+Balance grid migrated 74 cells
+  CPU time = 0.00227009 secs
+  reassign/sort/migrate/ghost percent = 74.3926 0.0305274 12.9892 12.5877
+
+global		    	nrho 4.138807e+20 fnum 1.4900e+11 temp 1000
+
+species		    	air.species O CO CO2 O2 C N N2 NO vibfile co2.species.vib
+mixture		    	air O CO CO2 O2 C N N2 NO vstream 0 0 0
+
+mixture             air O   frac 1
+mixture             air CO  frac 0.0
+mixture             air CO2 frac 0.0
+mixture             air C   frac 0.0
+mixture 			air O2 	frac 0.0
+mixture 			air N 	frac 0
+mixture 			air N2 	frac 0.0
+mixture 			air NO 	frac 0.0
+
+#create_particles    air n 0
+
+surf_collide        1 diffuse 1000 1
+
+collide         vss air air.vss
+collide_modify  vibrate discrete rotate smooth
+fix             vib vibmode
+
+create_particles    air n 0
+Created 99998 particles
+  CPU time = 0.0110644 secs
+##################################### SURF REACT ADSORB ######################################
+##################################### SURF OPTION ############################################
+
+
+
+#surf_react        	adsorb_test_gs2 adsorb ps sample-PS_1.surf nsync 1 face 1000 6.022e18 schu yes init_cover O 1 tally_only yes O CO N N2 O2 NO
+#bound_modify        xhi collide 1 react adsorb_test_gs2
+
+surf_react          gamma gamma gamma.surf face 1000 6.022e18 init_cover  O 1 O 1 C 1 N 1
+bound_modify        xhi collide 1 react gamma
+
+timestep            1e-6
+
+compute         1 boundary all n nflux ke erot evib etot echem
+fix             2 ave/time 1 1 1 c_1[*] mode vector ave one file boundary.dat
+
+
+
+stats		    	10
+stats_style	    	step cpu np nattempt ncoll nscoll nscheck nsreact
+run 		    	1000
+  Wall chemistry model: constant-gamma
+  Init_cover: 100% sites filled with O
+Memory usage per proc in Mbytes:
+  particles (ave,min,max) = 3.625 3.625 3.625
+  grid      (ave,min,max) = 1.51379 1.51379 1.51379
+  surf      (ave,min,max) = 0 0 0
+  total     (ave,min,max) = 5.13879 5.13879 5.13879
+Step CPU Np Natt Ncoll Nscoll Nscheck Nsreact 
+       0            0    99998        0        0        0        0        0 
+      10  0.029660071    97181    27002    13962        0        0     2735 
+      20  0.052110318    92941    24661    13399        0        0     1564 
+      30  0.073865308    89714    22984    12656        0        0      913 
+      40  0.094162141    87541    21886    12260        0        0      509 
+      50   0.11431455    86235    21251    12273        0        0      296 
+      60   0.13213864    85483    20871    11866        0        0      157 
+      70   0.14859264    85025    20657    11838        0        0      105 
+      80   0.16588221    84729    20517    11728        0        0       56 
+      90   0.18232947    84572    20442    11816        0        0       35 
+     100   0.19968771    84483    20385    11793        0        0       24 
+     110   0.21397794    84422    20354    11738        0        0       12 
+     120   0.22836664    84394    20345    11742        0        0        5 
+     130    0.2483774    84380    20335    11653        0        0        5 
+     140   0.26483135    84368    20333    11618        0        0        1 
+     150   0.28305172    84358    20328    11528        0        0        0 
+     160   0.30034555    84354    20331    11748        0        0        0 
+     170   0.31830202    84352    20333    11725        0        0        0 
+     180   0.33641781    84348    20319    11726        0        0        3 
+     190    0.3512266    84346    20325    11612        0        0        0 
+     200   0.36685736    84345    20331    11677        0        0        0 
+     210   0.38330267    84345    20322    11650        0        0        0 
+     220   0.39911111    84345    20318    11751        0        0        0 
+     230   0.41306339    84345    20329    11800        0        0        0 
+     240     0.428875    84345    20323    11709        0        0        0 
+     250   0.44625352    84345    20331    11733        0        0        0 
+     260   0.46497444    84345    20325    11921        0        0        0 
+     270   0.48578192    84345    20312    11785        0        0        0 
+     280     0.508965    84345    20313    11705        0        0        0 
+     290   0.52657349    84345    20320    11656        0        0        0 
+     300    0.5414025    84345    20326    11735        0        0        0 
+     310    0.5597789    84345    20332    11711        0        0        0 
+     320    0.5777188    84345    20318    11718        0        0        0 
+     330   0.59630297    84345    20323    11796        0        0        0 
+     340   0.61489851    84345    20319    11716        0        0        0 
+     350   0.63367005    84345    20322    11644        0        0        0 
+     360   0.65050184    84345    20325    11631        0        0        0 
+     370   0.66730736    84345    20324    11686        0        0        0 
+     380   0.68311842    84345    20319    11793        0        0        0 
+     390   0.69747024    84345    20331    11766        0        0        0 
+     400   0.71241484    84345    20313    11664        0        0        0 
+     410   0.72775387    84345    20314    11657        0        0        0 
+     420   0.74572581    84345    20323    11758        0        0        0 
+     430   0.76030982    84345    20324    11663        0        0        0 
+     440   0.78197989    84345    20322    11554        0        0        0 
+     450   0.79649403    84345    20329    11789        0        0        0 
+     460   0.81226832    84345    20310    11674        0        0        0 
+     470   0.82731987    84345    20323    11655        0        0        0 
+     480   0.84197507    84345    20318    11642        0        0        0 
+     490   0.85964311    84345    20318    11752        0        0        0 
+     500   0.87368245    84345    20318    11639        0        0        0 
+     510   0.88924322    84345    20323    11674        0        0        0 
+     520   0.90552813    84345    20316    11522        0        0        0 
+     530   0.92266607    84345    20323    11624        0        0        0 
+     540    0.9380592    84345    20321    11746        0        0        0 
+     550   0.95283517    84345    20318    11599        0        0        0 
+     560   0.96732253    84345    20330    11567        0        0        0 
+     570   0.98320839    84345    20322    11710        0        0        0 
+     580   0.99891453    84345    20332    11625        0        0        0 
+     590    1.0152988    84345    20318    11719        0        0        0 
+     600    1.0303244    84345    20319    11697        0        0        0 
+     610    1.0446579    84345    20319    11713        0        0        0 
+     620    1.0625246    84345    20306    11744        0        0        0 
+     630    1.0812639    84345    20322    11619        0        0        0 
+     640    1.0983339    84345    20317    11671        0        0        0 
+     650     1.113631    84345    20316    11770        0        0        0 
+     660    1.1292055    84345    20324    11738        0        0        0 
+     670    1.1445251    84345    20316    11834        0        0        0 
+     680    1.1598765    84345    20331    11757        0        0        0 
+     690    1.1743708    84345    20325    11739        0        0        0 
+     700    1.1893705    84345    20325    11708        0        0        0 
+     710     1.203806    84345    20312    11587        0        0        0 
+     720    1.2194085    84345    20325    11673        0        0        0 
+     730    1.2387933    84345    20321    11731        0        0        0 
+     740    1.2596449    84345    20324    11721        0        0        0 
+     750     1.276427    84345    20324    11675        0        0        0 
+     760     1.292847    84345    20326    11701        0        0        0 
+     770    1.3126994    84345    20325    11642        0        0        0 
+     780    1.3267011    84345    20318    11725        0        0        0 
+     790    1.3403087    84345    20320    11625        0        0        0 
+     800    1.3543123    84345    20314    11666        0        0        0 
+     810    1.3683553    84345    20318    11576        0        0        0 
+     820    1.3822245    84345    20327    11761        0        0        0 
+     830    1.3964442    84345    20329    11573        0        0        0 
+     840    1.4104633    84345    20315    11855        0        0        0 
+     850    1.4249127    84345    20323    11721        0        0        0 
+     860    1.4431057    84345    20326    11773        0        0        0 
+     870    1.4614498    84345    20324    11733        0        0        0 
+     880    1.4768568    84345    20319    11564        0        0        0 
+     890    1.4928395    84345    20333    11728        0        0        0 
+     900    1.5080802    84345    20318    11611        0        0        0 
+     910     1.523165    84345    20325    11662        0        0        0 
+     920    1.5380869    84345    20325    11796        0        0        0 
+     930    1.5531328    84345    20332    11642        0        0        0 
+     940    1.5680071    84345    20327    11634        0        0        0 
+     950    1.5826543    84345    20329    11748        0        0        0 
+     960    1.5992926    84345    20327    11806        0        0        0 
+     970    1.6137288    84345    20324    11744        0        0        0 
+     980    1.6287154    84345    20326    11591        0        0        0 
+     990    1.6431439    84345    20319    11828        0        0        0 
+    1000    1.6580998    84345    20322    11679        0        0        0 
+Loop time of 1.65813 on 4 procs for 1000 steps with 84345 particles
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Move    | 0.55401    | 0.61148    | 0.66365    |   6.5 | 36.88
+Coll    | 0.42531    | 0.42648    | 0.42701    |   0.1 | 25.72
+Sort    | 0.044749   | 0.04573    | 0.047003   |   0.4 |  2.76
+Comm    | 0.19293    | 0.19744    | 0.19941    |   0.6 | 11.91
+Modify  | 0.031446   | 0.12075    | 0.38683    |  44.2 |  7.28
+Output  | 0.0035541  | 0.025888   | 0.033339   |   8.0 |  1.56
+Other   |            | 0.2304     |            |       | 13.89
+
+Particle moves    = 84761708 (84.8M)
+Cells touched     = 189138196 (189M)
+Particle comms    = 11597242 (11.6M)
+Boundary collides = 11583967 (11.6M)
+Boundary exits    = 0 (0K)
+SurfColl checks   = 0 (0K)
+SurfColl occurs   = 0 (0K)
+Surf reactions    = 84345 (84.3K)
+Collide attempts  = 20533982 (20.5M)
+Collide occurs    = 11770507 (11.8M)
+Reactions         = 0 (0K)
+Particles stuck   = 0
+Axisymm bad moves = 0
+
+Particle-moves/CPUsec/proc: 1.27797e+07
+Particle-moves/step: 84761.7
+Cell-touches/particle/step: 2.23141
+Particle comm iterations/step: 3
+Particle fraction communicated: 0.136822
+Particle fraction colliding with boundary: 0.136665
+Particle fraction exiting boundary: 0
+Surface-checks/particle/step: 0
+Surface-collisions/particle/step: 0
+Surf-reactions/particle/step: 0.000995084
+Collision-attempts/particle/step: 0.242255
+Collisions/particle/step: 0.138866
+Reactions/particle/step: 0
+
+Surface reaction tallies:
+  id gamma style gamma #-of-reactions 5, model: constant-gamma
+    reaction all: 84345
+    reaction O + O --> O2: 84345
+
+Particles: 21086.2 ave 21305 max 20889 min
+Histogram: 2 0 0 0 0 0 0 0 1 1
+Cells:      25 ave 25 max 25 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+GhostCell: 11 ave 11 max 11 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+EmptyCell: 11 ave 11 max 11 min
+Histogram: 4 0 0 0 0 0 0 0 0 0

@@ -1,0 +1,5 @@
+# Catalytic surface reactants keep the initialized state constant so that
+# the measured event frequency can be compared directly with the formula.
+2O(sc) --> O2(g)
+LH2 S 1.0
+td 300.0

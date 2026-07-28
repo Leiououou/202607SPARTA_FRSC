@@ -1,0 +1,25 @@
+seed 123456
+dimension 3
+boundary oo oo so
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species ../20260727_ps_schu/air.species O O2
+mixture air O O2
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# O is intentionally omitted: its gamma must default to zero.
+surf_react grxn gamma gamma_oo.surf face 300.0 10.0 init_cover O 1.0
+bound_modify zlo react grxn
+
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+dump p particle air 1 particle_default_zero.dat id type x y z vx vy vz erot evib
+
+timestep 0.001
+stats 1
+stats_style step time np nsreact sr_grxn[1] sr_grxn[2] sr_grxn[3] sr_grxn[4]
+run 1

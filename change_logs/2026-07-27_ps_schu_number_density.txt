@@ -1,0 +1,154 @@
+SPARTA adsorb PS reaction `schu` extension
+Date: 2026-07-27
+
+1. Objective
+
+Reuse the existing `surf_react adsorb ... schu yes|no` switch for
+pure-surface (PS) chemistry.
+
+For `adsorb gs/ps`, the single switch controls both pathways:
+
+  schu no:
+    - GS keeps the original SPARTA path.
+    - PS keeps the legacy coverage-based frequency factor.
+
+  schu yes:
+    - GS uses the existing Molchanova finite-rate path.
+    - PS uses the Molchanova surface-number-density frequency factor.
+
+PS reaction-energy parsing and tallying are not part of this change.
+
+2. Source changes
+
+Files:
+  src/surf_react_adsorb.cpp
+  src/surf_react_adsorb.h
+
+In `SurfReactAdsorb::PS_react()`:
+
+  factor = fnum * weight[isurf] / area[isurf]
+  coverage_factor = factor / max_cover
+
+For non-SB reactions:
+
+  schu no:
+    nu_react *= coverage_factor^(alpha-1)
+
+  schu yes:
+    nu_react *= factor^(alpha-1)
+
+The existing `factor_pow` remains `alpha-1`, so the implementation works
+for arbitrary supported surface stoichiometry rather than multiplying by
+`max_cover` exactly once.
+
+For first-order desorption, `factor_pow=0`, so both modes are identical.
+
+For SB reactions, the vacant-site fraction remains:
+
+  1 - total_state * coverage_factor
+
+because this term is physically a surface coverage in both modes.
+
+3. Documentation
+
+Added:
+  docs/PS_schu_number_density.md
+
+It documents the shared GS/PS switch, both rate-constant conventions, the
+general conversion
+
+  k_coverage = k_number_density * max_cover^(alpha-1)
+
+and the unchanged DS and SB behavior.
+
+4. Focused tests
+
+Added:
+  test/20260727_ps_schu/air.species
+  test/20260727_ps_schu/ps_lh2.surf
+  test/20260727_ps_schu/ps_ds.surf
+  test/20260727_ps_schu/gs_adsorb.surf
+  test/20260727_ps_schu/in.ps_schu
+  test/20260727_ps_schu/in.ps_ds
+  test/20260727_ps_schu/in.gs_ps_shared_schu
+
+4.1 Second-order same-species LH test
+
+Setup:
+  max_cover = 100
+  area = 1
+  fnum = weight = 1
+  initial O coverage = 0.5
+  N_O = 50
+  C(N_O,2) = 1225
+  k = 1
+  simulated time = 10 s
+
+Expected:
+  schu no:  nu = 1225/100 = 12.25 1/s, about 122.5 events
+  schu yes: nu = 1225             = 1225 1/s, about 12250 events
+
+Observed with the same seed:
+  schu no:  121 events
+  schu yes: 12223 events
+
+Both agree with their analytical Poisson means.  Their observed ratio is
+101.02, close to the expected `max_cover` ratio of 100.
+
+4.2 First-order DS test
+
+Observed with the same seed:
+  schu no:  23 events
+  schu yes: 23 events
+
+This confirms `factor_pow=0` leaves first-order desorption unchanged.
+
+4.3 Shared `gs/ps` switch
+
+Both `schu no` and `schu yes` parsed and ran in `adsorb gs/ps` mode.
+The reported model changed from `SPARTA` to
+`Molchanova finite-rate (schu)`, and the PS branch responded to the same
+flag.  No second PS-specific flag was added.
+
+5. Compilation
+
+Targeted translation-unit compile:
+
+  cd src/Obj_serial
+  mingw32-make.exe surf_react_adsorb.o
+
+Result:
+  successful, no compile errors.
+
+Linked Windows serial executable:
+
+  g++.exe -O *.o -L../STUBS -lmpi_stubs -o ../spa_serial.exe
+
+Result:
+  successful; all focused tests above ran with the newly linked executable.
+
+Linux MPI rebuild:
+
+  wsl.exe -d Ubuntu-20.04 -- bash -lc \
+    'cd /mnt/d/博一/气固相互作用/202607_src/src &&
+     make clean-mpi && make mpi -j4'
+
+Result:
+  successful, using `/usr/bin/mpic++`.
+
+Generated file:
+  src/spa_mpi
+  size: 2,554,768 bytes
+  SHA-256:
+  6CEB3203A1B0D6C47A987BA8A7822DECADA6AFBC807CE4C3BACA9397F607BB4D
+
+The rebuilt MPI executable was run with the focused first-order PS
+desorption case under Ubuntu 20.04.  It completed successfully and reported
+23 events for `schu yes`, matching the serial result.
+
+6. Compatibility
+
+- Omitting `schu` still initializes `schu_flag=0`.
+- `schu no` uses the exact pre-change PS frequency factor.
+- Existing GS `schu` behavior is unchanged.
+- No PS reaction-file energy field was added or read.

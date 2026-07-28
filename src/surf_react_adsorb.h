@@ -48,7 +48,7 @@ class SurfReactAdsorb : public SurfReact {
   int distributed;
 
   int gsflag,psflag;                // 0/1 if gas and/or surf chem enabled
-  int schu_flag;                   // 0=原概率公式（默认），1=有限速率公式
+  int schu_flag;                   // 0=legacy GS/PS formulas, 1=finite-rate formulas
   int init_cover_flag;             // 0=空表面, 1=初始满覆盖
   char *init_cover_name;           // 初始覆盖物种名（暂存）
   int init_cover_index;            // 初始覆盖物种在 species_surf 中的索引

@@ -1,0 +1,5 @@
+# Blank and comment lines are ignored.
+
+O + O --> O2    # inline comments are also ignored
+
+1.0e-19         # heat is J per physical event

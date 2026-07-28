@@ -1,0 +1,22 @@
+seed 123456
+dimension 3
+boundary oo oo so
+
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species air.species O O2
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# One shared schu value must control the existing GS branch and the PS
+# number-density branch when the adsorb model is gs/ps.
+surf_react both adsorb gs/ps gs_adsorb.surf ps_lh2.surf nsync 1 face 300.0 100.0 schu ${SCHU} init_cover O 0.5 O
+bound_modify zlo react both
+
+timestep 0.001
+stats 1
+stats_style step time np nsreact
+run 1

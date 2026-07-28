@@ -1,0 +1,162 @@
+SPARTA adsorb PS `tally_only` extension
+Date: 2026-07-27
+
+1. Objective
+
+Extend the existing `surf_react adsorb ... tally_only yes|no` keyword to
+pure-surface (PS) reactions.
+
+The same flag now controls both pathways in `adsorb gs/ps` mode:
+
+  tally_only no:
+    GS and PS reactions are counted and executed normally.
+
+  tally_only yes:
+    GS and PS reactions are selected and counted, but do not change the
+    physical simulation state.
+
+The existing `init_cover` keyword was already valid for `ps` and `gs/ps`;
+it was not changed by this work.
+
+2. PS tally-only semantics
+
+A selected PS event still performs:
+
+  - total and per-reaction tally updates;
+  - optional per-surface compute tally calls;
+  - exponential waiting-time sampling;
+  - subtraction of the sampled time from the selected reaction's `tau`.
+
+It skips:
+
+  - reactant removal from `species_delta`;
+  - surface product addition to `species_delta`;
+  - gas-particle creation;
+  - product collision/scattering model calls.
+
+Updating `tau` is required.  If the selected event remained overdue while
+the surface state was unchanged, the PS while-loop could repeatedly select
+the same event and fail to progress.
+
+PS tally-only counts therefore represent hypothetical events at the fixed
+current surface state.  They are not limited by reactant depletion.
+
+3. Source changes
+
+File:
+  src/surf_react_adsorb.cpp
+
+In `SurfReactAdsorb::PS_react()`, after event tallying and selected-`tau`
+update, the following branch was added:
+
+  if (tally_only_flag) break;
+
+This exits the current active-reaction selection loop.  The outer PS event
+loop then recomputes event weights and continues until no event is due.
+
+The startup model banner condition was expanded from `gsflag` to
+`gsflag || psflag`, so a PS-only run now prints:
+
+  Wall chemistry model: ... [TALLY-ONLY]
+  *** TALLY-ONLY mode: reactions counted but NOT executed ***
+
+4. Documentation and tests
+
+Added documentation:
+  docs/PS_tally_only.md
+
+Added focused inputs:
+  test/20260727_ps_schu/in.ps_tally_only
+  test/20260727_ps_schu/in.gs_ps_tally_only
+
+4.1 PS-only serial comparison
+
+Setup:
+  first-order O(s) desorption
+  50 initially adsorbed O model particles
+  identical random seed
+  simulated time = 10 s
+
+Observed:
+
+  tally_only no:
+    reaction events = 50
+    particle moves = 50
+    boundary exits = 50
+
+  tally_only yes:
+    hypothetical reaction events = 522
+    particle moves = 0
+    boundary exits = 0
+
+The normal run depleted all 50 available reactants.  The tally-only run
+continued sampling the unchanged 50-particle state and created no products.
+
+4.2 Combined GS/PS serial comparison
+
+Observed:
+
+  tally_only no:
+    reaction events = 23
+    particle moves = 23
+    boundary exits = 23
+
+  tally_only yes:
+    hypothetical reaction events = 44
+    particle moves = 0
+    boundary exits = 0
+
+Both modes accepted the same shared `tally_only` keyword.
+
+4.3 MPI comparison
+
+The PS-only comparison reproduced the serial results with the rebuilt MPI
+executable:
+
+  tally_only no:  50 events, 50 moves, 50 exits
+  tally_only yes: 522 events, 0 moves, 0 exits
+
+A two-rank `tally_only yes` run also completed successfully:
+
+  MPI tasks = 2
+  reaction events = 522
+  particle moves = 0
+  boundary exits = 0
+
+5. Compilation
+
+Windows serial:
+
+  cd src/Obj_serial
+  mingw32-make.exe surf_react_adsorb.o
+  g++.exe -O *.o -L../STUBS -lmpi_stubs -o ../spa_serial.exe
+
+Result:
+  successful.
+
+  src/spa_serial.exe
+  size: 3,060,176 bytes
+  SHA-256:
+  0DFFF5DC8053FA81FBE19F68460A2C83390F532BBA3B232161F78268033C7A4A
+
+Linux MPI under WSL Ubuntu 20.04:
+
+  cd /mnt/d/博一/气固相互作用/202607_src/src
+  make clean-mpi
+  make mpi -j4
+
+Result:
+  successful with `/usr/bin/mpic++`.
+
+  src/spa_mpi
+  size: 2,554,768 bytes
+  SHA-256:
+  24D47B133EBA8197164933A3F5BCE701683510FBEDAD4F2EF3BD417F4F4B3F72
+
+6. Compatibility and exclusions
+
+- `tally_only` omitted or `tally_only no` preserves normal execution.
+- Existing GS tally-only behavior is unchanged.
+- `init_cover` behavior is unchanged.
+- The PS `schu` number-density extension remains active and compatible.
+- No PS reaction-energy field or heat tally was added.
