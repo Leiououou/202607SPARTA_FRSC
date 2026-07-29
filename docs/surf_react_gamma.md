@@ -136,6 +136,24 @@ particle/wall energy exchange to `etot`; `echem` remains zero.
 Vacancy samples do not adsorb and do not count as reaction candidates in this
 mode.
 
+## Occupied sites without a mapped reaction
+
+After a successful gamma trial, if the selected site is occupied but the
+unordered incident/adsorbed species pair is not defined in the reaction file,
+the event follows the DS2V separate-emission rule:
+
+- one stored surface particle is removed from the selected site;
+- the incident particle keeps its species;
+- a second gas particle is created with the stored particle's species;
+- both particles are diffusely, fully accommodated at `Tw`;
+- the event has reaction number zero, increments no reaction counter, and
+  contributes no `echem`.
+
+The ordinary particle-energy exchange of both emitted particles remains
+visible in the standard surface or boundary energy tally. With
+`tally_only yes`, neither the coverage removal nor second-particle creation is
+performed.
+
 ## MPI behavior
 
 There is no PS time evolution and no `nsync` setting. Coverage changes are

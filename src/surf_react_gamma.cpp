@@ -296,7 +296,7 @@ void SurfReactGamma::init()
 ------------------------------------------------------------------------- */
 
 int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
-                          Particle::OnePart *&, int &velreset)
+                          Particle::OnePart *&jp, int &velreset)
 {
   if (isurf < 0 && mode == SURF)
     error->one(FLERR,"Surf_react gamma surf used with box faces");
@@ -326,11 +326,35 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
     return 0;
   }
 
-  // occupied site without a defined unordered reaction: scatter
+  // occupied site without a defined unordered reaction:
+  // both the incident and adsorbed particles leave the surface separately
 
   int adsorbed = species_surf[jsurf];
   int ireaction = reaction_map[incident][adsorbed];
-  if (ireaction < 0) return 0;
+  if (ireaction < 0) {
+    if (tally_only_flag) return 0;
+
+    mark_surface(isurf);
+    species_delta[isurf][jsurf]--;
+
+    // create the desorbed particle at the incident particle's collision point
+    // add_particle() can reallocate the particle array, so repoint ip if needed
+
+    double x[3],v[3];
+    int pid = MAXSMALLINT*random->uniform();
+    memcpy(x,ip->x,3*sizeof(double));
+    memcpy(v,ip->v,3*sizeof(double));
+    Particle::OnePart *particles = particle->particles;
+    int reallocflag =
+      particle->add_particle(pid,adsorbed,ip->icell,x,v,0.0,0.0);
+    if (reallocflag) ip = particle->particles + (ip - particles);
+    jp = &particle->particles[particle->nlocal-1];
+
+    diffuse->wrapper(ip,norm,NULL,diffuse_coeffs);
+    diffuse->wrapper(jp,norm,NULL,diffuse_coeffs);
+    velreset = 1;
+    return 0;
+  }
 
   nsingle++;
   tally_single[ireaction]++;

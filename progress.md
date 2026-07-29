@@ -233,3 +233,55 @@
   remain.
 - Baseline SHA-256 hashes for `surf_react_adsorb.cpp` and `.h` are unchanged:
   `4489C124...25AB7` and `E823E17B...2B8`, respectively.
+
+## 2026-07-29 Zuppardi literature review
+- Started a read-only review of six PDFs in `D:\博一\气固相互作用\Zupparid`.
+- Focus: DS2V wall-catalysis implementation, constant gamma event semantics,
+  adsorption/desorption, non-reacting pairs, and reflection of surface species.
+- Extracted all six PDF text layers and visually verified the decisive pages:
+  Morsa et al. journal page 935 and Zuppardi/Mongelluzzo journal page 2830.
+- Found explicit DS2V semantics: if the second same-element-area impactor
+  cannot recombine with the stored first particle, both leave separately.
+- Found supporting diffuse, fully accommodated re-emission semantics at wall
+  temperature; the exact two-particle component sampling is not stated.
+- A Windows `rg` call used an unsupported `*.txt` path glob; rerunning the
+  search against the containing directory succeeded.
+
+## 2026-07-29 DS2V-style unmatched-pair implementation
+- Audited `SurfReactGlobal` and `SurfReactProb`: both create `jp` with
+  `particle->add_particle()` and repoint `ip` after a particle-array reallocation.
+- Confirmed all surface-collision styles process both `ip` and `jp`; update loops
+  assign the new particle its remaining time, surface flag, weight, and iteration slot.
+- Frozen the unmatched event as a non-reaction: no reaction tally/heat, but one
+  surface-state decrement and one emitted stored-species particle.
+- Two Windows `rg` searches initially used unsupported source-path globs.
+  Repeated them with `-g` filters successfully; no files were affected.
+- Implemented the unmatched occupied-site branch in `surf_react_gamma.cpp`:
+  decrement stored coverage, create `jp` with the stored species, safely repoint
+  `ip` after reallocation, diffusely reset both particles, and return reaction 0.
+- Deterministic face test passed:
+  - first impact: `np 1 -> 2`, outgoing types O and O2, both outward;
+  - all reaction counters and `echem` remained zero;
+  - a following controlled O impact adsorbed into the newly vacant site,
+    giving `np 3 -> 2`.
+- Unmatched `tally_only` test passed with `np=1`, no created particle, no
+  reaction tally, and no state mutation path executed.
+- Existing serial regressions passed unchanged: vacancy adsorption, mapped O+O
+  recombination, mapped tally-only, omitted gamma, both N/O incident orders,
+  and gamma-half (1,557 candidates / 3,174 impacts).
+- Replicated explicit-surface unmatched test passed: 1,000 O plus 6,393 emitted
+  O2 gave `np=7,393`, with zero surface reactions.
+- Particle-storage growth stress test passed without a stale pointer or crash:
+  `np=25,559` after 500 steps, with zero reaction tally.
+- Windows serial rebuilt successfully; its known suffix-blind `size spa_serial`
+  post-link step reported an error after producing `spa_serial.exe`.
+- Initial WSL invocation was denied by the sandbox; rerunning with approved WSL
+  access succeeded. Linux MPI rebuilt cleanly.
+- Two-rank face test reproduced `1 -> 2` emission and subsequent `3 -> 2`
+  adsorption with all reaction counters zero.
+- Two-rank distributed explicit-surface test passed with particle migration and
+  owner/ghost state: 1,000 O plus 6,293 O2 gave `np=7,293`, zero reactions,
+  5,001 owned and 4,999 ghost surface records per rank.
+- Strict warning syntax check found only established inherited shadow/unused
+  warnings after renaming the new local particle ID to `pid`.
+- Removed only generated gamma test logs, dumps, and boundary data after review.

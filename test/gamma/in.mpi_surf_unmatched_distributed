@@ -1,0 +1,27 @@
+seed 123456
+dimension 2
+boundary r r p
+
+create_box -0.003 0.003 -0.003 0.003 -0.5 0.5
+create_grid 10 10 1
+
+global nrho 1.0 fnum 1.0 temp 300.0 surfmax 5000 surfs explicit/distributed
+species ../20260727_ps_schu/air.species O O2
+mixture air O O2
+mixture air O frac 1.0
+mixture air O2 frac 0.0
+
+read_surf ../20260722_3/data.cylinder scale 1.0e-3 1.0e-3 1.0
+
+surf_collide wall diffuse 300.0 1.0
+surf_react grxn gamma gamma_oo.surf surf 300.0 1.0e10 init_cover O2 1.0 O 1.0
+surf_modify all collide wall react grxn
+
+create_particles air n 1000
+
+compute cnt count O O2
+
+timestep 1.0e-7
+stats 100
+stats_style step time np nsreact c_cnt[1] c_cnt[2] sr_grxn[1] sr_grxn[2]
+run 100

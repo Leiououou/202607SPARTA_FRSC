@@ -273,3 +273,54 @@
   `compute ID boundary all n nflux ke erot evib etot echem`; this can validate
   that adsorption has zero chemical heat but nonzero total wall energy and
   that recombination reports the file heat through `echem`.
+
+## 2026-07-29 Zuppardi supplemental literature: DS2V wall-event semantics
+- `Aerothermochemical analysis of the Orion capsule...` (2022), PDF page 6,
+  journal page 2830, gives the most direct implementation description:
+  the first wall impactor stays on the surface elemental area; when a second
+  particle impacts the same area, they recombine if the pair can do so and the
+  product returns to the flow; otherwise both particles leave separately.
+- The same page states that surface reactions use a prescribed probability;
+  fully catalytic and non-catalytic surfaces set it to one and zero,
+  respectively. Table 5 lists five allowed pairs and event energies:
+  `O+O->O2`, `N+N->N2`, `N+O->NO`, `CO+O->CO2`, and `C+O->CO`.
+- The same paper states that all released reaction energy is transferred to
+  the wall, not assigned to the product.
+- Morsa et al. (2014), PDF page 7 / journal page 935, independently states
+  that DS2V assigns a recombination probability to each reaction when atoms
+  meet on the same surface element; probability one represents a fully
+  catalytic surface.
+- Zuppardi (2020), PDF page 3, states that gas-surface interaction is
+  diffuse and fully accommodated. PDF page 16 describes re-emission using
+  wall-temperature Maxwell equilibrium. It does not specify the exact
+  component-wise sampling of the two separately emitted particles.
+- The 2023 Titan paper, PDF page 5, again states that DS2V models NC/FC by
+  setting all surface-reaction probabilities to zero/one, but adds no more
+  detail about the unmatched-pair event.
+- The 1997 paper is a continuum inverse heat-flux method for catalyticity,
+  not a DS2V particle-event algorithm.
+- Therefore the present constant-gamma no-map behavior (scatter only the
+  incident particle and retain the stored surface particle) does not match
+  the explicit 2022 description. A DS2V-oriented implementation should remove
+  the stored particle and emit it plus the incident particle as two separate
+  diffusely reflected gas particles.
+- Still unspecified by these papers: whether the second particle must first
+  pass a species-level gamma gate; exact joint velocity sampling; and what a
+  failed finite-gamma trial does to the stored particle. These details should
+  not be inferred beyond the quoted event description.
+
+## 2026-07-29 implemented unmatched-pair behavior
+- The unmatched branch remains behind the existing incident-species gamma gate.
+  A failed gate therefore preserves stored coverage and scatters only the incident
+  particle, while a passed gate can release the stored partner.
+- The event returns reaction number zero. Standard boundary/surface particle
+  energy exchange includes both emitted particles, but chemical heat and all
+  reaction counters remain zero.
+- Both outgoing particles are independently sampled by the gamma style's internal
+  diffuse model at `Tw` with accommodation one, matching the DS2V-oriented model
+  choice and preventing the outer collision style from sampling them a second time.
+- `tally_only yes` returns before coverage decrement or `jp` creation, preserving
+  its fixed-state contract.
+- Explicit-surface serial and distributed MPI tests confirmed the simple
+  conservation identity `final gas count = initial gas count + emitted stored
+  particles - vacancy adsorptions`, with no reaction events.

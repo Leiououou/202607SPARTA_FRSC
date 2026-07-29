@@ -1,0 +1,446 @@
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+
+
+
+
+An approximate method to evaluate the surface
+catalycity in high enthalpy flows
+G. Zuppardi & G. Verde
+Dipartimento di Scienza edlngegneria dello Spazio
+"Luigi G. Napolitano" - University of Naples "Federico II"
+P.le V. Tecchio 80, 80125 Naples - Italy
+
+
+Abstract
+
+An integrated numerical/experimental method is proposed to evaluate the
+surface catalycity. The method is approximated and relies in matching the
+measured heat flux with the computed one. It is iterative; the iteration parameter
+is the atom mass fraction at the surface. This is a boundary condition needed to
+integrate, numerically, the system of boundary layer differential equations. The
+atom mass fraction at the surface, fulfilling the match, is used to evaluate the
+surface catalycity. This is computed as the ratio of the atom mass fraction at the
+surface to the atom mass fraction at the boundary layer edge. The method has
+been applied to the evaluation of the catalycity of a hemisphere calorimeter in
+nitrogen flow, in the enthalpy range 48-59 [MJ/kg]. The computation of the heat
+flux relies on an improved version of the Fay-Riddel procedure. The results have
+been compared, by means of the Goulard formula, with the experimental ones.
+
+1 Introduction
+
+        During the re-entry path of a space vehicle, the high stagnation
+temperatures, produced by strong shock waves, generate endothermic chemical
+processes of dissociation and ionization. Dissociation is followed by an
+exothermic process of recombination when the gas expands or flows along a
+cool surface. Consequently the heat flux is made up also of a diffusive term due
+to the atom recombination at the surface. The surface recombination efficiency is
+named catalycity. This is, by definition, the ratio of the number of atoms
+recombining at the surface to the number of atoms striking the surface. The
+higher is the surface catalycity, the higher is the heat flux. The knowledge of the
+surface catalycity is important for the design and the choice of the material of a
+space vehicle Thermal Protection System (TPS). In fact, an heat flux reduction
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+
+590                              Computer Methods and Experimental Measurements
+
+by means of low catalycity surfaces may be an attractive possibility for a safe re-
+entry or for long range hypersonic vehicles.
+        The evaluation of the surface catalycity of a model or a calorimeter is
+also important both from an experimental and a numerical point of view. In fact,
+catalycity changes the gas composition close to the surface and influences a
+correct interpretation of the measured heat flux. The determination of the flow
+enthalpy, scaled from the heat flux measurement, is misleading whether the
+recombination process at the calorimeter surface is assumed to be fully catalytic
+or the gas composition at the calorimeter surface is assumed to be frozen (no
+recombination process). Knowledge of surface catalycity makes also possible to
+fix correctly the boundary conditions in solving numerically hypersonic flow
+fields. Barbato et al. [1] investigated the effects of different catalytic boundary
+conditions on the numerical simulation of hypersonic flows over a blunt body.
+        Catalycity depends on a number of factors: gas composition, flow
+conditions, temperature, material and roughness of the surface. As the last
+factors can not be easily modelled, the theoretical evaluation of catalycity is still
+today an open problem. Barbato referenced some theoretical models trying the
+evaluation of the surface catalycity. A current approach is to use fits or
+correlations coming from experimental data.
+        The purpose of the present paper is to propose a method to evaluate the
+catalycity of the surface of a test model (i.e. calorimeter). The method relies on
+an integrated numerical/experimental procedure. The philosophy of the method
+is to provide for the difficulties in modelling the effects of the surface material
+and roughness with experimental data. The method consists in matching the
+measured and computed heat fluxes. It is iterative; the iteration parameter is the
+atom mass fraction at the surface. This is a boundary condition needed to
+integrate, numerically, the system of the boundary layer differential equations.
+The atom mass fraction at the surface, fulfilling the match, is used to evaluate
+the surface catalycity. This is computed as the ratio of the atom mass fraction at
+the surface to the atom massfractionat the boundary layer edge. As the method
+has been applied to the evaluation of the catalycity of a hemisphere calorimeter,
+the computation of the heat flux relies on an improved version of the Fay-Riddel
+procedure [2].
+        By the present method the arc-heater wind tunnel experimenter is
+provided with an easily available tool to get a preliminary insight into the
+catalycity of the surface of hemisphere calorimeters. The computer code,
+developed on the present procedure is not time consuming and does not require
+a large core storage. It can easily operate, in fact, also on personal computers.
+        The method has been used to evaluate the catalycity of a calorimeter in
+nitrogen flow in the total enthalpy range 48-59 [MJ/kg]. The results have been
+compared, by means of the Goulard formula [3], with experimental data
+
+2 Improved Fay-Riddel computing procedure
+
+       The pioneering work by Fay and Riddel [4] is a milestone in the
+computation of the heat flux at the stagnation point of a blunt body, in
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+
+
+Computer Methods and Experimental Measurements                                                   591
+
+dissociating air. They found the solution of the laminar boundary layer by the
+theory of self-similar solutions, and provided also the related computing
+procedure. Because of the limitation of the knowledge about the kinetic
+parameters and the transport coefficients, and the lack of computer resources at
+that time (1958), the original Fay-Riddel procedure suffers from inaccuracies
+that reduce the validity of the results.
+        Zuppardi and Verde [2] developed a renewed Fay-Riddel procedure,
+getting over the above mentioned limitations. The improvements are related to:
+i) the overcoming of some operating limitations (like the evaluation of the
+equilibrium mass fraction of each chemical specie), ii) the using of updated and
+more reliable thermodynamic and kinetic parameters and iii) the computing of
+the Prandtl number and the Lewis number in the boundary layer. The Zuppardi-
+Verde computing procedure, originally written to operate with simulated air (i.e.
+a mixture of oxygen and nitrogen), for the purpose of this paper has been
+specialized to operate with pure nitrogen.
+        The independent, curvilinear space variables x and y are transformed by
+the Lees-Dorodnitsyn transformation in £ and r| variables. These read:
+
+
+                                                                      x                        (1)
+                           0                0
+u, p u, and r are the velocity, the density, the viscosity and the cylindrical body
+radius, respectively. Subscripts e, and w are for boundary layer edge and wall,
+respectively.
+        Fay-Riddel procedure considers air just like one component gas; the gas
+is a binary mixture of "air" atoms and "air" molecule. This assumption simplifies
+the problem because it reduces the number of species continuity equations to just
+one. The non-dimensional, dependent variables are f, 8 and C* f is defined in
+such a way that f ' = u/u@ (superscript ' is for partial derivation with respect to T|),
+8 is a non-dimensional temperature (8 = T/T^), C is the massfractionand
+subscript A is for atom. The system of ordinary differential equations is:
+
+   Momentum: (xf) +ff"+0.5K-f| = 0                                                               (2)
+
+
+   Energy: ((ol/Pr)&') +of»' +8(LeX/Pr)» C^ +XiX2V= 0                                          (3)
+
+   Atom continuity: ((AJLe/Pr)c]J + fC^ -%%v = 0                                               (4)
+Pr is the Prandtl number, Le is the Lewis number (Pr = Cpji/k, Le = pDCp/k, Cp is
+the constant pressure specific heat, k is the thermal conductivity, D is the
+diffusion coefficient), £, X, 5, a, v, xi and %2 are defined as:
+
+                                                                                                (5)
+   Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+592                               Computer Methods and Experimental Measurements
+
+
+                                                                                                  (6)
+ where:
+
+                                                                                         *)      (7)
+
+
+                       8 = C A - C M C P W =3/7-2/7e--'                                         (8)
+
+
+                                              e-^^          (l-CA)                              (9)
+
+
+                                                                                                (10)
+
+                     Xi=KpT;Rdue/dx                                                            (ll)
+
+ subscripts M, E and s are for molecule, equilibrium and inviscid stagnation point,
+ respectively. Subscript v is for vibrationai and superscript - is for average with
+ respect to the gas composition. RO is the universal gas constant and K the
+ recombination rate constant. The velocity gradient at the stagnation point is
+ computed, by the Newtonian theory, as:
+
+                                                   -pJ/Ps                                       (12)
+ R is the body nose radius.
+
+                                                   ;)                                           (13)
+
+ hf3 is the average atom dissociation enthalpy in external flow:
+
+
+ Ah° is the heat of formation of i* chemical species. The boundary conditions
+ are:
+
+
+
+
+                                                                                                (15)
+
+
+
+
+         Fay-Riddel provided the following equation to compute the heat transfer
+ at the wall:
+   Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+
+Computer Methods and Experimental Measurements                                                    593
+
+
+
+
+                                            I       i                                   J ri=0
+
+                                                                  /dx)J(hs - h J/Pr]             (16)
+ s is the ratio of the current mass fraction and the mass fraction at the boundary
+ layer edge.
+
+ 3 Evaluation of the surface catalycity
+
+         The system of the three ordinary differential equations (2), (3) and (4) is
+ integrated by a 4& order Runge-Kutta algorithm in the range of the independent
+ variable 0<r|<3. Beside C^w other boundary conditions, to be fixed for the
+ numerical integration, are the derivatives (d^f/drf)^, (d&/dr|)^ and
+ (dC^/d7i)w It is necessary to use the numerical, iterative procedure, named
+ shooting technique, to state the values both of C^w and of the unknown
+ derivatives.
+         In the present method the shooting technique relies on four nested
+ iteration cycles. The inner cycles are on the above mentioned derivatives. These
+ start from guessed values, and stop when df/dr], 8 and C*, at rj=3, are equal,
+ with a convergence criterion of 0.001, to 1, 1 and C^, respectively. The
+ boundary layer solution is achieved at the convergence of these cycles. The outer
+ iteration cycle is on the atom mass fraction at the wall. This cycle starts from
+ C*w = 0 (fully catalytic surface), and stops when the wall heat flux, computed by
+ Eq.16, matches, with a convergence criterion of ±0.05, the measured one. The
+ value of C^w fulfilling the match is used to compute the surface catalycity.
+         As already said, the catalycity (y) is the ratio of the number of atoms
+ recombining at the wall (N,.), per unit area and time, to the total number of
+ atoms striking the wall (N), per unit area and time:
+
+                                         ,.*
+ As CAW is representative of N,. and C^                   is representative of N, y can be
+ approximately evaluated as:
+
+                                y=^Aw                                         (18)
+                                      CAS
+  Often the recombination efficiency is defined in terms of the catalytic reaction
+  rate (k):
+
+
+
+  where m is the atom weight.
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+594                               Computer Methods and Experimental Measurements
+
+       By the simplifying hypotheses: T^ « Tg, X = 1, Pr = const., Le = const,
+allowing the uncoupling of the boundary layer equations (at the stagnation point
+of blunt bodies), Goulard [3] found, analytically, a formula linking the
+convective heat flux with partially catalytic surface (q^) to the one with fully
+catalytic surface (4wfc)"
+
+
+
+                           4wfc         1
+h0g is the flow total enthalpy, <p is the catalytic factor. This, as reported by Pope
+[5], reads:
+
+
+
+                                                                                              (21)
+
+                                                    Ps       Ps
+Sc is the Schmidt number (Sc = uVpD), Z is the compressibility factor:
+
+
+4 Analysis of the results
+
+        In order to work in physically congruent conditions, in terms of
+temperature, density, gas composition and so on, the computer code, developed
+on the present procedure, has been interfaced with a computer code [6]
+modelling the jet of an arc-heater wind tunnel. The original version of the code is
+able to operate with simulated air (i.e. a mixture of nitrogen and oxygen). For
+the purpose of this paper the code, that works like a pre-processor, been
+specialized to operate with pure nitrogen. The simulated wind tunnel is supposed
+to be made of: 1) a heater, 2) a chamber to mix hot nitrogen (coming from the
+heater) and cold gas (e.g. oxygen) if any, and 3) a supersonic nozzle (area ratio
+1:4). It solves an one-dimensional, steady, inviscid flow field. The thermo-
+chemical model considers the dissociation and the vibration of the N2 molecule;
+the gas is a mixture of two species (% and N) in chemical non-equilibrium. The
+thermo-fluid-dynamic parameters and the gas composition at the nozzle exit are
+considered to be the asymptotic ones. The boundary layer edge parameters, at
+the stagnation point, are the ones downstream a normal shock wave, due to the
+calorimeter. The gas composition is supposed to be frozen both through the
+shock and along the stand-off distance up to the boundary layer edge (no
+relevant chemical relaxation process was found). The flow total enthalpy at the
+stagnation point is the same as the asymptotic one: hgg =ho^. The total flow
+enthalpy will be labelled as hg.
+        The heat flux measurements have been performed by Rose and
+Stankewics [7] (also reported by Zoby [8]) in an arc-driven shock-tube by a
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+Computer Methods and Experimental Measurements
+
+calorimetric gage (thick resistance thermometer) of platinum, mounted at the
+stagnation point of an hemisphere model (R=0.635 [cm]). Unfortunately it has to
+be expected that the test conditions and the numerically simulated test conditions
+(computed by the above described pre-processor) are different. Only the total
+flow enthalpy is reproduced accurately. The temperature of the calorimeter is
+not provided. For the present runs a typical value of T^=350 [K] was assumed.
+Moreover, because of the shortness of the test time (this was on the order of 10
+[us]), the measured heat fluxes could be uncertain.
+        The method has been applied in the range of the flow total enthalpy:
+48<ho<59 [MJ/kg]. This enthalpy range has been chosen because for flow
+enthalpy lower then 48 [MJ/kg] the catalycity process could be not relevant (the
+nitrogen dissociation energy is 34 [MJ/kg]). For flow enthalpy higher than 59
+[MJ/kg] a gas ionization process occurs and the code is not able to consider this
+process (the ionization energy of nitrogen molecule and nitrogen atom is 54 and
+ 100 [MJ/kg], respectively). More specifically the data shown here are related to
+the following five values of the flow total enthalpy: 48, 53, 55, 58, 59 [MJ/kg].
+Table I shows some asymptotic parameters as a function of ho-
+
+               Table I - Asymptotic thermo-fluid-dynamic parameters
+
+
+           ho [MJ/kg] V= [m/s] ToofKl Poo [kg/m^]             %*            CNOC
+                48         3516       1661     5.99x10^       0.453         0.547
+                53         3647       1677     5.77x10^       0.396         0.604
+                55         3703       1685     5.68x10-^      0.372         0.628
+                58         3799       1708     5.54x10^       0.337         0.663
+                59         3845       1730     5.47x10^       0.326         0.674
+
+         The measured heat fluxes and the computed ones, with fully catalytic
+ surface, as a function of the flow total enthalpy, are shown in Fig 1. Table II
+ shows the atom concentration at the wall (C^wX providing the match of the
+ measured and the computed heatfluxes,the atom concentration at the boundary
+ edge (CNS), the surface catalycity (y), the catalytic reaction rate (k^), the
+ measured (q^m) and the computed (q^c) heatfluxes.As shown, the match of
+ the computed and the measured heat flux is good enough, the percentage
+ difference ranges between -1.8% and 2.6%.
+         Figs.2 and 3 show, as a typical example of the boundary layer solution,
+ the non-dimensional temperature (8), and the mass fraction profiles of nitrogen
+ atom (CN) and molecule (C^) as a function of rj, respectively.
+         The comparison of the catalytic reaction rate by the present method with
+ the experimental one is performed indirectly in terms of the ratio q^/Awfc
+ (Fig.4). The ratio qw/(Wc, labelled as measured, has been computed as the
+ ratio of the measured heat flux to the one computed by the present code for a
+ fully catalytic surface. The ratio, labelled as present method + Eq.20, has been
+Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+                                  Computer Methods and Experimental Measurements
+
+
+                      35.00 — i
+
+                                     Computed:ftillycatilytic suffice ;
+
+
+
+
+                      10.00 J
+
+
+                        45.00    50.00
+                    Figure 1: Heat fluxes vs. flow total enthalpy
+
+
+         Table II - Recombination efficiency and catalytic reaction rate
+
+h<)[MJ/kg]                                                                q^[kW/m2] q^[kW/m2]
+              CNW          CNS T = CNW^NS kw [cm/s]
+    48        0.026       0.547 4.70x10-2    855                            11096     11062
+    53        0.034       0.604  5.54x10-2  1009                            12519     12520
+    55        0.095       0.628  1.51x10"!  2752                            15933     15624
+    58        0.050       0.663  7.54x10-2  1372                            14226     14591
+    59         0.01       0.674  1.48x10-2   270                            12803     12574
+
+
+                                                                      ^~     |
+                     8
+                   080 -i                             y/^                     -
+                        -!                           7                        -
+                   0.60 ]                      /
+
+
+
+
+                   o.oo —f—
+
+     Figure 2: Non-dimensional temperature profiles in the boundary layer
+  Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+Computer Methods and Experimental Measurements                                                  J97
+
+
+
+
+         Figure 3: Nitrogen mass fraction profiles in the boundary layer
+
+
+
+
+                                                    Present method + Eq.20
+                                                    Measured (Ref.7)
+
+                                                           ho[MJ/kg]
+                      Figure 4: Heat fluxes vs. flow total enthalpy
+
+computed by Eq.20 by using the catalytic reaction rates (shown in table II) by
+the present method. As suggested by Goulard, a constant Lewis number
+(Le=1.4) and a constant Schmidt number (Sc=0.485) have been used. Typically
+the computed, asymptotic Lewis number ranges from 0.61 to 0.58, the Schmidt
+number ranges from 0.89 to 0.84. At the wall the Lewis number ranges from
+0.93 to 0.96, the Schmidt number ranges from 1.28 to 1.31.
+        Both sets of data show the same profile. The mismatch of the values (the
+percentage discrepancy range between 19% to 30%) had to be expected. In fact,
+besides the intrinsic approximations of both the present method and the Goulard
+formula (Eq.20), there is uncertainty in the measured heat flux and mismatch of
+the computed and the experimental asymptotic flow conditions. Because of these
+difficulties a reliable check of the method can be performed, by using the results
+of thermo-chemical, non-equilibrium Navier-Stockes codes (e.g. TINA,
+VIRGIN1).
+   Transactions on Modelling and Simulation vol 16, © 1997 WIT Press, www.witpress.com, ISSN 1743-355X
+598                               Computer Methods and Experimental Measurements
+
+  5 Conclusions
+
+          An integrated numerical/experimental method is proposed for an
+  approximate evaluation of the surface catalycity. The method relies in matching
+  the measured heat flux with the computed one and in evaluating the surface
+  catalycity as the ratio of the atom mass fraction at the wall (fulfilling the match)
+  to the atom mass fraction at the boundary edge.
+          The method has been used to evaluate the surface catalycity of a
+  calorimeter, mounted on a hemisphere cylinder. Numerical tests have been
+  performed by considering heat fluxes, measured in nitrogen flow in the total
+  enthalpy range 48-59 [MJ/kg].
+          The computation of the heat flux is performed by an improved version of
+  the Fay-Riddel procedure. As the computer code requires limited resources both
+  in terms of core storage and processing time, it could be easily used by an arc-
+  wind tunnel experimenter to get a preliminary insight into the surface catalycity
+  of hemisphere calorimeters.
+          The method seems to be sound, but the reliability of the results is closely
+  connected to the accuracy of the measured heat flux and to the capability in
+  reproducing numerically the test conditions.
+
+
+
+  6 References
+
+ 1. Barbato, M., Giordano, D, Muylaert, J & Bruno, C Comparison of
+    Catalytic Wall Conditions for Hypersonic Flow, Journal of Spacecraft and
+    Rockets, Vol. 33, Sept.-Oct., 1996
+ 2. Zuppardi, G & Verde, G. An Improved Fay-Riddel Procedure to Compute
+    the Stagnation Point Heat Flux (Submitted for publication on Journal of
+    Spacecraft and Rockets)
+ 3. Goulard, R On Catalytic Recombination Rates in Hypersonic Stagnation
+    Heat Transfer, Jet Propulsion, Vol. 28, No 11, Nov. 1958, pp 733-745
+ 4. Fay, J A & Riddel, FR Theory of Stagnation Point Heat Transfer in
+    Dissociated Air, Journal of Aeronautical Sciences, Vol. 25, No 2, Feb.
+    1958, pp 73-85
+ 5. Pope, B R Stagnation-Point Heat Transfer in Frozen Boundary Layer,
+    AIAA J., Vol.6, N. 4, Apr. 1968 pp 619-626
+ 6. Zuppardi, G, Verde, G & Esposito A., Numerical Modelling of an Arc Jet
+    Wind Tunnel, DISIS Report J-96-1, Jan. 1996 (in Italian)
+ 1. Rose, P.H. & Stankewics JO Stagnation Point Heat Transfer Measurements
+    in Partially Ionized Air, AIAA J., Vol.1, No 12, Dec 1963, pp 2752-2763
+ 8. Zoby, E V Empirical Stagnation Point Heat Transfer Relation in Several
+    Gas Mixtures at High Enthalpy Levels, NASA TND-4799, Oct. 1968
+

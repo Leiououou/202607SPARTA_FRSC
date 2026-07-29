@@ -378,3 +378,52 @@ surf_react ID gamma file_name surf|face Tw n_site
   recombination, `tally_only`, omitted-gamma default zero, and both orders of a
   heteronuclear reaction. Statistical, explicit-surface, and MPI cases follow
   after these deterministic checks pass.
+
+Completion note (2026-07-29): all Zuppardi supplemental literature-review
+phases are complete.
+
+## 2026-07-29 DS2V-style unmatched-pair double scattering
+
+### Goal
+Change only the constant-gamma occupied-site/no-reaction-map event so that
+the incident particle and stored surface particle both leave the wall, matching
+the Zuppardi/Mongelluzzo description of DS2V.
+
+### Frozen event semantics
+- Gamma trial fails: incident particle scatters normally; surface state is unchanged.
+- Gamma trial passes and selects a vacancy: preserve current adsorption behavior.
+- Gamma trial passes, selects an occupied site, and finds a mapped reaction:
+  preserve current recombination, reaction tally, reaction heat, and product emission.
+- Gamma trial passes, selects an occupied site, but finds no mapped reaction:
+  remove one stored surface particle; preserve the incident species; create one gas
+  particle with the stored species at the collision point; diffusely and fully
+  accommodate both at the gamma wall temperature; return reaction ID zero and add
+  no reaction tally or chemical heat.
+- `tally_only yes`: do not mutate coverage and do not create the second particle.
+- State synchronization remains deferred to the existing per-step delta reduction.
+
+### Execution phases
+- [complete] 1. Audit worktree and existing particle-creation conventions.
+- [complete] 2. Freeze state, velocity, tally, heat, and `tally_only` semantics.
+- [complete] 3. Implement the smallest source change in `surf_react_gamma.cpp`.
+- [complete] 4. Add deterministic tests for both species, coverage decrement,
+  reaction tally zero, and two-particle emission.
+- [complete] 5. Add guard tests for gamma failure, mapped reaction, vacancy adsorption,
+  and `tally_only`.
+- [complete] 6. Compile and run serial face and explicit-surface cases.
+- [complete] 7. Run statistical and two-rank MPI conservation/regression cases.
+- [complete] 8. Review the final diff, update documentation, and record all results.
+
+### Acceptance criteria
+- One unmatched occupied-site impact changes gas model-particle count by +1 and
+  stored coverage count by -1, conserving the total represented particle count.
+- Outgoing species are exactly the incident species and the former stored species.
+- Both outgoing normal velocities point away from the wall after diffuse reset.
+- Surface reaction count and `echem` remain zero for the unmatched event.
+- Existing mapped recombination results and gamma statistics remain unchanged.
+- No stale pointer occurs when `add_particle()` reallocates particle storage.
+
+## 2026-07-29 Zuppardi 文献补充核查
+- [in_progress] 遍历 `D:\博一\气固相互作用\Zupparid` 中的论文并建立书目信息
+- [pending] 检索并复核壁面催化反应、DS2V 实现、反射/复合与未定义反应相关原文
+- [pending] 对照当前 constant-gamma 实现，形成有页码依据的结论与修改建议

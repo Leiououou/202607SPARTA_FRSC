@@ -1,0 +1,1469 @@
+         Proceedings of the Institution of Mechanical
+          Engineers, Part G: Journal of Aerospace
+                        Engineering
+                         http://pig.sagepub.com/
+
+
+
+
+                   Influence of chemical models on heat flux for EXPERT and Orion capsules
+                         Luigi Morsa, Gennaro Zuppardi, Raffaele Votta and Antonio Schettino
+    Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering 2014 228: 930
+                                         originally published online 18 April 2013
+                                            DOI: 10.1177/0954410013483935
+
+                                        The online version of this article can be found at:
+                                           http://pig.sagepub.com/content/228/6/930
+
+
+                                                                     Published by:
+
+                                                     http://www.sagepublications.com
+
+                                                                      On behalf of:
+
+
+
+
+                                                   Institution of Mechanical Engineers
+
+
+
+Additional services and information for Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering
+                                                            can be found at:
+
+                                              Email Alerts: http://pig.sagepub.com/cgi/alerts
+
+                                           Subscriptions: http://pig.sagepub.com/subscriptions
+
+                                          Reprints: http://www.sagepub.com/journalsReprints.nav
+
+                                      Permissions: http://www.sagepub.com/journalsPermissions.nav
+
+                                       Citations: http://pig.sagepub.com/content/228/6/930.refs.html
+
+
+
+                                                >> Version of Record - Apr 7, 2014
+
+                                          OnlineFirst Version of Record - Apr 18, 2013
+
+                                                                    What is This?
+
+
+
+
+                                              Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Original Article
+
+                                                                                                                       Proc IMechE Part G:
+                                                                                                                       J Aerospace Engineering
+Influence of chemical models on heat flux                                                                              2014, Vol. 228(6) 930–948
+                                                                                                                       ! IMechE 2013
+
+for EXPERT and Orion capsules                                                                                          Reprints and permissions:
+                                                                                                                       sagepub.co.uk/journalsPermissions.nav
+                                                                                                                       DOI: 10.1177/0954410013483935
+                                                                                                                       uk.sagepub.com/jaero
+
+
+Luigi Morsa1, Gennaro Zuppardi1, Raffaele Votta2
+and Antonio Schettino2
+
+
+
+
+Abstract
+The computation of heat flux on two current re-entry capsules, European eXPErimental Reentry Testbed (EXPERT) and
+Orion, has been carried out by a direct simulation Monte Carlo code (DS2V) and by a computational fluid dynamic code
+(H3NS) in transitional regime, considering both non-reactive and fully catalytic surface. These capsules have been chosen
+for this analysis because they have been characterized by completely different shapes and re-entry trajectories. DS2V and
+H3NS use the Gupta and the Park chemical models, respectively. The results showed that the heat flux predicted by
+DS2V is always higher than that predicted by H3NS. Therefore, a sensitivity analysis of the chemical models on the heat
+flux has been carried out for both capsules. More specifically, the Park model has been implemented in DS2V as well. The
+results showed that DS2V and H3NS compute a different chemical composition both in the flow field and on the surface,
+even when using the same chemical model (Park); therefore, the different results obtained from the two codes can be
+attributed mostly to the different methodology used in handling all chemical processes.
+
+Keywords
+Gupta chemical model, Park chemical model, direct simulation Monte Carlo method, computational fluid-dynamic, heat
+flux computation, EXPERT capsule, Orion capsule
+
+Date received: 29 April 2012; accepted: 4 March 2013
+
+
+Introduction                                                                       is 30% larger. Orion will hold four to six astronauts
+European eXPErimental Reentry Testbed (EXPERT)                                     while Apollo was able to carry only three astronauts.
+capsule, funded by ESA, was designed to enhance                                    Orion will be launched by a system derived by the
+knowledge of aero-thermo-dynamic problems during                                   Shuttle/Ares space systems.
+the re-entry. Experiments are scheduled about phe-                                    It is well known that one of the most important
+nomena like gas–surface interaction, induced and nat-                              problems in the design of a capsule is the evaluation
+ural laminar-turbulent transition, real gas eﬀects on                              of heat ﬂux during the re-entry. This evaluation has to
+shock wave boundary layer interaction, shock layer                                 provide information about the design of the thermal
+chemistry and so on. EXPERT will follow a ballistic                                protection system. Such an analysis should be carried
+re-entry trajectory. The capsule will be transported by                            on experimentally in thermal tunnels or ﬂight tests
+a Russian VOLNA rocket at an altitude of about                                     but, as well known, studying any aerodynamic prob-
+105 km and then released.                                                          lem experimentally in hypersonic, rareﬁed ﬂow is very
+   According to the NASA programs, Orion will be                                   diﬃcult and expensive. For this reason, computa-
+part of the Multi-Purpose Crew Vehicle project for                                 tional methods play an important role and are sub-
+carrying crew to space, beyond Low Earth Orbit.                                    jected to continuous improvements.
+Orion will be able to conduct space operations such                                   A number of articles have been already written
+as rendezvous, docking and extravehicular activity.                                about aero-thermo-dynamic behavior both of
+These operations will be fulﬁlled in conjunction with                              EXPERT1–3 and of Orion.4,5 The aim of the present
+a series of payloads using the facilities of Spacelab
+module to conduct a variety of life sciences research                              1
+                                                                                    Department of Industrial Engineering, University of Naples ‘Federico
+(Space Life Science program). Furthermore, Orion                                   II’, Naples, Italy
+                                                                                   2
+will be used also as a backup system for the                                        Italian Aerospace Research Center—CIRA, Capua, Italy
+International Space Station (ISS) cargo and crew
+                                                                                   Corresponding author:
+delivery. Orion is Apollo-like, with some modiﬁca-                                 Gennaro Zuppardi, Department of Industrial Engineering, University of
+tions. More speciﬁcally, it is much larger than                                    Naples ‘Federico II’, 80125 Naples, Italy.
+Apollo; the mass is almost twice, the base diameter                                Email: zuppardi@unina.it
+
+
+
+
+                                             Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                       931
+
+
+article is to provide a further contribution to the                           stream Mach numbers. For example, at the lowest
+evaluation of the heat ﬂux to the capsules. More spe-                         altitudes of 70 km for EXPERT and 85 km for
+ciﬁcally the topics of this article are as listed below.                      Orion, the Mach numbers are 17 and 28, respectively.
+                                                                                 As well known, during the entry of a hypersonic
+1. Comparison of the heat ﬂux computations, in high                           vehicle or capsule at suﬃciently high velocity into the
+   altitude ﬂight, by two codes based on diﬀerent                             Earth’s atmosphere, plasma is formed due to the
+   philosophies: one code solves the ﬂow ﬁeld by                              ionization process but for orbital entry velocities
+   the direct simulation of the molecules evolution,                          (7.8 km/s), the level of ionization is relatively weak.
+   direct simulation Monte Carlo method (DSMC)                                On the other hand, the aim of this study is also to
+   and the other one by the solution of the Navier–                           compare the two chemical models in basic aspects or
+   Stokes equation, computational ﬂuid dynamics                               in dissociation, recombination and exchange reac-
+   (CFD). The DSMC code is DS2V,6 the CFD                                     tions. Therefore, both codes considered air as being
+   code is H3NS.7 It has to be pointed out that the                           made up of ﬁve neutral species: O2, N2, O, N and NO,
+   two codes rely on diﬀerent physical models. For                            relying on 17 forward/reverse chemical reactions.
+   example, DS2V relies on three temperatures                                 DS2V implements the Gupta chemical model9 while
+   (translational, rotational and vibrational) while                          H3NS implements the Park chemical model.10–12 The
+   H3NS relies only on two temperatures (transla-                             results showed that the heat ﬂux by DS2V is always
+   tional and vibrational); it considers the rotational                       higher than the one by H3NS. The reason is that the
+   temperature to be in equilibrium with the transla-                         two codes compute diﬀerent chemical compositions.
+   tional temperature. Furthermore, the viscosity and                         Therefore, a sensitivity analysis of the chemical
+   the diﬀusion models are not consistent.                                    models has been carried out. More speciﬁcally, the
+2. Evaluation of the inﬂuence of the chemical models                          Park model has been implemented also in the DS2V
+   on the computation of heat ﬂux on both capsules.                           code and the related results have been compared with
+3. Comparison of the heat ﬂux from DSMC and                                   those by the Gupta model.
+   CFD has been already considered in the literature
+   (see for instance the article by Glass and Moss8).                         Geometry and re-entry trajectory of
+   The conclusion of their article was that the com-
+   putation of heat ﬂux on a blunt body (sphere and
+                                                                              EXPERT and of Orion
+   cylinder) by CFD is higher than the one by                                 Figure 1(a) and (b) show the current baseline geome-
+   DSMC. Therefore, a further aim of the present                              tries of EXPERT and Orion capsules, respectively.
+   article is to verify whether by using a more                               EXPERT is a blunted pyramidal shape, consisting
+   updated and advanced DSMC code and using                                   of a body of revolution with an ellipse-clothoid-cone
+   another chemical model in the CFD code, the con-                           two-dimensional (2D) longitudinal proﬁle. The total
+   clusions arrived at by Glass and Moss can be                               length is 1.55 m, the base diameter (D) is 0.918 m. The
+   conﬁrmed.                                                                  nose, or the fore part of EXPERT up to x ¼ 0.40 m,
+                                                                              has a local radius of 0.6 m and an eccentricity of 2.5 in
+   The analysis has been carried out by DS2V at high                          the meridian plane. At x ¼ 0.4 m, the circle diameter
+altitudes and by H3NS at low altitudes. DS2V ran                              of the section in the azimuthal plane is 0.7 m. Orion is
+between 70 and 105 km for EXPERT and 85 and                                   ‘Apollo like’ or sphere-cone shape. The total length is
+125 km for Orion. H3NS ran between 65 and 75 km                               3.30 m, the base diameter is 5.03 m and the radius of
+for EXPERT and 75 and 95 km for Orion. Tests con-                             the cap is 6.04 m.
+sidered both non-reactive and fully-catalytic surface.                           Although Orion re-enters at an angle of attack dif-
+The results from the two codes have been compared at                          ferent from zero, the present computations have been
+the overlapping altitudes of 70 km for EXPERT and                             carried out considering zero angle of attack or in
+85 km for Orion. EXPERT is not axial-symmetric but                            axial-symmetric ﬂow in order to make possible the
+the nose (or the fore part of the capsule up to a distance                    use of DS2V. In fact, as said before, using a
+of 0.40 m, see section Geometry and re-entry trajectory                       2D/axial-symmetric code was necessary to get a
+of EXPERT and of Orion) is an axial-symmetric body.                           better geometrical deﬁnition of the stagnation point.
+Considering that using DS2V, instead of the corres-                              Figure 2 shows the re-entry trajectories of both cap-
+ponding three-dimensional version (DS3V), makes it                            sules. In the altitude interval considered in this study
+possible to increase the surface resolution, including                        for EXPERT (65–105 km), velocity does not change
+the deﬁnition of the nose stagnation point, only the                          meaningfully, ranging from 5038 to 4992 m/s1 and
+nose of EXPERT has been simulated.                                            the Mach number ranges from 16.1 to 17.0 (the max-
+   Considering diﬀerent capsules is proper for the                            imum value of 18.3 is met at h ¼ 88 km). The free
+purposes of this analysis. In fact, these capsules gen-                       stream Reynolds number (ReD1) ranges from
+erate diﬀerent ﬂuid-dynamic conditions, produced by                           7.3  104 to 82 and the free stream Knudsen number
+diﬀerent shock wave intensity. This is due both to                            (KnD1) ranges from 3.2  104 to 3.1  101.
+diﬀerent radii of the nose of EXPERT (0.6 m) and                                 The present test conditions for Orion are related
+of the cap of Orion (6.04 m) and to diﬀerent free                             to the re-entry from ISS in the altitude interval
+
+
+
+                                    Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+932                                                                                       Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+
+
+Figure 1. (a) EXPERT and (b) Orion capsules (the pictures are not in the same scale).
+EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+
+                               30
+                                                    Orion
+                                                                                 Kn D ∞ =
+                                                    EXPERT
+                               28             1               0.1                0.01                0.001          0.0001
+
+                                                                                          88 km
+
+                               26                                         102 km
+                                                                                                               75 km
+
+                                                                 110 km
+                               24
+                        Ma ∞
+
+
+
+
+                               22
+
+
+                                                     115 km
+                               20
+
+                                                                    90 km
+                                                     98 km
+                               18                                                       80 km
+                                                                                                      70 km
+                                     125 km
+                                                  104 km
+                               16
+                                                                                                                61 km
+
+
+                                    10              100              1000               10000               100000
+                                                                           Re D∞
+
+
+Figure 2. EXPERT and Orion re-entry trajectories.
+EXPERT: European eXPErimental Reentry Testbed.
+
+75–125 km. Velocity is 7600 m/s at all altitudes and                            Orion can be considered in transitional regime in the
+the Mach number ranges from 17.5 to 26.3 (the max-                              altitude interval 83–125 km, where KnD1 ranges from
+imum value of 27.7 is met at h ¼ 88 km). The related                            1.4  103 to 1.1. At lower altitudes or in the interval
+ReD1 and KnD1 range from 9.62  104 to 23.3 and                                 75–83 km, Orion is in continuum low density regime;
+from 4.04  104 to 1.11, respectively.                                         KnD1 ¼ 4.04  104 at h ¼ 75 km.
+   According to Moss,13 a general deﬁnition of the
+transitional regime is: 103 < KnL1<50. Therefore,
+EXPERT can be considered in transitional regime in                              Computing codes
+the altitude interval 80–105 km, where KnD1 ranges
+from 4.8  103 to 33. At lower altitudes or in the
+                                                                                Direct simulation Monte Carlo
+interval 61–80 km, EXPERT is in continuum low                                   It is well known that the DSMC method14,15 is now-
+density regime; KnD1 ¼ 3.2  104 at h ¼ 61 km.                                 adays the only available method to solve a rareﬁed
+
+
+
+                                          Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                     933
+
+
+ﬂow ﬁeld because it overcomes the failure, in this                            averaged Navier–Stokes equations and considers air
+regime, of the phenomenological equations of                                  to be made up of the ﬁve above-mentioned chemical
+Newton, Fourier and Fick on which the Navier–                                 species in thermo-chemical non-equilibrium. The code
+Stokes equations rely. Furthermore, DSMC over-                                implements the Park chemical model.10–12
+comes the numerical diﬃculties in the solution of                                H3NS is based on a ﬁnite volume approach with a
+the Burnett equations and is far more accurate than                           cell-centered formulation. The inviscid ﬂuxes are com-
+the engineering methods such as bridging formulae                             puted by a ﬂux diﬀerence splitting scheme. A second-
+and panel methods.                                                            order approximation is obtained with an essentially
+   This method is based on the kinetic theory of gases                        non-oscillatory reconstruction of interface values.
+and simulates the evolution of millions of molecules,                         H3NS ran by an explicit multistage Runge–Kutta
+each one representing a large number (say 1015) of real                       algorithm, coupled with an implicit evaluation of
+molecules in the physical space. The computational                            the source terms.
+domain is divided in cells. The cells are used for select-                       In order to take into account the eﬀects of rarefac-
+ing the colliding molecules and for sampling the                              tion, H3NS can implement, as boundary conditions,
+macroscopic ﬂuid-dynamic quantities.                                          the slip velocity (us) and the slip temperature (Ts).
+   As already said, the DSMC code used in this study                          Among the many available formulations of this kind
+is DS2V (Ver. 4.5, 64 bits),6 simulating 2D plane/axial-                      of conditions, the ones proposed by Kogan20 are usu-
+symmetric ﬂow ﬁelds in chemical non-equilibrium.                              ally used
+DS2V is widely tested and accepted worldwide. It is                                            
+‘sophisticated’ and advanced. A ‘sophisticated’ DSMC                                           @u
+                                                                                   us ¼ 1:012                                    ð1Þ
+algorithm (termed also DSMC07) relies on the same                                              @n w
+theoretical basis of the original DSMC algorithm
+                                                                                                                 pﬃﬃﬃ  
+(termed also DSMC94) by Bird14 but includes some                                                                 @T
+changes for improving the accuracy and the computa-                                Ts ¼ Tw þ 1:73                                ð2Þ
+                                                                                                               1 4    @n w
+tional eﬃciency of the method. In fact, a DSMC0716–18
+relies on two sets of cells (collision and sampling cells)                    where u is the tangential component of velocity,  is
+with the related cell adaptation and implements meth-                         the speciﬁc heat ratio, n and w stand for local normal
+ods promoting nearest neighbor collisions. A                                  and wall, respectively.
+DSMC07 code generates automatically computational
+parameters such as numbers of cells and of simulated
+                                                                              The Gupta and the Park chemical models
+molecules by the input numbers of megabytes and of
+free stream number density. It uses a radial weighting                        The ﬁve chemical species (O2, N2, O, N and NO) react
+factor in solving axial-symmetric ﬂow ﬁelds and pro-                          according to 17 forward/reverse chemical reactions
+vides optimal time step. Finally, the same collision pair                     proposed by the Gupta and the Park models; as said
+cannot have sequential collisions. DS2V is advanced                           before, these models are built-in the DS2V and H3NS
+because it allows the user to check online, i.e. during                       codes, respectively. In the Gupta model, both the for-
+the run, the adequacy of the number of simulated mol-                         ward (kf) and the reverse (kr) rate coeﬃcients are
+ecules and therefore the quality of the results by means                      expressed in terms of the Arrhenius-like equation
+of the display of the maximum and averaged values of                                                                   
+the ratio of the mean collision separation (mcs) to the                                              nf,r         Eaf,r
+                                                                                   kf,r ¼ Cf,r T            exp                  ð3Þ
+local mean free path (l). Bird19 suggests 0.2 as a limit                                                          kT
+value of mcs/l for an optimal quality of the run.
+Furthermore, DS2V provides facilities that are very                           where C is the pre-exponential factor, n is the tem-
+useful for checking online the evolution of the run                           perature exponent, Ea is the speciﬁc activation energy,
+and therefore for evaluating the reliability of the                           k is the Boltzmann constant, subscripts f and r stand
+results and allows the user to increase, during a run,                        for forward and reverse reactions. The reactions are
+the number of simulated molecules, if necessary.                              reported in Tables 1 and 2, together with the reaction
+   DS2V is able to consider a number of built-in                              rate coeﬃcients and the ratios of activation energies
+gases, including air plasma. The built-in, neutral,                           and the Boltzmann constant. The reactions are 15 dis-
+real air is considered to be made up of ﬁve chemical                          sociation/recombination (Table 1) and 2 exchange
+species: O2, N2, O, N and NO in thermo-chemical                               (Table 2).
+non-equilibrium. The built-in chemical model relies                              Park provides the forward reaction rate coeﬃcients
+on 17 forward/reverse chemical reactions from the                             expressed in the Arrhenius-like equation
+Gupta model.9                                                                                                       
+                                                                                                                 Eaf
+                                                                                   kf ¼ Cf Tnc f exp                             ð4Þ
+Computational fluid dynamics                                                                                     kTc
+
+The CFD code H3NS,7 developed by the Italian                                  where Tc is the temperature controlling the reaction.
+Aerospace Research Center, solves full Reynolds                               This temperature takes into account the inﬂuence of
+
+
+
+                                    Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+934                                                                                      Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+Table 1. Gupta kinetic model for dissociation/recombination reactions.
+
+No       Reactions                     Cf (m3/molecule/s)                nf           Eaf/k (K)          Cr (m6/molecule2/s)   nr     Ear/k (K)
+
+ 1       O2 þ N $ O þ O þ N            5.99  1012                      1            59500             8.30  1045          0.5   0.0
+ 2       O2 þ NO $ O þ O þ NO          5.99  1012                      1            59500             8.30  1045          0.5   0.0
+ 3       O2 þ N2 $ O þ O þ N2          1.20  1011                      1            59500             1.66  1044          0.5   0.0
+ 4       O2 þ O2 $ O þ O þ O2          5.39  1011                      1            59500             7.47  1044          0.5   0.0
+ 5       O2 þ O $ O þ O þ O            1.50  1010                      1            59500             2.07  1043          0.5   0.0
+ 6       N2 þ O $ N þ N þ O            3.18  1013                      0.5         113200             3.01  1044          0.5   0.0
+ 7       N2 þ O2 $ N þ N þ O2          3.18  1013                      0.5         113200             3.01  1044          0.5   0.0
+ 8       N2 þ NO $ N þ N þ NO          3.18  1013                      0.5         113200             3.01  1044          0.5   0.0
+ 9       N2 þ N2 $ N þ N þ N2          7.97  1013                      0.5         113200             7.51  1044          0.5   0.0
+10       N2 þ N $ N þ N þ N            6.90  108                       1.5         113200             6.42  1039          1.5   0.0
+11       NO þ N2 $ N þ O þ N2          6.59  1010                      1.5          75500             2.78  1040          1.5   0.0
+12       NO þ O2 $ N þ O þ O2          6.59  1010                      1.5          75500             2.78  1040          1.5   0.0
+13       NO þ NO $ N þ O þ NO          1.32  108                       1.5          75500             5.57  1039          1.5   0.0
+14       NO þ O $ N þ O þ O            1.32  108                       1.5          75500             5.57  1039          1.5   0.0
+15       NO þ N $ N þ O þ N            1.32  108                       1.5          75500             5.57  1039          1.5   0.0
+
+
+
+
+Table 2. Gupta kinetic model for exchange reactions.
+
+No         Reactions               Cf (m3/molecule/s)               nf             Eaf/k (K)            Cr (m3/molecule/s)     nr     Ear/k (K)
+                                              21                                                                  18
+16         NO þ O $ O2 þ N         5.28  10                        1.0            19220                1.60  10              0.5    3580
+17         N2 þ O $ NO þ N         1.12  1016                     0.0            38400                2.49  1017           0.0       0.0
+
+
+the vibrational temperature on the rates of reaction.                             Handling all chemical processes in a DSMC code is
+Park assumes that Tc is a function of the geometrical                          diﬀerent from that in a CFD code; in fact a DSMC
+mean temperature between transitional and vibra-                               code does not rely on the rate equation (equations (3)
+tional temperatures                                                            and (4)) but uses only the pre-exponential factor (Cf,r),
+                                                                               the temperature exponent (nf,r) and the activation
+     Tc ¼ T Tð1Þ
+              v                                                 ð5Þ            energy (Eaf,r) to calculate the reaction probability
+                                                                               (or steric factor14). For this reason, in order to imple-
+According to Park et al.,11  ¼ 0.5 for dissociation/                          ment the reverse reaction rates of the Park model in
+recombination reactions and  ¼ 1.0 for exchange                               DS2V or to deﬁne Cr, nr and Ear, the curves, best-
+reactions.                                                                     ﬁtting the values kf/Ke as a function of temperature,
+   The reverse rate coeﬃcient (kr) is computed by the                          have been obtained in the form of equation (3). Such
+ratio of the forward rate coeﬃcient (kf) and the equi-                         an approach has been already proposed by Boyd.21
+librium constant (Ke): kr ¼ kf/Ke. For reactions 1–10                          More speciﬁcally, in order to have kr expressed in the
+and for reactions 16 and 17, the equilibrium constant                          modiﬁed Arrhenius form, Boyd computed the equilib-
+is computed by11                                                               rium constant as
+                                                                                                      
+     Ke ðTÞ ¼ exp½A1 =Z þ A2 þA3 lnðZÞ þ A4 Z þ A5 Z2                                             Eaf
+                                                                                                   ne
+                                                                                   Ke ¼ Ce T exp                                           ð8Þ
+                                                     ð6Þ                                           kT
+
+For reactions 11–15, the equilibrium constant is com-                          The values of Ce and ne are stated by best-ﬁt approxi-
+puted by12                                                                     mations of Ke provided by Park. As a consequence,
+                                                                               the computation of kr is lacking of the exponential
+     Ke ðTÞ ¼ exp½A1 þA2 lnðZÞ þ A3 Z þ A4 Z2 þ A5 Z3                         term
+                                                     ð7Þ
+                                                                                            Cf Tnf
+                                                                                   kr ¼
+where Z ¼ 10,000/T. Table 3 reports the pre-                                                Ce Tne
+exponential factors, the temperature exponents, the
+ratios of activation energies and the Boltzmann con-                           This implies that the activation energy of the reverse
+stant and the equilibrium constant coeﬃcients.                                 reaction is always zero. On the other hand, in the
+
+
+
+                                         Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                   935
+
+
+Table 3. Park kinetic model for dissociation/recombination and exchange reactions.
+
+No    Reactions                     Cf (m3/molecule/s)           nf            Eaf/k (K)        A1             A2       A3       A4       A5
+
+ 1    O2 þ N $ O þ O þ N            1.66  108                  1.5           59500            2.855          0.988   6.181   0.023   0.001
+ 2    O2 þ NO $ O þ O þ NO          3.32  109                  1.5           59500            2.855          0.988   6.181   0.023   0.001
+ 3    O2 þ N2 $ O þ O þ N2          3.32  109                  1.5           59500            2.855          0.988   6.181   0.023   0.001
+ 4    O2 þ O2 $ O þ O þ O2          3.32  109                  1.5           59500            2.855          0.988   6.181   0.023   0.001
+ 5    O2 þ O $ O þ O þ O            1.66  108                  1.5           59500            2.855          0.988   6.181   0.023   0.001
+ 6    N2 þ O $ N þ N þ O            4.98  108                  1.6          113200            1.858         1.325   9.856   0.174    0.008
+ 7    N2 þ O2 $ N þ N þ O2          1.16  108                  1.6          113200            1.858         1.325   9.856   0.174    0.008
+ 8    N2 þ NO $ N þ N þ NO          1.16  108                  1.6          113200            1.858         1.325   9.856   0.174    0.008
+ 9    N2 þ N2 $ N þ N þ N2          1.16  108                  1.6          113200            1.858         1.325   9.856   0.174    0.008
+10    N2 þ N $ N þ N þ N            4.98  108                  1.6          113200            1.858         1.325   9.856   0.174    0.008
+11    NO þ N2 $ N þ O þ N2          8.30  1015                  0.0           75500            0.792         0.492   6.761   0.091    0.004
+12    NO þ O2 $ N þ O þ O2          8.30  1015                  0.0           75500            0.792         0.492   6.761   0.091    0.004
+13    NO þ NO $ N þ O þ NO          1.83  1013                  0.0           75500            0.792         0.492   6.761   0.091    0.004
+14    NO þ O $ N þ O þ O            1.83  1013                  0.0           75500            0.792         0.492   6.761   0.091    0.004
+15    NO þ N $ N þ O þ N            1.83  1013                  0.0           75500            0.792         0.492   6.761   0.091    0.004
+16    NO þ O $ O2 þ N               1.39  1017                  0.0           19400           1.840         1.768   4.759    1.154   0.239
+17    N2 þ O $ NO þ N               9.46  1018                  0.42          42938           3.032          0.078   7.693    1.411   0.517
+
+
+
+procedure proposed in this study, it is possible to also                       the wall temperature of EXPERT is 300 K in the
+take into account the exponential term that is import-                         whole altitude interval 65–105 km1 and the wall tem-
+ant in some reactions (as per reaction #16) in order to                        perature of Orion ranges from 1464 to 494 K in the
+better approximate the ratio kf/Ke provided by Park                            altitude interval 75–125 km.5
+(see Figure 3(d)).                                                                 The surface recombination reactions, implemented
+   Tables 4 and 5 report the pre-exponential factors                           in both codes, are O þ O!O2, N þ N!N2 and
+and the exponent coeﬃcients of the ﬁtting curves.                              N þ O!NO. The condition of fully catalytic surface
+Figure 3(a)–(e) show the comparison of the present                             is diﬀerent between H3NS and DS2V. In H3NS the
+reverse reaction rates with the ones from the study                            fully catalytic model relies on the ‘super-catalytic’
+of Park in the temperature interval 3000–13,000 K.                             boundary condition. This condition implies that the
+The reasonably good agreement of the present                                   gas composition on the surface is imposed equal to the
+curves with those proposed by Park made possible                               free stream composition; therefore, the molar frac-
+their implementation in DS2V.                                                  tions of O2 and N2 at the wall are the same like the
+   The ﬁts with the original Park model for reactions                          input data. In DS2V, modeling catalyticity is fulﬁlled
+NO þ O $ O2 þ N (Figure 3(d)) and N2 þ O $                                     by setting the probability of recombination reaction
+ NO þ N (Figure 3(e)) are not so good like the ones                            for each recombination reaction when the atoms meet
+obtained for other reactions. On the other hand, con-                          on the same surface element. Therefore, stating a sur-
+sidering other ﬁtting parameters in the Arrhenius                              face as fully catalytic means to impose this probability
+equation produced worse results.                                               at 1. In other words, if two atoms impact the same
+   For a direct comparison of the Gupta and the Park                           surface element, their recombination occurs certainly.
+models, Figure 4(a)–(f) shows the proﬁles of forward                           If, for instance, the ﬁrst impacted atoms is N and the
+and reverse reaction rates for some reactions in the                           second one is O, the reemitted molecule will be NO; if
+temperature interval 3000–13,000 K. These reactions                            the second one is N, the reemitted molecule will be N2
+have been chosen because they are the most frequent                            and so on for every possibility, regardless of the free
+in the present runs. These ﬁgures show that the reac-                          stream composition.
+tion rate coeﬃcients are comparable and that neither                               The computing domain of DS2V was a rectangle
+the Gupta model nor the Park model is always preva-                            in the meridian plane: for EXPERT nose Lx ¼ 0.68 m
+lent on the other one.                                                         and Ly ¼ 0.55 m, for Orion Lx ¼ 6.0 m and Ly ¼ 4.5 m;
+                                                                               as an example, Figure 5 shows the computing domain
+                                                                               for Orion. For all runs, the simulation time was longer
+Test conditions
+                                                                               than six times the time necessary to cross the comput-
+Tables 6 and 7 report the input data to both codes for                         ing domain along the x direction at the free stream
+EXPERT and Orion. The free stream thermodynamic                                velocity (Lx/V1 ﬃ 8  104 s for EXPERT and
+parameters are provided by the US Standard                                     Lx/V1 ﬃ 5  103 s for Orion). This simulation time
+Atmosphere 1976. According to the test matrices,                               can be considered long enough for stabilizing all
+
+
+
+                                     Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+936                                                                                          Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+
+
+Figure 3. Profiles of reverse reaction rate coefficients (m3/molecule/s) by fitting curves (dashed line) and by Park original curves
+(continuous line): (a) O2 þ M $ O þ O þ M (M ¼ O, N), (b) N2 þ M $ N þ N þ M, (M ¼ O, N), (c) NO þ M $ N þ O þ M (M ¼ O,
+N, NO), (d) NO þ O $ O2 þ N, (e) N2 þ O $ NO þ N.
+
+
+
+Table 4. Reaction rate coefficients of the reverse (recom-                         Table 5. Reaction rate coefficients of the reverse (exchange)
+bination) equations approximating the Park model.                                  equations approximating the Park model.
+
+                                 Cr                               Ear/k                                                Cr                        Ear/k
+No Reactions                     (m6/molecule2/s) nr              (K)              No      Reactions                   (m3/molecule/s)   nr      (K)
+
+ 1    O2 þ N $ O þ O þ N         4.41  1042            0.8 0.0                  16      NO þ O $ O2 þ N             4.32  1015      0.5    3580
+ 2    O2 þ NO $ O þ O þ NO       8.82  1043
+                                                         0.8 0.0                  17      N2 þ O $ NO þ N             4.65  1020       0.75      0.0
+ 3    O2 þ N 2 $ O þ O þ N 2     8.82  1043            0.8 0.0
+                                          43
+ 4    O2 þ O2 $ O þ O þ O2       8.82  10               0.8 0.0
+ 5    O2 þ O $ O þ O þ O         4.41  1042            0.8 0.0                  quality or to satisfy the condition that mcs/l is less
+ 6    N2 þ O $ N þ N þ O         1.01  1038
+                                                         1.7 0.0                  that 0.2. For the present tests, the number of simu-
+ 7    N 2 þ O2 $ N þ N þ O2      2.35  1039            1.7 0.0
+                                                                                   lated molecules were about 2.2  107 for EXPERT
+                                          39                                      and 6.5  107 for Orion.
+ 8    N2 þ NO $ N þ N þ NO       2.35  10               1.7 0.0
+ 9    N2 þ N2 $ N þ N þ N2       2.35  1039            1.7 0.0
+10    N2 þ N $ N þ N þ N         1.01  1038            1.7 0.0                  Grid analysis and particle convergence
+11    NO þ N2 $ N þ O þ N2       2.76  1040            1.5 0.0                  It is well known that, for both CFD and DSMC
+12    NO þ O2 $ N þ O þ O2       2.76  1040            1.5 0.0                  codes, the computation of heat ﬂux is the most sensi-
+13    NO þ NO $ N þ O þ NO 5.51  1039                  1.5 0.0                  tive parameter to the grid dimension and shape; there-
+14    NO þ O $ N þ O þ O         5.51  1039            1.5 0.0                  fore, the grid analysis has been carried out considering
+15    NO þ N $ N þ O þ N         5.51  1039            1.5 0.0                  heat ﬂux as a merit parameter. For a DSMC code
+                                                                                   also, the number of molecules, or particles, aﬀects
+                                                                                   the quality of the results. Preliminary runs have
+thermo-aerodynamic parameters. Using a 64-bit ver-                                 been fulﬁlled in order to check the suitability of the
+sion of DS2V made simulations possible with proper                                 grid, both for H3NS and for DS2V, the number of
+numbers of cells and simulated molecules and there-                                molecules as well. The results of the analysis is related
+fore made it possible to fulﬁll DSMC runs of good                                  to the most severe test conditions: for Orion at
+
+
+
+                                             Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                  937
+
+
+
+
+Figure 4. Profiles of the (a)–(d) forward and (e) and (f) reverse rates of some reactions by the Gupta and the Park models.
+
+
+
+
+                                      Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+938                                                                                       Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+      Table 6. Input data for EXPERT.
+
+      h (km)         T1 (K)         N1 (1/m3)                O2                   N 2                 O          V1 (m/s)    Tw (K)
+
+       65            233            3.30  1021              0.2095                0.7808               0.0097      5045        300
+       70            220            1.77  1021              0.2095                0.7808               0.0097      5047        300
+       75            209            8.42  1020              0.2095                0.7808               0.0097      5043        300
+       85            189            1.74  1020              0.2095                0.7808               0.0097      5028        300
+       95            189            2.81  1019              0.1983                0.7766               0.0251      5009        300
+      105            208            5.48  1018              0.1544                0.7731               0.0725      4992        300
+      EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+      Table 7. Input data for Orion.
+
+      h (km)         T1 (K)         N1 (1/m3)                O2                   N 2                 O          V1 (m/s)    Tw (K)
+
+       75            208            8.30  1020              0.2095                0.7808               0.0097      7600        1464
+       85            189            1.71  1020              0.2095                0.7808               0.0097      7600        1184
+       95            189            2.92  1019              0.1988                0.7767               0.0245      7600         951
+      105            210            5.03  1018              0.1516                0.7729               0.0755      7600         760
+      115            299            9.81  1017              0.1001                0.7490               0.1509      7600         618
+      125            416            3.03  1017              0.0777                0.7085               0.2138      7600         494
+
+
+
+
+                                                                                is that the ﬂow ﬁeld in the base region is very rareﬁed
+                                                                                and the residuals do not decrease signiﬁcantly.
+                                                                                    The heat ﬂux proﬁles from the two grid levels
+                                                                                (Figure 6) practically do not change along the Orion
+                                                                                surface, verifying a good reliability of level 3 grid.
+                                                                                Similar results were also obtained for EXPERT; the
+                                                                                optimal third grid level was made up of 5200 cells.
+                                                                                    As said before, DS2V does not allow the user to
+                                                                                input the cell grid; the grid is made up automatically
+                                                                                by the code on the input numbers of megabytes and of
+                                                                                free stream number density. The user can roughly
+                                                                                control the number of cells by setting the input
+                                                                                number of elements in each cell, the higher the
+                                                                                number of elements, the higher the number of the
+                                                                                cells after the adaptation process. The Orion grid ana-
+                                                                                lysis relies on four runs by two numbers of megabytes
+Figure 5. Computing domain of the Orion capsule and two-                        (1600 and 1770) and two numbers of elements
+dimensional plot of temperature.
+                                                                                (10  10 and 15  15). The numbers of computing or
+                                                                                collision cells (Nc) ranged from 1.26  106 to
+h ¼ 95 km running H3NS and at h ¼ 85 km running                                 2.92  106 and the number of sampling cells (Ns)
+DS2V, for the EXPERT nose at 70 km running                                      ranged from 7.42  104 to 8.48  104. Figure 7 veriﬁes
+DS2V.                                                                           that the four computing grids are pratrically equiva-
+    The computation domain of H3NS was a grid, fol-                             lent; in fact, the proﬁles of heat ﬂux practically over-
+lowing the shock wave proﬁle with three grid levels.                            lap. For EXPERT, nose Nc ranged from 1.23  106 to
+The convergence of the solution was obtained when                               2.20  106 and Ns from 7.34  104 to 8.02  104.
+the maximum and the average residuals were stabi-                                   In Figure 6 the heat ﬂux distribution from DS2V
+lized and, at the same time, the heat ﬂux did not                               and in Figure 7 the heat ﬂux distribution from H3NS
+change meaningfully during the iterations. To check                             are reported for completeness.
+the grid convergence, an analysis on diﬀerent grid                                  At low altitude (h ¼ 70 km), a particle convergence
+levels was carried out: grid level 2 (10,600 cells) and                         analysis is important in order to state the proper
+grid level 3 (42,400 cells). The residuals of the calcu-                        number of the optimal free stream simulated mol-
+lations decreased four order of magnitudes (ﬁnal                                ecules. For this purpose, Figure 8 shows the heat
+order O(1)). The reason for a not very high decrease                            ﬂux along the surface of the EXPERT nose, changing
+
+
+
+                                          Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                          939
+
+
+
+                                                     60000
+
+
+                                                     55000
+
+
+                                                     50000
+
+
+                                                     45000
+                        Heat Flux [W/m2]
+
+
+
+
+                                                     40000
+
+
+                                                     35000
+
+
+                                                     30000
+                                                                                   Orion
+                                                                                   H3NS: Grid level 2
+                                                     25000
+                                                                                   H3NS: Grid level 3
+                                                                                   DS2V
+                                                     20000
+
+                                                             –0.1          0           0.1           0.2           0.3          0.4       0.5   0.6
+                                                                                                           x [m]
+
+
+Figure 6. H3NS heat flux profiles along the Orion surface by two grid levels: h ¼ 95 km, fully catalytic wall.
+H3NS: computational fluid dynamic code.
+
+
+
+
+                                                     80000
+                                                                                                                         Orion
+                                                                                                                    Nc=1.26x10 6, Ns=7.41x104
+                                                     70000
+                                                                                                                    Nc=2.52x106, Ns=8.17x104
+                                                                                                                    Nc=2.30x106, Ns=8.38x104
+                                                     60000                                                          Nc=2.92x106, Ns=8.48x104
+                                                                                                                    H3NS
+                              Heat Flux [ W / m2 ]
+
+
+
+
+                                                     50000
+
+
+                                                     40000
+
+
+                                                     30000
+
+
+                                                     20000
+
+
+                                                     10000
+
+
+                                                         0
+                                                               0           0.1          0.2           0.3          0.4          0.5       0.6   0.7
+                                                                                                         x[m]
+
+
+Figure 7. DS2V heat flux profiles along Orion surface by four grid levels: h ¼ 85 km, non-reactive wall.
+DS2V: direct simulation Monte Carlo code.
+
+
+
+
+                                                                Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+940                                                                                                   Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+
+                                    400000
+                                                                                                       EXPERT
+                                                                                                1.1x10 7 Simulated Molecules
+                                    350000                                                            7
+                                                                                                1.6x10 Simulated Molecules
+                                                                                                      7
+                                                                                                2.2x10 Simulated Molecules
+                                                                                                       7
+                                    300000                                                      3.3x10 Simulated Molecules
+                                                                                                       7
+                                                                                                4.4x10 Simulated Molecules
+
+                                    250000
+                        q [W/m2 ]
+
+
+
+
+                                    200000
+
+
+                                    150000
+
+
+                                    100000
+
+
+                                     50000
+
+
+                                        0
+
+                                             0      0.1         0.2         0.3             0.4            0.5      0.6       0.7      0.8
+                                                                                            s [m]
+
+
+Figure 8. DS2V heat flux profiles along the surface of the EXPERT nose by five numbers of simulated molecules: h ¼ 70 km.
+DS2V: direct simulation Monte Carlo code; EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+
+      (a)                                                                          (b) 450
+                                                                                                                 Orion
+                                                                                             400                     DS2V
+                                                                                                                     H3NS
+
+                                                                                             350
+
+                                                                                             300
+
+                                                                                             250
+                                                                                   p [Pa]
+
+
+
+
+                                                                                             200
+
+                                                                                             150
+
+                                                                                             100
+
+                                                                                              50
+
+                                                                                                0
+                                                                                                    –0.8     –0.7   –0.6    –0.5    –0.4 –0.3   –0.2   –0.1   0
+                                                                                                                                       x [m]
+
+
+Figure 9. (a) Pressure iso-lines and (b) pressure profiles along the stagnation line of Orion: h ¼ 85 km.
+
+
+the number of simulated molecules from 1.1  107 to                                            Figure 9(a) and (b) verify the adequacy of the grid
+4.4  107. The number of simulated molecules                                                and the number of cells and simulated molecules. In
+greater than 1.1  107 seems to not aﬀect the results.                                      fact, these ﬁgures show a good match of the pressure
+Therefore, the runs for EXPERT have been made                                               iso-lines (Figure 9(a)) and the pressure distribution
+with a number of simulated molecules of about                                               along the stagnation line (Figure 9(b)) computed by
+2.2  107.                                                                                  H3NS and DS2V for Orion at h ¼ 85 km. In fact, no
+
+
+
+                                                 Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                                                                     941
+
+
+signiﬁcant diﬀerence appears in the ﬂow ﬁelds.                                                                            those by DS2V. Slip corrections, implemented in the
+Figure 9(b) shows that, as expected, the shock wave                                                                       CFD code, compute a higher wall temperature; there-
+thickness computed by the particle code is larger                                                                         fore, a lower heat ﬂux is predicted (Fourier formula)
+than the Navier–Stokes code; this value, generally                                                                        with respect to the no-slip case. The H3NS computa-
+expressed as a multiple of the upstream mean free                                                                         tions with slip corrections are less accurate than the
+path, is well predicted by DS2V.                                                                                          no-slip one if compared with DSMC computations. A
+                                                                                                                          similar condition, not shown here, was obtained also
+                                                                                                                          from other runs of this study. For this reason, the
+Analysis of the results                                                                                                   comparison with the DS2V results relies on those
+Comparison between the results from DS2V                                                                                  obtained without slip corrections. The evaluation of
+                                                                                                                          coupling the slip eﬀects and catalitycity should be
+and H3NS                                                                                                                  proper and interesting but it was not considered in
+As the chemical eﬀects increase with decreasing                                                                           this study.
+rarefaction, considering the lowest altitudes for                                                                            The proﬁles of heat ﬂux are in agreement with what
+EXPERT (h ¼ 70 km) and for Orion (h ¼ 85 km) is                                                                           was expected by the diﬀerent geometries or with the
+proper for the purpose of this study. At these alti-                                                                      diﬀerent aspect ratios of the capsules. The proﬁles on
+tudes, the two capsules are at diﬀerent Mach numbers                                                                      the EXPERT nose are typical of slender bodies, i.e.
+(17 for EXPERT and 28 for Orion). This produces,                                                                          heat ﬂux decreases quickly on the ﬁrst part of the nose
+for Orion, a stronger shock wave and therefore a                                                                          and then tends to a practically constant value toward
+stronger dissociation. On the other hand, the                                                                             the end of the body. The proﬁles on Orion are typical
+Knudsen numbers are comparable: 1.2  103 for                                                                            of blunt bodies, i.e. heat ﬂux is about constant along
+EXPERT nose and 2.0  103 for Orion. Thus the                                                                            the cap surface. Furthermore, a peak of heat ﬂux is
+rarefaction similarity is achieved.                                                                                       predicted by H3NS in the shoulder region. The peak is
+   Figure 10(a) and (b) shows the proﬁles of heat ﬂux                                                                     probably linked to a strong expansion and therefore
+by DS2V and H3NS, considering both non-reactive                                                                           to a high skin friction. On the contrary, DS2V seems
+and fully catalytic surface, along the EXPERT nose                                                                        to be not able to predict clearly the peak of heat ﬂux.
+(Figure 10(a)) and along the Orion surface                                                                                This is due probably to a not proper reﬁnement of the
+(Figure 10(b)) at the altitudes of 70 and 85 km;                                                                          grid in this region. On the other hand, as already
+these, as said before, are the overlapping altitudes of                                                                   pointed out, the user of DS2V cannot control the
+the runs of DS2V and H3NS.                                                                                                grid locally.
+   It must be pointed out that in this study, the slip                                                                       For both capsules and for both surface conditions,
+corrections, besides being very small, seem to be not                                                                     the heat ﬂux computed by DS2V is always higher than
+proper. In fact, as shown in Figure 10(b), for fully                                                                      the one computed by H3NS. This result does not
+catalytic surface, the slip corrections amplify instead                                                                   agree with the results from Glass and Moss.8
+of reducing the deviation of the H3NS results from                                                                        Probably, the diﬀerence between DS2V and G2 is
+
+
+
+
+    (a) 450000                                                                                         (b) 200000
+                                                                                                                                                              Orion
+                                                                  EXPERT
+                         400000                                DS2V, fully catalytic surface
+                                                                                                                          180000                     DS2V, fully catalytic surface
+                                                                                                                                                     H3NS, fully catalytic surface
+                                                               H3NS, fully catalytic surface
+                                                                                                                          160000                     H3NS, fully catalytic surface with slip
+                                                               DS2V, non-reactive surface
+                         350000                                                                                                                      DS2V, non-reactive surface
+                                                               H3NS, non-reactive surface
+                                                                                                                                                     H3NS, non-reactive surface
+                                                               DS2V, no chemistry                                         140000
+                                                                                                                                                     DS2V, no chemistry
+                                                                                                     Heat Flux [W /m2 ]
+
+
+
+
+                         300000
+    Heat Flux [W /m2 ]
+
+
+
+
+                                                               H3NS, no chemistry
+                                                                                                                          120000
+                         250000
+                                                                                                                          100000
+                         200000
+                                                                                                                           80000
+                         150000
+                                                                                                                           60000
+
+                         100000                                                                                            40000
+
+                          50000                                                                                            20000
+
+                              0                                                                                                0
+                                  0   0.05   0.1   0.15   0.2   0.25      0.3     0.35         0.4                                 0   0.1   0.2   0.3      0.4        0.5       0.6           0.7
+                                                          x [m]                                                                                       x [m]
+
+
+
+Figure 10. Heat flux profiles along the EXPERT nose at (a) 70 km and (b) along the Orion surface at 85 km.
+EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+                                                          Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+942                                                                                               Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+due to the fact that the DS2V user does not have                                      while the diﬀerences are 7% for EXPERT and 12%
+much control on the grid construction. The diﬀerence                                  for Orion for fully catalytic surface. This can be justi-
+with H3NS is probably due to the diﬀerent chemical                                    ﬁed because the fully catalytic surface reduces the dif-
+models. Even when using the same chemical model                                       ferences of gas composition generated in the ﬂow ﬁeld.
+(Park), the coeﬃcients of the reverse reactions are cor-                              The condition of fully catalytic wall is practically
+rectly approximate for most reactions (but, as said                                   equivalent to that of non-reactive gas in which no
+before, for the ones involving NO); however, DS2V                                     reaction occurs either in the ﬂow or on the surface.
+does not consider the ‘temperature controlling the                                    The proﬁle of heat ﬂux computed with non-reactive
+reaction’ (equation (5)). Furthermore, the two codes                                  gas matches the one computed by the condition of
+use inconsistent viscosities/diﬀusion values. On the                                  fully catalytic surface. Therefore, in the condition of
+other hand, DS2V, being a closed code, does not                                       fully catalytic surface, the small diﬀerences between
+allow the user to manage these parameters; it allows                                  DS2V and H3NS are due not to chemistry but to the
+the user to input the exponent of temperature in the                                  diﬀerent physical models used in the codes.
+viscosity temperature power law. Furthermore, the                                        As shown in Figure 11, for fully catalytic surface,
+CFD code GASP, used by Glass and Moss, relied                                         the two codes compute diﬀerent surface molar frac-
+on the Dunn–Kang chemical model, while H3NS, as                                       tions. More speciﬁcally, O2 and NO predicted by
+said before, relies on the Park chemical model.                                       DS2V are less and greater than the ones predicted
+   The mismatch between DS2V and H3NS decreases                                       by H3NS, respectively. The diﬀerent results are due
+for fully catalytic surface. For example, at the stagna-                              to the diﬀerent setting of the fully catalytic boundary
+tion point, the percentage diﬀerences are 38% for                                     conditions. In fact, as said before, the ‘super-catalytic’
+EXPERT and 87% for Orion for non-reactive surface,                                    boundary condition implies that the molar fractions
+
+
+
+          (a) 0.25                                                                 (b) 0.9
+                                                           Orion
+                                                                DS2V                      0.8
+                                                                H3NS
+                 0.2
+                                                                                          0.7
+
+
+                0.15                                                                      0.6
+         α O2
+
+
+
+
+                                                                                   αN2
+
+
+
+
+                                                                                          0.5
+
+                 0.1
+                                                                                          0.4
+
+                                                                                          0.3
+                0.05
+                                                                                                         Orion
+                                                                                          0.2                 DS2V
+                                                                                                              H3NS
+                  0                                                                       0.1
+                       –0.6   –0.5   –0.4   –0.3       –0.2     –0.1        0                   –0.6    –0.5      –0.4    –0.3    –0.2   –0.1   0
+                                            x [m]                                                                         x [m]
+
+                                            (c) 0.11
+                                                                 Orion
+                                                     0.1              DS2V
+                                                                      H3NS
+                                                    0.09
+
+                                                    0.08
+
+                                                    0.07
+
+                                                    0.06
+                                            α NO
+
+
+
+
+                                                    0.05
+
+                                                    0.04
+
+                                                    0.03
+
+                                                    0.02
+
+                                                    0.01
+
+                                                      0
+                                                       –0.6      –0.5      –0.4      –0.3        –0.2     –0.1        0
+                                                                                     x [m]
+
+
+Figure 11. Molar fraction of (a) O2, (b) N2 and (c) NO along the stagnation line of Orion: fully catalytic surface, h ¼ 85 km.
+
+
+
+                                                Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                        943
+
+
+of O2 and N2 at the wall are the same like the ones in                              molar fraction of NO. This is probably due to the
+the free stream; consequently, as NO1 ¼ 0, also                                    fact that, as pointed out before, the ﬁts with the ori-
+NOw ¼ 0. On the contrary, in DS2V, the formation                                   ginal Park model for the reactions in which NO is
+of NO is made possible when atoms of O and N                                        involved are not so good.
+impinge onto the same surface element.                                                 The condition that the heat ﬂux, computed by
+    The overestimation of heat ﬂux by DS2V                                          DS2V, is higher than the one computed by H3NS is
+(Figure 10(a) and (b)), for non-reactive surface, is                                also met at other altitudes. Figure 13(a) and (b) show
+due mostly to a lower dissociation of O2 and N2. In                                 the heat ﬂux at the stagnation point of EXPERT
+fact, as shown in Figure 12(a) and (b), the molar frac-                             (Figure 13(a)) and of Orion (Figure 13(b)). For both
+tion of O and N along the stagnation line of EXPERT                                 codes, the diﬀerence between the conditions of non-
+at h ¼ 70 km, computed by H3NS, are higher than the                                 reactive and fully catalytic surface increases with
+ones computed by DS2V. This implies that a larger                                   decreasing altitudes. This is due to the fact that dis-
+amount of energy is spent for dissociation; thus, a                                 sociation increases with density and, at the same time,
+lower amount of energy is exchanged with the surface.                               the wall, being stated as fully catalytic, recombines all
+At the same time, DS2V computes a slightly higher                                   impinging atoms.
+molar fraction of NO (Figure 12(c)); therefore, a
+slightly higher amount of energy is recovered by the                                Comparison between the Gupta and the Park
+recombination of this species.
+    As shown in Figures 11 and 12, the trends of the
+                                                                                    chemical models
+molar fractions for each chemical species by DS2V                                   As shown before, the heat ﬂux computed by DS2V
+and H3NS are pretty similar. The highest diﬀerences                                 both for non-reactive and fully catalytic surface is
+in the core of the shock wave are observed for the                                  higher than the one computed by H3NS.
+
+
+          (a) 0.35                                                               (b)   0.09
+                          EXPERT                                                                       EXPERT
+                              DS2V                                                     0.08                DS2V
+                0.3
+                              H3NS                                                                         H3NS
+                                                                                       0.07
+               0.25
+                                                                                       0.06
+
+                0.2                                                                    0.05
+          αO
+
+
+
+
+                                                                                  αN
+
+
+
+
+               0.15                                                                    0.04
+
+                                                                                       0.03
+                0.1
+                                                                                       0.02
+
+               0.05
+                                                                                       0.01
+
+                 0                                                                         0
+                  –0.06   –0.05   –0.04   –0.03         –0.02   –0.01     0                –0.06       –0.05    –0.04   –0.03   –0.02   –0.01   0
+                                          x [m]                                                                         x [m]
+
+                                          (c) 0.11
+                                                  0.1           EXPERT
+                                                                    DSMC
+                                                 0.09               H3NS
+
+                                                 0.08
+
+                                                 0.07
+
+                                                 0.06
+                                          α NO
+
+
+
+
+                                                 0.05
+
+                                                 0.04
+
+                                                 0.03
+
+                                                 0.02
+
+                                                 0.01
+
+                                                   0
+                                                    –0.06       –0.05   –0.04     –0.03        –0.02    –0.01       0
+                                                                                   x [m]
+
+
+
+Figure 12. Molar fraction of (a) O, (b) N and (c) NO along the stagnation line of EXPERT: h ¼ 70 km, non-reactive surface.
+
+
+
+                                          Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+944                                                                                                     Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+   (a) 110                                                                           (b) 130
+                                               EXPERT                                                                                 Orion
+                                            DS2V fully catalytic surface                                                          DS2V fully catalytic surface
+                                            H3NS fully catalytic surface                      120                                 H3NS fully catalytic surface
+               100                          DS2V non-reactive surface                                                             DS2V non-reactive surface
+                                            H3NS non-reactive surface                                                             H3NS non-reactive surface
+                                                                                              110
+               90
+
+
+
+
+                                                                                     h [km]
+      h [km]
+
+
+
+
+                                                                                              100
+
+               80
+                                                                                               90
+
+
+               70
+                                                                                               80
+
+
+
+               60                                                                              70
+                     0   100000   200000   300000   400000      500000      600000                  0       50000        100000       150000       200000        250000
+                                   Heat Flux [ W / m2 ]                                                               Heat Flux [ W / m 2 ]
+
+
+Figure 13. Heat flux at the stagnation point versus altitude for (a) EXPERT and (b) Orion.
+EXPERT: European eXPErimental Reentry Testbed.
+
+
+Therefore, verifying the eﬀect of the diﬀerent chemical
+models is proper. With this aim, the Park model has
+                                                                                              Influence of dissociation
+been implemented in DS2V as well.                                                             DS2V and H3NS compute diﬀerent compositions
+   Figures 14(a)–(f) show the proﬁles of molar frac-                                          both in the ﬂow ﬁeld and on the surface, even using
+tions of O, N and NO along the stagnation lines                                               the same chemical model (i.e. the Park model). The
+across the shock layer of the two capsules, computed                                          diﬀerence in the computation of heat ﬂux can be
+by the two chemical models. The two models at the                                             attributed to the diﬀerent computing methodologies
+ﬂuid-dynamic condition or temperature in the shock                                            of the codes (DSMC and CFD) and more speciﬁcally
+wave of EXPERT (maximum temperature is about                                                  to the diﬀerent handling of the chemical processes
+10,000 K) and of Orion (maximum temperature is                                                that produces higher dissociation of O2 and N2 com-
+about 23,000 K) compute a diﬀerent composition in                                             puted by H3NS with respect to that computed by
+the ﬂow ﬁeld. In fact, the absolute value of the per-                                         DS2V. The inﬂuence of the higher level of dissociation
+centage variation of the molar fractions of O, N and                                          can be veriﬁed when DS2V implements only the for-
+NO, averaged along the stagnation line across the                                             ward reactions. This condition can be considered as a
+shock layer, computed by the two chemical models                                              limit case in which no recombination occurs; there-
+are: 36%, 38% and 78% for EXPERT and 78%,                                                     fore, the level of dissociation is the highest one.
+52% and 307% for Orion. However, using the Park                                                  Figure 16(a) and (b) show that when DS2V uses
+model in DS2V does not generate any match of the                                              only the forward reactions, the proﬁles of heat ﬂux,
+molar fractions of O, N and NO with those computed                                            for both capsules, are closer to the ones computed by
+by H3NS. This is well apparent for EXPERT by the                                              H3NS and the proﬁles computed by DS2V, using the
+comparison of Figure 14(a)–(c) with Figure 12(a)–(c).                                         Park model, even overlap the ones by H3NS; con-
+   Air compositions, computed by the two models at                                            sidering only the forward reactions, the diﬀerence in
+the stagnation point of both capsules, are not very                                           the computation of heat ﬂux between the Gupta and
+diﬀerent (see Tables 8 and 9). This can be justiﬁed                                           the Park models is highlighted.
+because, as already shown in Figure 4(a)–(f), with
+decreasing temperature, the diﬀerence of rate coeﬃ-
+cients by both models tends to reduce. For this
+                                                                                              Conclusions
+reason, the chemical models do not inﬂuence mean-                                             In order to provide further contribution to the evalu-
+ingfully the computation of heat ﬂux. In fact, as                                             ation of heat ﬂux to the current capsules EXPERT
+shown in Figure 15(a) and (b), the heat ﬂux, com-                                             and Orion and to deepen the comparison of heat
+puted by the two models along the nose of                                                     ﬂux at high altitude by two codes based on diﬀerent
+EXPERT and along the surface of Orion, are practic-                                           philosophies, the computation of heat ﬂux to these
+ally the same. Furthermore, it seems that the proﬁles                                         capsules has been carried out by a direct simulation
+of heat ﬂux by Park are a little bit more smooth than                                         Monte Carlo code (DS2V) and by a computational
+the ones by Gupta (Figure 15(a) and (b)).                                                     ﬂuid dynamic code (H3NS). DS2V and H3NS
+
+
+
+                                                    Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                                                  945
+
+
+       (a) 0.35                                                                           (b) 0.9
+                            EXPERT                                                                                 EXPERT
+                                Gupta                                                            0.8                   Gupta
+              0.3               Park                                                                                   Park
+                                                                                                 0.7
+             0.25
+                                                                                                 0.6
+
+              0.2                                                                                0.5
+       αO
+
+
+
+
+                                                                                          αN
+             0.15                                                                                0.4
+
+                                                                                                 0.3
+              0.1
+                                                                                                 0.2
+             0.05
+                                                                                                 0.1
+
+                0                                                                                 0
+                –0.06        –0.05   –0.04      –0.03    –0.02      –0.01         0                    –0.06       –0.05      –0.04       –0.03     –0.02    –0.01    0
+                                               x [m]                                                                                       x [m]
+
+      (c) 0.11                                                                             (d) 0.35
+                            EXPERT                                                                                   Orion
+              0.1               Gupta                                                                                     Gupta
+                                Park
+                                                                                                   0.3                      Park
+             0.09
+
+             0.08                                                                                 0.25
+
+             0.07
+                                                                                                   0.2
+             0.06
+      α NO
+
+
+
+
+                                                                                           αO
+
+
+
+
+             0.05                                                                                 0.15
+             0.04
+                                                                                                   0.1
+             0.03
+
+             0.02
+                                                                                                  0.05
+             0.01
+
+               0                                                                                        0
+                –0.06       –0.05    –0.04     –0.03     –0.02      –0.01        0                          –0.6      –0.5         –0.4     –0.3      –0.2     –0.1       0
+                                                x [m]                                                                                       x [m]
+
+        (e) 0.9                                                                            (f) 0.11
+                              Orion                                                                                  Orion
+               0.8                 Gupta                                                           0.1                    Gupta
+                                   Park                                                                                   Park
+                                                                                                  0.09
+               0.7
+                                                                                                  0.08
+               0.6
+                                                                                                  0.07
+               0.5                                                                                0.06
+                                                                                          α NO
+        αN
+
+
+
+
+               0.4                                                                                0.05
+
+                                                                                                  0.04
+               0.3
+                                                                                                  0.03
+               0.2
+                                                                                                  0.02
+               0.1
+                                                                                                  0.01
+
+                0                                                                                       0
+                     –0.6     –0.5      –0.4    –0.3       –0.2       –0.1            0                     –0.6     –0.5          –0.4     –0.3      –0.2    –0.1        0
+                                                x [m]                                                                                       x [m]
+
+
+
+Figure 14. Molar fraction of O, N and NO along the stagnation line of (a)–(c) EXPERT (a, b, c) (h ¼ 70 km) and Orion (d, e, f)
+(h ¼ 85 km): non-reactive surface.
+EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+
+                                                 Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+946                                                                                                                                   Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+                            Table 8. Molar fractions at the stagnation point of EXPERT: h ¼ 70 km, non-reactive surface.
+
+                            Chemical model                   O2                        N 2                                          O                   N                       NO
+
+                            Gupta                            0.0025                     0.6796                                        0.3021               0.0083                   0.0074
+                            Park                             0.0021                     0.6552                                        0.3043               0.0133                   0.0252
+                            EXPERT: European eXPErimental Reentry Testbed.
+
+
+
+
+                            Table 9. Molar fractions at the stagnation point of Orion: h ¼ 85 km, non-reactive surface.
+
+                            Chemical model                    O2                      N 2                                           O                    N                        NO
+
+                            Gupta                             0                        0.2610                                         0.2484                0.4906                    0
+                            Park                              0                        0.2196                                         0.2695                0.5109                    0
+
+
+
+
+   (a) 450000                                                                                        (b) 180000
+                                                           EXPERT: h=70 km                                                                                         Orion: h=85 km
+                          400000                           Gupta - Fully catalytic surface                                   160000                              Gupta - Fully catalytic surface
+                                                           Park - Fully catalytic surface                                                                        Park - Fully catalytic surface
+                                                           Gupta - Non-reactive surface                                                                          Gupta - Non-reactive surface
+                          350000                                                                                             140000
+                                                           Park - Non-reactive surface                                                                           Park - Non-reactive surface
+   Heat Flux [ W / m2 ]
+
+
+
+
+                                                                                                      Heat Flux [ W / m2 ]
+
+
+
+
+                          300000                                                                                             120000
+
+                          250000                                                                                             100000
+
+                          200000                                                                                              80000
+
+                          150000                                                                                              60000
+
+                          100000                                                                                              40000
+
+                           50000                                                                                              20000
+
+                              0                                                                                                  0
+                                   0   0.05   0.1   0.15    0.2     0.25     0.3     0.35      0.4                                    0        0.1   0.2    0.3      0.4      0.5      0.6         0.7
+                                                           x [m]                                                                                               x [m]
+
+
+
+Figure 15. Heat Flux profile along the EXPERT nose (a) and the Orion surface (b) by DS2V with the Park and the Gupta models.
+EXPERT: European eXPErimental Reentry Testbed.
+
+
+implement the Gupta and the Park chemical models,                                                                       The mismatch between DS2V and H3NS decreases
+respectively.                                                                                                        for the fully catalytic surface. This can be justiﬁed
+   The capsules have been chosen because they are                                                                    because the fully catalytic surface reduces the diﬀer-
+characterized by completely diﬀerent shapes and                                                                      ences of the chemical models and keeps only the dif-
+re-entry trajectories and therefore by diﬀerent ﬂuid-                                                                ferences related to the diﬀerent physical models on
+dynamic conditions, as per the Mach number. Heat                                                                     which the two codes rely. On the other hand, the over-
+ﬂux was evaluated in the altitude interval 65–105 km                                                                 estimation of heat ﬂux by DS2V, for non-reactive sur-
+for EXPERT and 75–125 km for Orion, considering                                                                      face, is due mostly to a lower dissociation of O2 and
+both non-reactive and fully catalytic surfaces. Heat                                                                 N2 and to a higher formation of NO.
+ﬂux computed by DS2V is always higher than the                                                                          To assess the eﬀect of the chemical models, the
+one computed by H3NS. This result is opposite to                                                                     Park model was implemented in DS2V as well. The
+that found by Glass and Moss by the DSMC code                                                                        results veriﬁed that the two chemical models compute
+G2. This mismatch can be justiﬁed by the fact that                                                                   a diﬀerent composition in the ﬂow ﬁeld but the same
+the DS2V user does not have much control on the grid                                                                 composition on the surface and therefore the same
+construction. Furthermore, the mismatch with H3SN                                                                    heat ﬂux. However, using the Park model in DS2V
+could be expected because of chemical problems, as                                                                   does not generate any match of the molar fractions
+per some inaccuracies in evaluating the rates of the                                                                 of the chemical species with the ones computed by
+backward reactions in the Park model, and inconsist-                                                                 H3NS. Therefore, DS2V and H3NS compute a diﬀer-
+ency of the values of viscosity and diﬀusivity.                                                                      ent composition both in the ﬂow ﬁeld and on the
+
+
+
+                                                                   Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+Morsa et al.                                                                                                                                                                            947
+
+
+
+   (a) 300000                                                                                         (b) 60000
+                                                            EXPERT: h=70 km
+                                                            DS2V - Gupta, forward/reverse
+                           250000                           DS2V - Park, forward/reverse                                     50000
+                                                            DS2V - Gupta, only forward
+                                                            DS2V - Park, only forward
+                                                            H3NS - Park, forward/reverse
+
+
+
+
+                                                                                                      Heat Flux [ W / m2 ]
+                                                                                                                             40000
+    Heat Flux [ W / m2 ]
+
+
+
+
+                           200000
+
+
+
+                           150000                                                                                            30000
+
+
+
+                           100000                                                                                            20000
+                                                                                                                                                 Orion: h=85 km
+                                                                                                                                               DS2V - Gupta, forward/reverse
+                                                                                                                                               DS2V - Park, forward/reverse
+                            50000                                                                                            10000             DS2V - Gupta, only forward
+                                                                                                                                               DS2V - Park, only forward
+                                                                                                                                               H3NS - Park, forward/reverse
+                               0                                                                                                0
+                                    0   0.05   0.1   0.15    0.2     0.25     0.3     0.35     0.4                                   0   0.1      0.2     0.3      0.4    0.5   0.6   0.7
+                                                            x [m]                                                                                            x [m]
+
+
+Figure 16. Heat Flux profile along the EXPERT nose (a) and the Orion surface (b) by H3NS, implementing forward and reverse
+reactions and by DS2V, implementing only the forward reactions by the Park and the Gupta models.
+EXPERT: European eXPErimental Reentry Testbed; H3NS: computational fluid dynamic code.
+
+
+surface, even when using the same model (Park). For                                                                   6. Bird GA. Visual DSMC program for two-dimensional
+this reason, the diﬀerence in the computation of heat                                                                    flows. In: The DS2V program user’s guide Version 4.5.
+ﬂux between DS2V and H3NS can be attributed                                                                              Available at: http://gab.com.au.
+mostly to the diﬀerent methodology in handling of                                                                     7. Ranuzzi G and Borreca S. H3NS: code development
+all chemical process.                                                                                                    verification and validation. CIRA-CF-06-1017. Italy:
+                                                                                                                         Capua, 2006.
+Funding                                                                                                               8. Glass CE and Moss JN. Aerothermodynamic character-
+                                                                                                                         istics in the hypersonic continuum-rarefied transitional
+This work was supported in part by the FARO project,                                                                     regime. In: 35th AIAA Thermophysics Conference
+funded by ‘Compagnia di S. Paolo e Polo delle Scienze e                                                                  (AIAA 2001-2962), Anaheim, USA, 11–14 June 2001.
+delle Tecnologie’, University of Naples ‘Federico II’.                                                                9. Gupta RN, Yos JM and Thompson RA. A review of
+                                                                                                                         reaction rates and thermodynamic transport properties
+References                                                                                                               for the 11-species air model for chemical and thermal
+1. Schettino A, Votta R, Roncioni P, et al. Aerodynamic and                                                              non-equilibrium calculations to 30,000 K. Technical
+   aero-thermodynamic data base of EXPERT capsule. In:                                                                   report, NASA TM 101528, February 1989.
+   Proceedings of the west-east high speed flow field confer-                                                        10. Park C and Lee SH. Validation of multi-temperature
+   ence, Moscow, Russia, 19–22 November 2007.                                                                            nozzle flow code NOZNT. In: AIAA 28th thermophysics
+2. Ivanov M, Vashchenkov P and Kashkovsky A.                                                                             conference, Orlando, FL, USA, 6–9 July 1993.
+   Numerical investigation of the EXPERT reentry vehicle                                                             11. Park C, Jaffe RL and Partridge H. Chemical-kinetic
+   aerothermodynamics along the descent trajectory.                                                                      parameters of hyperbolic earth entry. J Thermophys
+   In: 39th AIAA thermophysics conference, Miami, USA,                                                                   Heat Trans 2001; 15(1): 76–90.
+   25–28 June 2007.                                                                                                  12. Gnoffo PA, Gupta RN and Shinn JL. Consevation
+3. Zuppardi G, Morsa L, Schettino A, et al. Analysis of                                                                  equation and physical models for hypersonic air flows
+   aero-thermodynamic behavior of EXPERT capsule in                                                                      in thermal and chemical nonequilibrium. Technical
+   transitional regime. In: Levin DA, Wysong IJ and                                                                      report. NASA TP 2867, February 1989.
+   Garcia AL (eds) Proceedings of the 27th international                                                             13. Moss JN. Rarefied flows of planetary entry capsules.
+   symposium on rarafied gas dynamics, Pacific Grove,                                                                    In: Proceedings of AGARD-R-808, Rhode-Saint-
+   USA, 10–15 July 2010, pp. 1349–1354.                                                                                  Genèse, Belgium, May 1997, pp. 95–129.
+4. Moss JN, Boyles KA and Greene FA, Orion aerodynam-                                                                14. Bird GA. Molecular gas dynamics and direct simulation
+   ics for hypersonic free molecular to continuum condi-                                                                 Monte Carlo. Oxford, Great Britain, 1998.
+   tions. In: 14th AIAA international space planes and                                                               15. Shen C. Rarefied gas dynamics: fundamentals, simula-
+   hypersonic systems and technologies conference,                                                                       tions and micro flows. Berlin, Germany: Springer-
+   Canberra, Australia, 6–9 November 2006, AIAA paper                                                                    Verlag, 2005.
+   no 2006-8081.                                                                                                     16. Bird GA. Sophisticated versus simple DSMC. In:
+5. Votta R, Schettino A, Ranuzzi G, et al. Hypersonic low-                                                               Ivanov M and Rebrov A (eds) Proceedings of the 25th
+   density aerothermodynamics of orion-like exploration                                                                  international symposium on rarefied gas dynamics, Saint
+   vehicle. J Spacecraft Rockets 2009; 46(4): 781–787.                                                                   Petersburg, Russia, 21–28 July 2006, pp. 349–354.
+
+
+
+
+                                                              Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+948                                                                                     Proc IMechE Part G: J Aerospace Engineering 228(6)
+
+
+17. Bird GA, Gallis MA, Torczynski JR, et al. Accuracy                        kr                     reverse rate coefficient (m3/molecule/s)
+    and efficiency of the sophisticated direct simulation                                            or (m6/ molecule2/s)
+    Monte Carlo algorithm for simulating noncontinuum                         Ke                     equilibrium constant (Ke ¼ kf/kr)
+    gas flows. Phys Fluid 2009; 21: 017103.                                   L                      geometrical characteristic dimension
+18. Gallis MA, Torczynski JR, Rader DJ, et al.
+                                                                                                     (m)
+    Convergence behavior of a new DSMC algorithm.
+                                                                              Lx, Ly                 dimensions of computing region along
+    J Computat Phys 2009; 228: 4532–4548.
+19. Bird GA. The DS2V/3V program suite for DSMC cal-                                                 x and along y (m)
+    culations. In: Capitelli M (ed) Proceedings of the 24th                   Ma                     Mach number
+    international symposium on rarafied gas dynamics,                         n                      temperature exponent in the rate equa-
+    Monopoli, Italy, 10–16 July 2004, pp. 541–546.                                                   tion, local normal
+20. Kogan NM. Rarefied gas dynamics. New York, USA:                           N                      number density (1/m3)
+    Plenum Press, 1969.                                                       Nc                     number of collision cells
+21. Boyd I. Modeling backward chemical rate processes in                      Ns                     number of sampling cells
+    the direct simulation Monte Carlo method. Phys Fluid                      Re                     Reynolds number
+    2007; 19: 126103.                                                         T                      translational temperature (K)
+                                                                              Tc                     temperature controlling the reaction
+                                                                                                     (K) (equation (5))
+Appendix                                                                      u                      velocity component tangential to the
+                                                                                                     surface (m/s)
+Notation                                                                      Tv                     vibrational temperature (K)
+Ai             coefficients in equilibrium constant,                          V                      velocity (m/s)
+               i¼1, . . . , 5 (equations (6) and (7))
+                                                                                                    molar fraction
+Cf             pre-exponential factor in the forward
+                                                                                                    specific heat ratio
+               rate equation (m3/molecule/s) (equa-
+                                                                              l                      mean free path (m)
+               tions (3) and (4))
+Cr             pre-exponential factor in the reverse
+               rate equation (m3/molecule/s) or (m6/
+               molecule2/s) (equation (3))
+                                                                              Subscripts and superscripts
+D              capsule base diameter (m)                                      e                      equilibrium
+Eaf,r          activation energy for forward, reverse                         s                      slip
+               reaction (J/kg)                                                w                      wall
+H              altitude (km)                                                  1                      free stream
+k              Boltzmann constant                                                                   exponent in average temperature
+               (1.3806  1023 J/K)                                                                  (equation (5))
+kf             forward rate coefficient (m3/molecule/s)
+
+
+
+
+                                        Downloaded from pig.sagepub.com at BROWN UNIVERSITY on October 27, 2014
+
