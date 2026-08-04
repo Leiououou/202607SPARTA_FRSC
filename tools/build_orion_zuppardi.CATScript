@@ -1,0 +1,188 @@
+Option Explicit
+
+Sub WriteStatus(message)
+    Dim fso, stream
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set stream = fso.CreateTextFile("D:\博一\catalytic\zupparid\build_status.txt", True, True)
+    stream.WriteLine message
+    stream.Close
+End Sub
+
+Function Atan2(y, x)
+    Dim pi
+    pi = 4 * Atn(1)
+    If x > 0 Then
+        Atan2 = Atn(y / x)
+    ElseIf x < 0 And y >= 0 Then
+        Atan2 = Atn(y / x) + pi
+    ElseIf x < 0 And y < 0 Then
+        Atan2 = Atn(y / x) - pi
+    ElseIf x = 0 And y > 0 Then
+        Atan2 = pi / 2
+    ElseIf x = 0 And y < 0 Then
+        Atan2 = -pi / 2
+    Else
+        Atan2 = 0
+    End If
+End Function
+
+Sub CATMain()
+    On Error Resume Next
+
+    Dim fso
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FolderExists("D:\博一\catalytic") Then
+        fso.CreateFolder "D:\博一\catalytic"
+    End If
+    If Not fso.FolderExists("D:\博一\catalytic\zupparid") Then
+        fso.CreateFolder "D:\博一\catalytic\zupparid"
+    End If
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|creating output directory|" & Err.Description
+        Exit Sub
+    End If
+    Err.Clear
+
+    Dim ax, ay, bx, by, cx, cy, dx, dy, ex, ey
+    ax = 3302#: ay = 0#
+    bx = 3302#: by = 883.8
+    cx = 847.7: cy = 2475.2
+    dx = 712.6: dy = 2514.6
+    ex = 0#: ey = 0#
+
+    Dim noseRadius, noseCenterX, noseThetaE, noseThetaD, pi
+    pi = 4 * Atn(1)
+    noseRadius = (dx * dx + dy * dy) / (2# * dx)
+    noseCenterX = noseRadius
+    noseThetaE = pi
+    noseThetaD = Atan2(dy, dx - noseCenterX)
+
+    Dim midX, midY, chordX, chordY, normalX, normalY
+    Dim targetCenterX, targetCenterY, projection
+    Dim shoulderCenterX, shoulderCenterY, shoulderRadius
+    Dim shoulderThetaD, shoulderThetaC
+
+    midX = 0.5 * (cx + dx)
+    midY = 0.5 * (cy + dy)
+    chordX = cx - dx
+    chordY = cy - dy
+    normalX = -chordY
+    normalY = chordX
+    targetCenterX = 710#
+    targetCenterY = 2260#
+    projection = (((targetCenterX - midX) * normalX) + _
+                  ((targetCenterY - midY) * normalY)) / _
+                 ((normalX * normalX) + (normalY * normalY))
+    shoulderCenterX = midX + projection * normalX
+    shoulderCenterY = midY + projection * normalY
+    shoulderRadius = Sqr((dx - shoulderCenterX) * (dx - shoulderCenterX) + _
+                         (dy - shoulderCenterY) * (dy - shoulderCenterY))
+    shoulderThetaD = Atan2(dy - shoulderCenterY, dx - shoulderCenterX)
+    shoulderThetaC = Atan2(cy - shoulderCenterY, cx - shoulderCenterX)
+
+    Dim px(480), py(480)
+    Dim index, i, fraction, theta
+    index = 0
+
+    For i = 0 To 320
+        fraction = i / 320#
+        theta = noseThetaE + fraction * (noseThetaD - noseThetaE)
+        px(index) = noseCenterX + noseRadius * Cos(theta)
+        py(index) = noseRadius * Sin(theta)
+        index = index + 1
+    Next
+
+    For i = 1 To 30
+        fraction = i / 30#
+        theta = shoulderThetaD + fraction * (shoulderThetaC - shoulderThetaD)
+        px(index) = shoulderCenterX + shoulderRadius * Cos(theta)
+        py(index) = shoulderCenterY + shoulderRadius * Sin(theta)
+        index = index + 1
+    Next
+
+    For i = 1 To 100
+        fraction = i / 100#
+        px(index) = cx + fraction * (bx - cx)
+        py(index) = cy + fraction * (by - cy)
+        index = index + 1
+    Next
+
+    For i = 1 To 30
+        fraction = i / 30#
+        px(index) = bx + fraction * (ax - bx)
+        py(index) = by + fraction * (ay - by)
+        index = index + 1
+    Next
+
+    Dim partDocument, part, body, sketch, factory2D, line2D
+    Set partDocument = CATIA.Documents.Add("Part")
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|creating CATPart document|" & Err.Description
+        Exit Sub
+    End If
+    Err.Clear
+
+    Set part = partDocument.Part
+    part.Name = "Orion_Zuppardi_CoordinatePriority"
+    Set body = part.Bodies.Item("PartBody")
+    body.Name = "Orion_Solid"
+    part.InWorkObject = body
+
+    Set sketch = body.Sketches.Add(part.OriginElements.PlaneXY)
+    sketch.Name = "Published_Meridian_Profile_480_Intervals"
+    Set factory2D = sketch.OpenEdition()
+
+    For i = 0 To 479
+        Set line2D = factory2D.CreateLine(px(i), py(i), px(i + 1), py(i + 1))
+    Next
+    Set line2D = factory2D.CreateLine(ax, ay, ex, ey)
+    sketch.CloseEdition
+    part.Update
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|creating meridian sketch|" & Err.Description
+        partDocument.Close
+        Exit Sub
+    End If
+    Err.Clear
+
+    Dim shaft
+    Set shaft = part.ShapeFactory.AddNewShaft(sketch)
+    shaft.Name = "Axisymmetric_360deg_Solid"
+    shaft.FirstAngle.Value = 360#
+    shaft.SecondAngle.Value = 0#
+    part.Update
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|creating revolved solid|" & Err.Description
+        partDocument.Close
+        Exit Sub
+    End If
+    Err.Clear
+
+    Dim catPartPath, stepPath
+    catPartPath = "D:\博一\catalytic\zupparid\Orion_Zuppardi_coordinate_priority.CATPart"
+    stepPath = "D:\博一\catalytic\zupparid\Orion_Zuppardi_coordinate_priority.stp"
+
+    partDocument.SaveAs catPartPath
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|saving CATPart|" & Err.Description
+        partDocument.Close
+        Exit Sub
+    End If
+    Err.Clear
+
+    partDocument.ExportData stepPath, "stp"
+    If Err.Number <> 0 Then
+        WriteStatus "ERROR|exporting STEP|" & Err.Description
+        partDocument.Close
+        Exit Sub
+    End If
+
+    WriteStatus "SUCCESS|CATPart=" & catPartPath & _
+                "|STEP=" & stepPath & _
+                "|surface_intervals=480|TPS_intervals=350" & _
+                "|coordinate_priority_nose_radius_m=" & CStr(noseRadius / 1000#) & _
+                "|published_nose_radius_m=6.04"
+
+    partDocument.Close
+    CATIA.Quit
+End Sub

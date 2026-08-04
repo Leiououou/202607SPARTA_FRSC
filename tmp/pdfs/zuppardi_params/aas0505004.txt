@@ -1,0 +1,784 @@
+Advances in Aircraft and Spacecraft Science, Vol. 5, No. 5 (2018) 581-594
+DOI: https://doi.org/10.12989/aas.2018.5.5.581                                                                      581
+
+
+
+
+            Effects of chemistry in Mars entry and Earth re-entry
+                                              Gennaro Zuppardi
+         Department of Industrial Engineering, University of Naples “Federico II” – Aerospace Division
+                                   Piazzale Tecchio 80, 80125 Naples, Italy
+
+               (Received January 3, 2018, Revised March 18, 2018, Accepted March 21, 2018)
+
+Abstract.      This paper is the follow-on of a previous paper by the author where it was pointed out that the
+forthcoming, manned exploration missions to Mars, by means of complex geometry spacecraft, involve the study of
+phenomena like shock wave-boundary layer interaction and shock wave-shock wave interaction also along the entry
+path in Mars atmosphere. The present paper focuses the chemical effects both in the shock layer and on the surface of
+a test body along the Mars orbital entry and compares these effects with those along the Earth orbital re-entry. As well
+known, the Mars atmosphere is almost made up of Carbon dioxide whose dissociation energy is even lower than that
+of Oxygen. Therefore, although the Mars entry is less energized than the Earth re-entry, one can expect that the
+effects of chemistry on aerodynamic quantities, both in the shock layer and on a test body surface, are different from
+those along the Earth re-entry. The study has been carried out computationally by means of a direct simulation Monte
+Carlo code, simulating the nose of an aero-space-plane and using, as free stream parameters, those along the Mars
+entry and Earth re-entry trajectories in the altitude interval 60-90 km. At each altitude, three chemical conditions have
+been considered: 1) gas non reactive and non-catalytic surface, 2) gas reactive and non-catalytic surface, 3) gas
+reactive and fully-catalytic surface. The results showed that the number of reactions, both in the flow and on the nose
+surface, is higher for Earth and, correspondingly, also the effects on the aerodynamic quantities.
+Keywords:    hypersonic; rarefied aerodynamics; effects of chemical reactions in Mars entry; effects of
+chemical reactions in Earth re-entry; direct simulation Monte Carlo method
+
+
+
+1. Introduction
+
+    The present paper is the follow-on of a paper by the author (Zuppardi 2018) where it was
+pointed out that the forthcoming manned exploration missions to Mars, by means of complex
+geometry spacecrafts as per lifting vehicles provided with control aerodynamic surfaces, involve
+the study of phenomena, typical of hypersonic Aerodynamics such as Shock Wave-Boundary
+Layer Interaction (SWBLI) and Shock Wave-Shock Wave Interaction (SWSWI) also along the
+entry path in Mars atmosphere. As well known, the Mars atmosphere is almost made up of Carbon
+dioxide whose dissociation energy is even lower than that of Oxygen; the dissociation energy of
+Carbon dioxide is 9.9 MJ/kg, that of Oxygen is 15.5 MJ/kg. Therefore, even though the Mars entry
+is less energized than the Earth re-entry (the flow energy, at the altitude of 90 km of the orbital
+entry, is about 10.9 MJ/kg for Mars and about 29.8 MJ/kg for Earth), it has to be expected that the
+chemical effects on the aerodynamic quantities both in the shock layer and on the surface of a
+
+
+Corresponding author, Senior Lecturer, E-mail: zuppardi@unina.it
+
+Copyright © 2018 Techno-Press, Ltd.
+http://www.techno-press.org/?journal=aas&subpage=7                  ISSN: 2287-528X (Print), 2287-5271 (Online)
+582                                      Gennaro Zuppardi
+
+
+space vehicle are different from those in Earth re-entry.
+    When a gas flows around a space vehicle at high velocity, such as that along a planet entry
+trajectory, it can be characterized by an energy higher than the dissociation energy and even higher
+than the ionization energy of the molecules of the planet atmosphere. Both ionization and
+dissociation reactions are beneficial because, being endothermic, they absorb energy from the flow
+and reduce the heat flux exchanged with the surface of a space vehicle.
+    Ionization produces protons and electrons, dissociation produces atomic species. These radical
+species spread in the flow field and some of them reach the space vehicle surface. In space
+application, the surface of a vehicle must be kept, for structural reason, at “low” temperatures, of
+order 2000 K at most (Barbato and Bruno 1996). At low surface temperature, the ionized species
+tend to regain the lost electron (or to de-ionize) and the dissociated species tend to recombine.
+Both the de-ionization and the recombination reactions are exothermic; this means that these
+reactions give back the energy used for ionizing and dissociating the molecules in the flow and
+increase the heat flux to the space vehicle surface. For this reason, one of the most important topic
+in the current aerospace research is related to the choice of the most proper material for the
+Thermal Protection System (TPS). In order to efficiently counteract the increase of heat flux due to
+de-ionization and to recombination, the TPS material has to exhibit a low level of cataliticity.
+    The problem of aerodynamics and of aerothermodynamics of the Mars atmosphere is very
+relevant as shown by the literature on the subject. Only to cite some recently published journal
+articles, the reader can refer to Reynier (2014), Yang et al. (2014), Kolesnikov et al (2016); the
+work by Hollis and Prabhu (2013) includes also the boundary layer region, Wang et al. (2016)
+investigate both lamina and turbulent heating, while (Hao et al., 2017) emphasize the importance
+of the evaluation of transport parameters. The aim of the present paper is to quantify the chemical
+effects in Mars entry and to compare them with those in Earth re-entry and to point out the
+differences. The present study considers the aerodynamic quantities both in the shock layer (gas
+composition, temperature and so on) and on the test body surface (pressure, heat flux and so on).
+This part of the work can be useful for providing information to the designer about the proper
+project (sizing, choice of material, etc.) of the TPS.
+    This study has been carried out computationally simulating, as test body, a possible nose of an
+aero-space-plane. Both the Mars and the Earth computations have been carried out in the altitude
+interval 60-90 km considering, at each altitude, three chemical conditions: 1) non-reactive gas and
+non-catalytic surface, 2) reactive gas and non-catalytic surface, 3) reactive gas and fully-catalytic
+surface. Quantification is fulfilled in terms of the percentage differences of aerodynamic quantities
+between the chemical conditions.
+    Previous computations (Zuppardi et al. 2014) verified that the maximum value of heat flux, at
+the nose stagnation point of SpaceLiner, is met at altitudes close to these altitudes. The nose
+simulated in the present tests is axis-symmetric and its dimension (base diameter) is such that the
+flow field in the altitude interval is in continuum, low density regime therefore using a direct
+simulation Monte Carlo code has been mandatory.
+
+
+2. Direct simulation Monte Carlo method and DS2V-64bits code
+
+    The Direct Simulation Monte Carlo (DSMC) method (Bird 1998, Bird 2013, Shen 2005) is a
+computational, statistical and stochastic method, solving flow fields from the free molecule regime
+to the continuum low-density regime. DSMC relies on the kinetic theory of gases and considers
+                          Effects of chemistry in Mars entry and Earth re-entry                    583
+
+
+the gas as made up of millions of simulated molecules, each one representing a large number of
+real molecules (in the present computations of the order of 109 ) in the physical space.
+    The evolution of molecules, in terms of velocity, spatial coordinates and internal
+thermodynamic/chemical status, is produced by intermolecular collisions and molecule-surface
+interactions within the simulated physical space. This is divided into cells both for selecting the
+colliding molecules and for sampling the thermo-fluid-dynamic quantities. The molecules in a cell
+represent those at the same location in the physical field. The method does not rely on integration
+of differential equation therefore it does not suffer from numerical instabilities but it is inherently
+unsteady with a steady solution achievable after a sufficiently long simulation time.
+    The basic assumption of the method is the temporal decoupling of motion and collision of the
+simulated molecules. The motion and collision phases are computed by two distinct algorithms,
+performed sequentially. This assumption holds when the evolution time step of the aerodynamic
+system (or global time step), is shorter than the collision time or the time between two subsequent
+molecular collisions. In the motion phase, the simulated molecules move ballistically at their
+velocity over the global time step. Molecules change position in the flow field and interact with
+the surface of the body under study. In the collision phase, a couple of colliding molecules are
+selected in the computing cell. Chemical reactions take place, both colliding molecules exchange
+energy among the translational and interior degrees of freedom (rotation, vibration) and change
+velocity. The macroscopic gas properties (density, temperature, etc.), the aerodynamic force and
+the heat flux, exchanged with the body surface, are computed by sampling molecular quantities
+(number density, gas composition, momentum, kinetic energy, internal energy, etc.) over a pre-
+fixed number of global time steps.
+    The DSMC code used in the present study is the general 2D/axisymmetric code DS2V-4.5
+64bits (Bird 2012). DS2V-4.5 64bits is “sophisticated”; a DSMC code is defined sophisticated if it
+implements computing procedures achieving both greater efficiency and accuracy with respect to a
+“basic” DSMC code. More specifically, a sophisticated code (Bird 2006, Bird et al. 2009, Gallis et
+al. 2009):
+    1) divides the computational volume into two grids or sets of cells (collision and sampling)
+with the related cell adaptation. The DS2V-4.5 64bits code automatically generates the number of
+cells and the structure of the collision and sampling grids on the basis of the input megabytes
+(1300 in the present computations) and of the free stream number density. However, the user can
+change the number of cells and therefore the structure of grids by inputting the number of
+molecules for the adaptation of the collision and of the sampling cells; the lower the input number
+of molecules per cell, the higher the number of cells after the adaptation process,
+    2) implements the “nearest neighbor” procedure for the selection, in the collision cell, of the
+pair of colliding molecules. This procedure is aimed at fulfilling the physical condition that a
+molecule collides with the molecule closest to it. This implies that, when a molecule is chosen at
+random in the collision cell, the collision partner is the molecule closest to it. In the “basic” DSMC
+method, the collision partner was selected at random in the same computing cell.
+    3) provides an optimal global time step. This is computed as a fraction (say 0.2) of the current,
+average collision time over the computing dominion. In the “basic” DSMC method, the global
+time step was an input to the code and then kept constant during the evolution of the system,
+therefore irrespective of the actual, evolving fluid-dynamic conditions.
+    4) avoids sequential collisions between the same collision pair. This procedure avoids a second
+collision between the same collision partners; this is physically impossible because after a
+collision, the molecules move away in opposite directions.
+584                                             Gennaro Zuppardi
+
+                                0.4
+
+
+
+                                0.3
+                        y [m]
+
+
+                                0.2
+
+                                                                          D/2=0.36 m
+                                0.1                rn=0.20 m
+
+                                          70 deg
+                                 0
+                                      0   0.1      0.2     0.3      0.4      0.5       0.6
+                                                          x [m]
+                                                 Fig. 1 Test body
+
+
+    5) allows the user to evaluate the quality of the computation by means of the evaluation of the
+adequacy of the number of simulated molecules. The ratio between the molecule mean collision
+separation (mcs) and the mean free path (λ), in each collision cell, is the parameter making
+possible this evaluation; mcs/λ has to be less than unity everywhere in the computational domain
+for a good quality of a DSMC computation. Bird (2006) suggests that the mcs/λ ratio should be
+less than 0.2 for an optimal quality of the computation.
+    Finally, DS2V-4.5 64bits provides indication also about the stabilization of the DSMC
+computation. This is achieved when the profile of the simulated molecules, as a function of the
+simulated time, becomes jagged and included within a band which defines the standard deviation
+of the number of simulated molecules.
+
+
+3. Test conditions
+
+    Figure 1 shows the axial-symmetrical test body, representing the nose or the first part (0.60 m)
+of the fuselage of a probable space vehicle. The radius of curvature at the stagnation point (rn=0.20
+m) is proper for the present tests; it is almost the same like that of the current space-plane
+SpaceLiner (Zuppardi et al. 2014). The dimensions of the computing dominion in the meridian
+plane (x, y) are: Lx=0.8 m, Ly=0.5 m.
+    The study relies on 24 runs: 2 entry trajectories (Mars, Earth), 4 altitudes (h=60, 70, 80, 90
+km), 3 chemical conditions: 1) gas non-reactive and non-catalytic surface (NR), 2) gas reactive
+and non-catalytic surface (NC), 3) gas reactive and fully-catalytic surface (FC). Tables 1(a) and
+1(b) report the input data to DS2V-4.5 64 bits for Mars and for Earth, respectively and the free
+stream Mach (M), Reynolds (ReD), Knudsen (KnD) numbers and the Reynolds number
+downstream a normal shock wave (ReD2), for the aerodynamic characterization of the flow fields;
+D is the base diameter of the nose, D=0.72 m.
+    The free stream velocities for Mars and for Earth are those of a non-lifting capsule along the
+free orbital Earth re-entry and Mars entry, both ones already computed by Zuppardi and Savino
+(2015). As the radius of Mars (RM=3.39103 km) is about half than that of Earth (RE=6.37103
+km), the orbital entry velocity for Mars is smaller than that for Earth. According to the Mars
+atmosphere model (NASA Glenn Research Center), temperature of Mars is much lower than that
+                           Effects of chemistry in Mars entry and Earth re-entry                    585
+
+
+Table 1(a) Input data and aerodynamic parameters: Mars
+   h       V          N         T                      e
+                                                                    M      ReD       KnD       ReD2
+ [km]     [m/s]      [1/m3]       [K]       [kg/m3]       [MJ/kg]
+  90      4667     3.08×1020       50      2.21×10-5       10.9     41.8   2.61×104   2.10×10-3   149
+  80      4612     5.24×1020      72       3.77×10-5       10.7     34.4   3.11×104   1.45×10-3   256
+  70      4506     9.86×1020      94       7.09×10-5       10.2     29.4   4.46×104   8.64×10-4   490
+  60      4044     1.96×1021      117      1.41×10-4        8.2     23.7   6.67×104   4.67×10-4   1015
+
+Table 1(b) Input data and aerodynamic parameters: Earth
+   h       V           N        T                      e
+                                                                    M       ReD       KnD      ReD2
+ [km]     [m/s]       [1/m3]      [K]       [kg/m3]       [MJ/kg]
+  90      7700      7.121019     187      3.3910-6       29.8     27.9   1.48103   2.7310-2    37
+  80      7000      3.841020     199      1.8310-5       24.6     24.7   6.91103   5.1210-3   213
+  70      5933      1.721021     220      8.2110-5       17.8     19.9   2.42104   1.7210-3   1065
+  60      4624      6.441021     247      3.0710-4       10.9     14.6   6.41104   2.3110-4   4610
+
+
+of Earth. The most relevant differences between the Mars and Earth trajectories are in the flow
+energy (e=cvT+V2/2) and in the Mach number; even though velocity is lower, due to lower
+temperature and therefore to lower sound speed, the Mach number for Mars is much higher than
+that for Earth. The flow energy e both for Earth and even more for Mars is lower than the
+ionization energy of Oxygen (eiO2=36.4 MJ/kg) and of Carbon dioxide (eiCO2=30.2 MJ/kg),
+therefore ionization has been not considered in the present computations.
+    The free stream Knudsen number (KnD) and the Reynolds number behind a normal shock
+wave (ReD2) indicate that both flow fields are in continuum low density regime. The transitional
+regime is defined, according to Moss (1995), in terms of the global Knudsen number by 10-
+3
+  <KnD<50 and, according to Vallerani (1973), in terms of the Reynolds number downstream a
+normal shock wave by 10-1< ReD2 <104.
+    The study of chemistry of the Mars atmosphere is not new; McKensie (1966) already dealt with
+this topic longer than 50 years ago. But, for the purpose of the present paper, the chemical model
+of the Mars atmosphere, proposed by Bird (2005) in the previous version 3.3 of the DS2V code,
+has been preferred and therefore implemented in the current version of the code. Both the
+McKensie and the Bird model considers the Mars atmosphere made up of 9 species (O2, N2, O, N,
+NO, C, CO, CO2, AR) with molar fractions: XO2=0.00176, XN2=0.04173, XNO=0.00014,
+XC=0.00396, XCO=0.00108, XCO2=0.93399, XAR=0.01734 constant with altitude. The McKensie
+model relies on 17 chemical reactions, the model reported by Bird is more complete. In fact, it
+relies on 54 chemical reactions: 40 dissociation, 7 forward exchange, 7 reverse exchange.
+    The Earth atmosphere is considered as made up of 5 species (O2, N2, O, N, NO). According to
+the US Standard atmosphere, air composition is practically constant in the altitude interval 60-90
+km. The molar fractions are: XO2=0.210, XN2=0.790. The chemical model, built-in in the DS2V-
+4.5 64bits code is the Jos-Gupta-Thomson model (Gupta et al. 1989). This model relies on 23
+chemical reactions: 15 dissociation, 2 forward exchange, 2 reverse exchange, 4 recombination.
+    Table 2 reports five surface recombination reactions, implemented in the present computations
+with the related exothermic molecular and specific energy. The conditions of non-catalytic and
+fully-catalytic surface are simulated by fixing to zero and to unit the probability for each surface
+recombination reaction, respectively.
+586                                               Gennaro Zuppardi
+
+
+Table 2 Surface recombination reactions and exothermic energy
+                  Reaction                                  E [J]                            e [MJ/kg]
+                  O+O->O2                                8.2010-19                            15.4
+                  N+N->N2                                1.5610-18                            33.6
+                  N+O->NO                                1.0410-18                            20.9
+               CO+O->CO2                                 7.2510-19                                9.9
+                  C+O->CO                                1.7810-18                            38.2
+
+Table 3 Computation parameters
+             Nm                        Nc                               Ns                               FN
+                  7                           6                                4
+         2.510                      2.810                           8.010                       3.0109
+
+Table 4 Quality parameters of the DS2V runs
+                                        Mars                                               Earth
+      h [km]                 mcs/                        ts/tf                    mcs/                      ts/tf
+        90                   0.04                        12.9                      0.004                  15.9
+        80                   0.06                        15.8                      0.02                   12.5
+        70                   0.11                        14.4                      0.10                   15.0
+        60                   0.22                        10.0                      0.40                       8.8
+
+
+4. Computation parameters and quality of the results
+
+    Tables 3 reports some computation parameters like the number of: Simulated molecules (Nm),
+collision (Nc) and sampling (Ns) cells, real molecules represented by each simulated molecule (FN).
+These data are meaningful because roughly obtained in each computation. Nc and Ns were
+obtained by the adaptation procedure of the collision and sampling cells, using the numbers of
+molecules of 8 and of about 280 respectively, as suggested by DS2V-4.5 64bits.
+    The quality of the results can be verified from Table 4 reporting, at each altitudes of the two
+trajectories, the ratios mcs/, averaged over the collision cells and the ratios ts/tf: ts is the
+simulation time, tf is the time required to travel the length (L) of the body under study, in this case
+the nose (L=0.6 m, see Fig.1), at the free stream velocity: tf=L/V.
+    Even though the ratio mcs/ does not satisfy, at h=60 km of both trajectories, the optimal value
+of 0.2, however it is less than unit, as required by the DSMC method. The criterion of the
+stabilization of the computation, from a fluid-dynamic point of view, is also satisfied; a well
+known rule of thumb suggests considering a computation stabilized when the ratio t s/tf is O(10).
+Furthermore, the longer the simulation time the greater the beneficial effects on the quality of the
+results from a DSMC code. More specifically, the longer ts, the larger the sample size on which the
+fluid-dynamic quantities are averaged during the evolution of the DSMC computation toward the
+steady state condition. Increasing the sample size, for making the average of the molecular
+properties, is equivalent to making a calculation with a larger number of molecules. Therefore,
+achieving a one to one correspondence between the real and the simulated molecules could be
+possible, thus the fluid-dynamic fluctuations match those in real gas. Finally, the jagging of the
+molecule time history profile is achieved in each computation.
+                                      Effects of chemistry in Mars entry and Earth re-entry                                                          587
+
+                 0     100     200        300       400           500                         0   20    40      60     80      100   120      140
+           100                                                          100             100                                                         100
+                                                          Mars                                                                        Mars
+                                                          Earth                                                                       Earth
+            90                                                          90              90                                                          90
+
+
+
+            80                                                          80              80                                                          80
+
+
+
+
+                                                                               h [km]
+  h [km]
+
+
+
+
+            70                                                          70              70                                                          70
+
+
+
+            60                                                          60              60                                                          60
+
+
+
+            50                                                          50              50                                                          50
+                 0     100     200        300       400           500                         0   20    40      60      80     100   120      140
+                              Nrf x 10-18 [1/s]                                                              Nrs x 10-17 [1/s]
+                           (a)                                                 (b)
+ Fig. 2 Profiles of number of reactions per second in the flow (a) and of number of reactions per second of
+ fully-catalytic surface (b) as functions of altitude
+
+Table 5 Fraction of reactions in the flow
+                                                  Mars                                                                 Earth
+  h [km]             CO2+CO2-> CO2+CO+O                     CO2+O-> CO+O2                          O2+N2->2O+N2                  O2+N->NO+O
+           90                 0.78                                      0.06                            0.25                           0.10
+           80                 0.72                                      0.09                            0.08                           0.24
+           70                 0.67                                      0.12                            0.06                           0.22
+           60                 0.66                                      0.13                            0.07                           0.24
+
+Table 6 Fractions of fully-catalytic surface reactions
+                                                  Mars                                                                 Earth
+  h [km]                     O+O->O2                              C+O->CO                              O+O->O2                       O+N>NO
+           90                 0.87                                      0.12                            0.71                           0.22
+           80                 0.90                                      0.09                            0.68                           0.24
+           70                 0.94                                      0.06                            0.91                           0.08
+           60                 0.97                                      0.03                            0.99                           0.01
+
+
+   Table 4 reports, for each altitude and for each chemical condition, only one value of the
+parameters because roughly obtained in each computation at that altitude of the two trajectories.
+Thus, this value can be considered as representative of all corresponding computations.
+
+
+5. Analysis of results
+
+    Figures 2(a) and 2(b) show the profiles of the number of reactions per second in the flow (N rf,
+(a)) and the number of fully-catalytic surface reactions per second (Nrs, (b)) as functions of altitude
+588                                                                             Gennaro Zuppardi
+
+                       -0.05      -0.04           -0.03       -0.02    -0.01        0                                -0.05    -0.04     -0.03        -0.02       -0.01       0
+               0.2                                                                      0.2                  0.3                                                                     0.3
+                                   Mars                                                                                        Earth
+                                     h=90 km                                                                                     h=90 km
+                                     h=80 km                                                                0.25                 h=80 km                                             0.25
+              0.16                                                                      0.16
+                                     h=70 km                                                                                     h=70 km
+                                     h=60 km                                                                                     h=60 km
+                                                                                                             0.2                                                                     0.2
+              0.12                                                                      0.12
+        XCO
+
+
+
+
+                                                                                                       XO
+                                                                                                            0.15                                                                     0.15
+
+              0.08                                                                      0.08
+                                                                                                             0.1                                                                     0.1
+
+
+              0.04                                                                      0.04
+                                                                                                            0.05                                                                     0.05
+
+
+
+                   0                                                                    0                        0                                                                   0
+                       -0.05      -0.04           -0.03       -0.02    -0.01        0                                -0.05    -0.04     -0.03        -0.02       -0.01       0
+                                                      x [m]                                                                                  x [m]
+                                                     (a)                                                                                    (b)
+                       Fig. 3 Profiles of molar fraction of CO and O in the shock layer for Mars (a) and for Earth (b)
+                   -0.03       -0.025     -0.02     -0.015     -0.01   -0.005   0                                -0.16         -0.12        -0.08            -0.04       0
+        14000                                                                       14000              30000                                                                     30000
+                                                                                                                             h=90 km
+                                                                                                                                Earth, NR
+        12000                                                                       12000
+                                                                                                       25000                    Earth, FC                                        25000
+                                                                                                                                Mars, NR
+        10000                                                                       10000                                       Mars, FC
+                                                                                                       20000                                                                     20000
+
+         8000                                                                       8000
+T [K]
+
+
+
+
+                                                                                               T [K]
+
+
+
+
+                                                                                                       15000                                                                     15000
+         6000                                                                       6000
+
+                                                                                                       10000                                                                     10000
+         4000                                                 h=60 km               4000
+                                                                 Earth, NR
+                                                                 Earth, FC                              5000                                                                     5000
+         2000                                                                       2000
+                                                                 Mars, NR
+                                                                 Mars, FC
+               0                                                                    0                        0                                                                   0
+                   -0.03       -0.025     -0.02     -0.015     -0.01   -0.005   0                                -0.16         -0.12        -0.08            -0.04       0
+                                                     x [m]                                                                                  x [m]
+                                          (a)                                                    (b)
+                         Fig. 4 Profiles of temperature along the stagnation line at h=60 km (a) and at h=90 km (b)
+
+for Mars and for Earth. As expected, both numbers of reactions decrease with increasing altitude or
+with decreasing density. Both numbers for Earth are higher than those for Mars; for example at
+h=60 km, Nrf and Nrs for Earth are 16.1 and 7.8 times higher than those for Mars. The higher
+values for Earth are due to higher density and/or to higher flow energy (see Tables 1(a) and 1(b)).
+   The two most likely chemical reactions are the dissociation reaction CO2+CO2->CO2+CO+O
+and the direct (endothermic) exchange reaction CO2+O->CO+O2 for Mars, the dissociation
+reaction O2+N2->2O+N2 and the reverse (exothermic) exchange reaction O2+N->NO+O for Earth.
+Table 5 reports the fractions of the above reactions at the four altitudes. For the sake of
+completeness, Figs. 3(a) and 3(b) show the profiles, along the stagnation line in the shock layer, of
+the molar fractions of CO and O produced by dissociation of CO2 and O2 (computations have been
+                                         Effects of chemistry in Mars entry and Earth re-entry                                                                           589
+
+
+Table 7 Average temperature over the stagnation line and percentage variation
+                                                  Mars                                                                             Earth
+                                                                          ( TNR − TFC )                                                                 ( TNR − TFC )
+   h [km]              TNR [K]                  TFC [K]                       TFC
+                                                                                        %                    TNR [K]             TFC [K]                    TFC
+                                                                                                                                                                      %
+
+          90               6680                  6214                               7.5                      15147               12758                      18.7
+          80               6351                  5489                           15.7                         10864                8820                      23.2
+          70               4282                  3245                           32.0                         11129                8037                      38.5
+          60               6101                  4458                           36.9                          8273                5524                      49.8
+
+                 0   0.1    0.2   0.3    0.4     0.5    0.6      0.7      0.8                            0     0.1   0.2   0.3     0.4    0.5    0.6      0.7      0.8
+          7000                                                                  7000               120                                                                   120
+                                                       h=60 km                                                                                  h=60 km
+                                                              Mars, NR                                                                                 Mars, NR
+          6000                                                Mars, NC          6000                                                                   Mars, NC
+                                                                                                   100                                                                   100
+                                                              Mars, FC                                                                                 Mars, FC
+          5000                                                Earth, NR         5000                                                                   Earth, NR
+                                                              Earth, NC                             80                                                 Earth, NC         80
+                                                              Earth, FC                                                                                Earth, FC
+          4000                                                                  4000
+                                                                                           [Pa]
+ p [Pa]
+
+
+
+
+                                                                                                    60                                                                   60
+          3000                                                                  3000
+
+                                                                                                    40                                                                   40
+          2000                                                                  2000
+
+                                                                                                    20                                                                   20
+          1000                                                                  1000
+
+
+             0                                                                  0                    0                                                                   0
+                 0   0.1    0.2   0.3    0.4     0.5    0.6      0.7      0.8                            0     0.1   0.2   0.3     0.4    0.5    0.6      0.7      0.8
+                                        s [m]                                                                                     s [m]
+                                   (a)                                                      (b)
+                     Fig. 5 Profiles of pressure (a) and skin friction (b) along the nose surface: h=60 km
+
+
+carried out considering the nose surface as fully-catalytic). Table 6 reports the fractions of the
+fully-catalytic surface reactions. The surface recombination O+O->O2 is the most likely equation
+also for Mars.
+    The effect of the endothermic reactions in the flow, both for Earth and for Mars, is higher than
+that of the exothermic reactions; this condition can be qualitatively evaluated by means of the
+profiles of temperature along the stagnation line in the shock layer (Fig.4(a) at h=60 km and
+Fig.4(b) at h=90 km). As expected, temperature computed considering the gas non reactive (and
+non-catalytic surface, NR) is higher than that computed considering the gas reactive (and fully-
+catalytic surface, FC). To quantify the chemical effects, Table 7 reports the values of temperature
+averaged over the shock layer, for non-reactive and reactive gas and the related percentage
+differences. Higher values of the percentage variation indicate that the influence of chemistry for
+Earth is higher than that for Mars and that this influence decreases with altitude.
+    The effects of chemistry are almost negligible on pressure and on skin friction and therefore on
+the aerodynamic drag. For example, Figs. 5(a) and 5(b) show the profiles of pressure and skin
+friction along the nose surface at the altitude of h=60 km; similar results were obtained also at
+higher altitudes. Fig.6 shows the profiles of the aerodynamic drag coefficient (CD) of the nose as
+functions of altitude. The quantification of chemical condition on the drag coefficient is reported in
+Table 8; also the drag coefficient is almost independent from the chemical conditions. The very
+590                                                     Gennaro Zuppardi
+
+                                             0.4      0.5       0.6        0.7   0.8         0.9
+                                       100                                                         100
+
+
+
+                                        90                                                         90
+
+
+
+                                        80                                                         80
+                              h [km]
+
+
+
+
+                                        70                                                         70
+                                                                                 Mars, NC
+                                                                                 Mars, FC
+                                        60                                       Mars, NR          60
+                                                                                 Earth, NC
+                                                                                 Earth, FC
+                                                                                 Earth, NR
+                                        50                                                         50
+                                             0.4      0.5       0.6        0.7   0.8         0.9
+                                                                      CD
+
+                  Fig. 6 Profiles of the drag coefficient of the nose as functions of altitude
+
+Table 8 Percentage variations of drag coefficient
+                                             Mars                                                            Earth
+                (CD NR − CDFC )                     (CDFC − CD NC )              (CD NR − CDFC )                     (CDFC − CD NC )
+   h [km]                         %                                    %                                 %                             %
+                     CDFC                                   CD NC                      CDFC                              CD NC
+
+      90              -0.88                                  1.49                      -0.57                               0.42
+      80              -0.88                                  1.65                      -0.11                               0.30
+      70              -0.56                                  1.43                       1.22                               -0.04
+      60              -0.17                                  0.66                       0.18                               0.05
+
+
+different values between the Mars and the Earth drag coefficients are due to the very different
+Reynolds and Mach numbers (see Tables 1(a) and 1(b)). For example, at h=90 km where the
+Reynolds number for Earth is about one order of magnitude smaller than that for Mars and the
+Mach number is less than half than that for Mars, CD for Earth is about 0.88 and CD for Mars is
+about 0.57; the percentage difference is about 54%.
+    On the opposite, the chemical effects are pretty consistent on heat flux. Figs. 7(a), 7(b) and
+Figs. 8(a), 8(b) show the heat flux profiles along the nose surface for Mars and for Earth at h=60
+km (a) and at h=90 km (b) for each chemical condition. As expected, the values of heat flux,
+computed considering the gas non-reactive (and non-catalytic surface, NR), are the largest, the
+values of heat flux, computed considering the gas reactive (and non-catalytic surface, NC), are the
+smallest. Figures clearly show that the incidence of the chemical reactions decreases with altitude.
+    The profiles of heat flux at the nose stagnation point, as functions of altitude, are shown in Figs.
+9(a) for Mars and 9(b) for Earth. In order to quantify the influence of the chemical reactions in the
+flow and on the surface, Table 9 reports, at each altitude, the percentage difference between the
+heat flux, computed considering the gas non-reactive (and non-catalytic surface, NR) and the heat
+flux, computed considering the gas reactive (and non-catalytic surface, NC). Similarly, the
+influence of the surface reactions is quantified by the percentage difference of heat flux, computed
+considering the gas reactive and fully-catalytic surface (FC) with respect to heat flux, computed
+considering the gas reactive and non-catalytic surface (NC). It seems that the influence of the
+                                              Effects of chemistry in Mars entry and Earth re-entry                                                                       591
+
+                      0   0.1   0.2   0.3    0.4   0.5    0.6    0.7      0.8                               0   0.1   0.2   0.3    0.4   0.5     0.6   0.7      0.8
+                600                                                             600                   600                                                             600
+                                                     Mars, h=60 km                                                                             Mars, h=90 km
+                                                             FC                                                                                        FC
+                500                                                             500                   500                                                             500
+                                                             NC                                                                                        NC
+                                                             NR                                                                                        NR
+                400                                                             400                   400                                                             400
+    q [kW/m2]
+
+
+
+
+                                                                                          q [kW/m2]
+                300                                                             300                   300                                                             300
+
+
+                200                                                             200                   200                                                             200
+
+
+                100                                                             100                   100                                                             100
+
+
+                  0                                                             0                       0                                                             0
+                      0   0.1   0.2   0.3    0.4 0.5      0.6    0.7      0.8                               0   0.1   0.2   0.3    0.4 0.5       0.6   0.7      0.8
+                                            s [m]                                                                                 s [m]
+                                            (a)                                                                                   (b)
+    Fig. 7 Heat flux profiles along the body surface along the Mars entry at h=60 km (a) and at h=90 km (b)
+                      0   0.1   0.2   0.3    0.4   0.5    0.6    0.7      0.8                               0   0.1   0.2   0.3    0.4   0.5     0.6   0.7      0.8
+          1400                                                                  1400            1400                                                                  1400
+                                                         Earth, h=60 km                                                                        Earth, h=90 km
+                                                                  FC                                                                                    FC
+          1200                                                                  1200            1200                                                                  1200
+                                                                  NC                                                                                    NC
+                                                                  NR                                                                                    NR
+          1000                                                                  1000            1000                                                                  1000
+
+
+                800                                                             800                   800                                                             800
+ q [kW]
+
+
+
+
+                                                                                       q [kW]
+
+
+
+
+                600                                                             600                   600                                                             600
+
+
+                400                                                             400                   400                                                             400
+
+
+                200                                                             200                   200                                                             200
+
+
+                  0                                                             0                       0                                                             0
+                      0   0.1   0.2   0.3    0.4 0.5      0.6    0.7      0.8                               0   0.1   0.2   0.3    0.4 0.5       0.6   0.7      0.8
+                                            s [m]                                                                                 s [m]
+                                            (a)                                                                                   (b)
+                Fig. 8 Heat flux profiles along the body surface along the Earth re-entry at h=60 (a) and 90 km (b)
+
+
+surface chemical condition, at the altitudes of 60, 70 and 80 k m is slightly higher for Earth. At 90
+km both the flow and the surface reactions reduce; this reduction is slightly stronger for Earth.
+This is probably due to much stronger reduction of density; density reduces, from 80 and 90 km,
+of -41% for Mars and of -82% for Earth (see tables 1(a) and 1(b)).
+
+
+6. Conclusions and further developments
+
+  The effects of chemical reactions both in the flow and on the surface of a test body, along the
+Mars entry and the Earth re-entry paths, have been quantified and compared. The Earth re-entry
+592                                                           Gennaro Zuppardi
+
+                 200     300          400       500           600                         200   400     600       800   1000 1200 1400 1600
+           100                                                      100             100                                                           100
+                                                  Mars                                                                            Earth
+                                                         FC                                                                               FC
+            90                                           NC         90               90                                                   NC      90
+                                                         NR                                                                               NR
+
+
+            80                                                      80               80                                                           80
+
+
+
+
+                                                                           h [km]
+  h [km]
+
+
+
+
+            70                                                      70               70                                                           70
+
+
+
+            60                                                      60               60                                                           60
+
+
+
+            50                                                      50               50                                                           50
+                 200     300         400        500           600                         200   400     600        800 1000 1200 1400 1600
+                                q(0) [kW/m2]                                                                     q(0) [kW/m2]
+
+                                  (a)                                                    (b)
+                       Fig. 9 Stagnation point heat flux along the Mars entry (a) and Earth re-entry (b)
+
+Table 9 Percentage variation of stagnation point heat flux
+                                               Mars                                                                 Earth
+                          (q NR − q NC )            (q FC − q NC )                      (q NR − q NC )                 (q FC − q NC )
+      h [km]                               %                           %                                     %                                %
+                               q NC                       q NC                                 q NC                            q NC
+
+            90                   19                            16                                   5                                6
+            80                   25                            24                                  28                               31
+            70                   44                            34                                  40                               41
+            60                   27                            22                                  26                               32
+
+
+velocity is higher than that of Mars entry therefore the flow is more energized, but the Mars
+atmosphere is almost made up of Carbon dioxide whose dissociation energy is lower than that of
+Oxygen; one could expect that the effects of chemistry on aerodynamic quantities are different
+from those along the Earth re-entry.
+    The study has been carried out computationally. Computer tests have been made in the altitude
+interval 60-90 km considering, as test body, an axial-symmetric nose of an aero-space-plane and as
+free stream velocities those of not-lifting capsules in free entry. As both flow fields are in
+transitional regime, the use of a DSMC code (DS2V-4.5 64 bits) has been mandatory.
+    At each altitude, three chemical conditions have been considered: 1) gas non reactive and non-
+catalytic surface, 2) gas reactive and non-catalytic surface, 3) gas reactive and fully-catalytic
+surface. Computations found that the numbers of reactions in the flow and on the surface in Earth
+re-entry are about one order of magnitude higher than those in Mars entry. Correspondingly, the
+effects of chemistry on the aerodynamic quantities in the shock layer, as per temperature, are
+higher for Earth. The influence of surface reaction was negligible on pressure and on skin friction,
+therefore on aerodynamic drag, but it was consistent on heat flux.
+    The present study is not exhaustive therefore further computer tests are needed. Tests at other
+altitudes, as well as considering other possible entry trajectories, have been scheduled. More
+specifically, interplanetary or direct entry trajectories will be considered. In fact, this kind of
+                           Effects of chemistry in Mars entry and Earth re-entry                       593
+
+
+entry/re-entry is characterized by much higher velocity therefore by much higher energy. For
+example, velocity at h=90 km is about 11 km/s for Earth re-entry and about 5 km/s for Mars entry.
+
+
+References
+Barbato, M. and Bruno, C. (1996), “Heterogeneous catalysis: Theory, models and applications”, Molecular
+  Physics and Hypersonic Flows, 139-160, Springer, Netherlands.
+Bird, G.A. (2006), “Sophisticated versus simple DSMC”, Proceedings of the 25th International Symposium
+  on Rarefied Gas Dynamics, Saint Petersburg, Russia, July.
+Bird, G.A. (1998), Molecular Gas Dynamics and Direct Simulation Monte Carlo Method, Clarendon Press,
+  Oxford, United Kingdom.
+Bird, G.A. (2005), “Visual DSMC program for two-dimensional flows”, DS2V Program User’s Guide, Ver.
+  3.3, G.A.B. Consulting Pty Ltd., Sydney, Australia.
+Bird, G.A. (2012), “Visual DSMC program for two-dimensional flows”, DS2V Program User’s Guide, Ver.
+  4.5, G.A.B. Consulting Pty Ltd., Sydney, Australia.
+Bird, G.A. (2013), The DSMC method, Ver. 1.1, CreateSpace Independent Publishing Platform, California,
+  U.S.A.
+Bird, G.A., Gallis, M.A., Torczynski, J.R. and Rader, D.J. (2009), “Accuracy and efficiency of the
+  sophisticated direct simulation Monte Carlo algorithm for simulating non-continuum gas flows”, Phys.
+  Fluids, 21(1), 017103.
+Gallis, M.A., Torczynski, J.R., Rader, D.J. and Bird, G.A. (2009), “Convergence behavior of a new DSMC
+  algorithm”, J. Comput. Phys., 228(12), 4532-4548.
+Gupta, R.N., Yos, J.M. and Thompson, R.A. (1989), “A review of reaction rates and thermodynamic
+  transport properties for an 11-species air model for chemical and thermal non-equilibrium calculations to
+  30,000 K”, NASA-RP-1232; NASA Langley Research Center, U.S.A.
+Hao, J., Wang, J., Gao, Z. and Jiang, C. (2017), “Comparison of transport properties models for numerical
+  simulation of Mars entry vehicles”, Acta Astronautica, 130, 24-33.
+Hollis, B.R. and Prabhu, D.K. (2013), “Assessment of laminar, convective aeroheating prediction
+  uncertainties for Mars entry vehicles”, J. Spacecraft Rockets, 50(1), 56-68.
+Kolesnikov, A.F., Gordeev, A.N. and Vasilevskii, S.A. (2016), “Effects of catalytic recombination on the
+  surface of metals and quartz for the conditions of entry into the Martian atmosphere”, High Temp., 54(1),
+  29-37.
+McKensie, R.L. (1966), “An estimate of the chemical kinetics behind normal shock waves in mixtures of
+  carbon dioxide and nitrogen for conditions typical of Mars entry”, NASA-TN-D-3287; NASA Ames
+  Research Center, U.S.A.
+Moss, J.N. (1995), “Rarefied flows of planetary entry capsules”, Special Course on “Capsule
+  aerothermodynamics”, Rhode-Saint-Genèse, Belgium, May.
+NASA Glenn Research Center (2015), Mars Atmosphere Model; NASA Glenn Research Center, Cleveland,
+  U.S.A., www.grc.nasa.gov/www/k-12/airplane/atmosmrm.html.
+Reynier, P. (2014), “Survey of aerodynamics and aerothermodynamics efforts carried out in the frame of
+  Mars exploration projects”, Prog. Aerosp. Sci., 70, 1-27.
+Shen, C. (2005), Rarefied Gas Dynamic: Fundamentals, Simulations and Micro Flows, Springer-Verlag,
+  Berlin, Germany.
+Vallerani, E. (1973), “A review of supersonic sphere drag from the continuum to the free molecular flow
+  regime”, Proceedings of the 41st AGARD Conference, London, United Kingdom, April.
+Wang, X., Yan, C., Zheng, W., Zhong, K. and Geng, Y. (2016), “Laminar and turbulent heating predictions
+  for Mars entry vehicles”, Acta Astronautica, 128, 217-228.
+Yang, X., Tang, W., Gui, Y., Du, Y., Xiao, G. and Liu, L., (2014), “Hypersonic static aerodynamics for Mars
+  science laboratory entry capsule”, Acta Astronautica, 103, 168-175.
+Zuppardi, G. (2015), “Aerodynamic control capability of a wing-flap in hypersonic, rarefied regime”, Adv.
+594                                      Gennaro Zuppardi
+
+
+  Aircraft Spacecraft Sci., 2(1), 45-56.
+Zuppardi, G. (2018), “Effects of SWBLI and SWSWI in Martian atmosphere entry”, Proceedings of 31st
+  International Symposium on Rarefied Gas Dynamics, Glasgow, United Kingdom, July.
+Zuppardi, G., Morsa, L., Sippel, M. and Schwanekamp, T. (2014), “Aero-thermo-dynamic analysis of the
+  SpaceLiner-7.1 vehicle in high altitude flight”, Proceedings of the 29th International Symposium on
+  Rarefied Gas Dynamics, Xian, China, July.
+Zuppardi, G. and Savino, R. (2015), “DSMC aero-thermo-dynamic analysis of a deployable capsule for
+  Mars entry”, A Paper Presented at DSMC15 Symposium, Kapaa, Hawaii, U.S.A., September.
+
+
+EC
+

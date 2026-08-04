@@ -1,0 +1,110 @@
+# nsite sensitivity study for the constant-gamma wall chemistry model
+# Five cases are executed sequentially and independently in this input file.
+
+variable nsite index 6.022e18 6.022e19 6.022e20 6.022e17 6.022e16
+variable caseid index nsite_6.022e18 nsite_6.022e19 nsite_6.022e20 nsite_6.022e17 nsite_6.022e16
+
+label loop_nsite
+
+clear
+
+shell mkdir ${caseid}
+shell mkdir ${caseid}/data
+log ${caseid}/log.sparta
+
+print "============================================================"
+print "Starting nsite sensitivity case: nsite = ${nsite}"
+print "Output directory: ${caseid}"
+print "============================================================"
+
+seed                 123456
+dimension            2
+global               gridcut 0.0 comm/sort yes
+boundary             o o p
+
+create_box           -2 2 -2 2 -0.5 0.5
+create_grid          223 223 1
+balance_grid         rcb cell
+
+global               nrho 3.63e18 fnum 3.8931e13 vstream 4811 0 0 temp 144.74
+species              air.species N2 O2 NO N O CO2 CO C vibfile co2.species.vib
+
+mixture              air N2 frac 0.05
+mixture              air O2 frac 0.05
+mixture              air NO frac 0.0
+mixture              air N frac 0.3
+mixture              air O frac 0.2
+mixture              air CO2 frac 0.1
+mixture              air CO frac 0.0
+mixture              air C frac 0.3
+
+mixture              N2 N2
+mixture              O2 O2
+mixture              NO NO
+mixture              N N
+mixture              O O
+mixture              CO2 CO2
+mixture              CO CO
+mixture              C C
+
+read_surf            circle_R0.5_P10000.surf
+
+surf_collide         1 diffuse 560 1
+surf_modify          all collide 1
+
+surf_react           gamma gamma gamma.surf surf 560 ${nsite} O 1 C 1 N 1
+surf_modify          all react gamma
+
+react                tce air.tce
+react_modify         recomb no partial_energy no
+
+fix                  in emit/face air xlo xhi ylo yhi
+collide              vss air air.vss
+collide_modify       vibrate discrete rotate smooth
+fix                  vib vibmode
+
+create_particles     air n 0
+
+timestep             2e-6
+stats                10
+stats_style          step cpu np nattempt ncoll nscoll nscheck nsreact
+
+# Initial transient and particle-based grid adaptation
+run                  10
+fix                  bal1 balance 100 1.2 rcb time
+fix                  bal2 balance 1000 1.02 rcb time
+
+run                  1000
+adapt_grid           all refine particle 200 400 iterate 3
+run                  1000
+adapt_grid           all refine particle 200 400 iterate 3
+run                  1000
+adapt_grid           all refine particle 200 200 iterate 3
+run                  1000
+adapt_grid           all refine particle 50 50 iterate 3
+
+# Grid-field output
+compute              1 grid all air nrho u v trot
+compute              2 thermal/grid all air temp press
+compute              3 tvib/grid all air
+compute              4 grid all CO2 nrho
+compute              5 grid all N2 nrho
+
+fix                  1 ave/grid all 1 10000 10000 c_1[*] c_2[*] c_3[*] c_4[*] c_5[*] ave running
+dump                 1 grid all 10000 ${caseid}/data/grid.*.dat id xc yc f_1[*]
+dump_modify          1 format float %12.5g
+
+# Surface-field output
+compute              9 surf all all n nwt press fx fy px py shx shy etot ke erot evib echem
+fix                  2 ave/surf all 1 10000 10000 c_9[*] ave running
+dump                 2 surf all 10000 ${caseid}/data/surf.*.dat id v1x v1y v2x v2y f_2[*]
+dump_modify          2 format float %12.5g
+
+run                  60000
+
+print "Completed nsite sensitivity case: nsite = ${nsite}"
+
+next nsite caseid
+jump in.cylinder_gamma loop_nsite
+
+print "All five nsite sensitivity cases completed."

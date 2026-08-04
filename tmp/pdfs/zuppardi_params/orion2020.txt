@@ -1,0 +1,417 @@
+                                                                                                   JOURNAL OF SPACECRAFT AND ROCKETS
+                                                                                                   Vol. 58, No. 2, March–April 2021
+
+
+
+                                                                                                   Aerodynamics of Orion in Rarefied Flow Along a Mars Entry Path
+                                                                                                                                                                     G. Zuppardi∗
+                                                                                                                                                 University of Naples Federico II, 80125 Naples, Italy
+                                                                                                                                                                  https://doi.org/10.2514/1.A34825
+                                                                                                                         It is well known that the Orion capsule was born as a rescue shuttle for the International Space Station. NASA
+                                                                                                                      developed the Orion project for the transportation of instruments and astronauts to moon, Mars, and beyond. Orion
+                                                                                                                      is similar in shape but larger than the Apollo command module; Orion will be able to host up to six astronauts, but
+                                                                                                                      Apollo command module could host only three astronauts. The aerodynamics of Orion during reentry to Earth in all
+                                                                                                                      rarefied regimes (that is, from free molecule regime to continuum) was already studied. The forthcoming use of Orion
+                                                                                                                      for Mars landing stimulated the author to evaluate global aerodynamic coefficients in rarefied flow along an entry
+                                                                                                                      path. The study considered problems both in axisymmetric and in three-dimensional flows by means of two direct
+                                                                                                                      simulation Monte Carlo codes. Global aerodynamic coefficients were computed at the altitudes of 80, 90, and 100 km.
+                                                                                                                      Special attention was paid to longitudinal stability.
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                                               Nomenclature                                              manned, partially reusable capsule for future space exploration.
+                                                                                                   CA , CN           =    axial and normal force coefficients                            The Orion CEV was born as a rescue shuttle for the International
+                                                                                                   CL , CD , CMz     =    lift, drag, and longitudinal moment coefficients               Space Station (ISS). NASA originally started this project to replace
+                                                                                                   D                 =    Orion base area diameter, m                                    the retired space shuttle as a transfer to and from the ISS. According to
+                                                                                                   g                 =    gravity acceleration, m∕s2                                     current plans (Artemis Program [2]), NASAwill land the first woman
+                                                                                                   h                 =    altitude, km                                                   and the next man on the moon by 2024, using innovative technologies
+                                                                                                   Kn                =    Knudsen number                                                 to explore more of the lunar surface than ever before. Orion will be
+                                                                                                   L                 =    Orion length, m                                                used also to transport instruments and astronauts on Mars.
+                                                                                                   Ma                =    Mach number                                                       Orion is similar in shape to but larger than the Apollo command
+                                                                                                   N                 =    number density, 1∕m3                                           module (CM). In fact, the diameter and mass of Orion are 5.03 m and
+                                                                                                   NM                =    number of simulated molecules                                  8500 kg, respectively; those of the Apollo CM were 3.90 m and
+                                                                                                   m                 =    Orion mass, kg                                                 5557 kg. Orion is capable of transporting cargo and can host four to
+                                                                                                   p                 =    pressure, Pa                                                   six astronauts up to 21 days undocked and up to six months docked. It
+                                                                                                   R                 =    trajectory curvature radius, m                                 is equipped with a solar power system, an automated docking system,
+                                                                                                   Re                =    Reynolds number                                                and glass cockpit interfaces.
+                                                                                                   S                 =    Orion base area, m2                                               Like Apollo, Orion will be attached to a service module for life
+                                                                                                   T                 =    temperature, K                                                 support and to the propulsion system. Orion is primarily designed to
+                                                                                                   t                 =    time, s                                                        launch atop a space launch system (SLS) with a tower launch escape
+                                                                                                   V                 =    velocity, m∕s                                                  system. The SLS is a carrier rocket conceptually similar to Ares V [1].
+                                                                                                   X, Y, Z           =    computing domain dimensions, m                                 An AJ10 engine provides the capsule’s primary propulsion, whereas
+                                                                                                   x, y, z           =    Cartesian coordinates, m                                       eight R-4D-11 engines and six pods of engines provide the capsule’s
+                                                                                                   α                 =    angle of attack, deg                                           secondary propulsion.
+                                                                                                   γ                 =    flight-path angle, deg                                            The Orion project is currently still under development by NASA.
+                                                                                                   λ                 =    mean free path, m                                              The first unmanned flight test took place on 5 December 2014. The
+                                                                                                   ρ                 =    density, kg∕m3                                                 capsule was launched from Cape Canaveral with a Delta IV Heavy
+                                                                                                                                                                                         rocket and made two terrestrial orbits reaching an altitude of 5700 km
+                                                                                                                                                                                         before splashing down into the Pacific Ocean off the coast of California.
+                                                                                                   Subscripts
+                                                                                                                                                                                            The aerodynamics of Orion in Earth’s atmosphere entry from the
+                                                                                                   ∞                 =    freestream                                                     ISS was already studied by Moss et al. [3] in all hypersonic rarefaction
+                                                                                                   eq                =    equilibrium                                                    regimes, i.e., from free molecular flow to continuum. Moss et al.
+                                                                                                   f                 =    fluid dynamic                                                  performed calculations by direct simulation Monte Carlo (DSMC)
+                                                                                                   s                 =    simulation                                                     codes in rarefied regimes and by a computational fluid-dynamic
+                                                                                                   w                 =    surface                                                        (CFD) code in continuum. Votta et al. [4] focused the study of the
+                                                                                                   2                 =    downstream of a normal shock wave                              transitional regime and provided information about the overlap alti-
+                                                                                                   2-D               =    two-dimensional axisymmetric                                   tude of the results from CFD and DSMC codes. In addition, Votta et al.
+                                                                                                   3-D               =    three-dimensional                                              implemented slip flow boundary conditions in a CFD code in order to
+                                                                                                                                                                                         take into account some effects of rarefaction.
+                                                                                                                                                                                            The aim of the present paper was to study the aerodynamic
+                                                                                                                              I.   Introduction                                          behavior of Orion along a high-altitude entry path in Mars atmos-
+                                                                                                                                                                                         phere. More specifically, global aerodynamic coefficients were com-
+                                                                                                   O     RION [1], previously known as the Crew Exploration Vehicle
+                                                                                                         (CEV) of the former NASA Constellation Program, is a
+                                                                                                                                                                                         puted at the altitudes of 80, 90, and 100 km in the range of angles of
+                                                                                                                                                                                         attack of 0–180 deg. The problem of longitudinal equilibrium was
+                                                                                                                                                                                         focused through a sensitivity analysis of the longitudinal moment
+                                                                                                      Received 29 March 2020; revision received 20 August 2020; accepted for             with respect to the position of the center of gravity. The equilibrium
+                                                                                                   publication 15 September 2020; published online 12 October 2020. Copyright            angles of attack and the stability derivatives were also evaluated.
+                                                                                                   © 2020 by the American Institute of Aeronautics and Astronautics, Inc. All               The computations relied on a homemade code computing the Mars
+                                                                                                   rights reserved. All requests for copying and permission to reprint should be
+                                                                                                   submitted to CCC at www.copyright.com; employ the eISSN 1533-6794 to
+                                                                                                                                                                                         entry trajectory [5] and two direct simulation Monte Carlo codes
+                                                                                                   initiate your request. See also AIAA Rights and Permissions www.aiaa.org/             (DS2V (Version 4.5, 64 bits) [6] and DS3V (Version 2.6) [7]), solving
+                                                                                                   randp.                                                                                the two-dimensional (2-D) and three-dimensional (3-D) flowfields,
+                                                                                                      *Lecturer in Hypersonic Aerodynamics, Department of Industrial Engi-               respectively. Since zero is the most probable angle of attack, compu-
+                                                                                                   neering–Aerospace Division, Piazzale Tecchio 80; zuppardi@unina.it.                   tation of aerodynamic drag also by DS2V at a zero angle of attack or
+                                                                                                                                                                                   531
+                                                                                                   532                                                                    ZUPPARDI
+
+
+                                                                                                   in axisymmetric flow was considered proper for a comparison of the            between the collision time and the transit time or the time necessary
+                                                                                                   drag coefficient with that from DS3V. DS2V, being a 64-bit code, is           for a molecule to transit the collision cell at its velocity. In a DSMC94
+                                                                                                   much more powerful than DS3V, which is a 32-bit code.                         code, the global time step was an input datum kept constant during the
+                                                                                                                                                                                 evolution of the system, and therefore not related to the actual,
+                                                                                                                                                                                 evolving fluid-dynamic conditions.
+                                                                                                         II.   Direct Simulation Monte Carlo Method and                             3) The code avoids sequential collisions between the same collision
+                                                                                                                          DS2V/3V Codes                                          pair. This procedure does not allow a second collision between the
+                                                                                                      The direct simulation Monte Carlo method [8–10] is a stochastic            same collision partners. This is, in fact, physically impossible because
+                                                                                                   method solving the flowfields in the transitional regime, i.e., from          the molecules, after a collision, move away in opposite directions.
+                                                                                                   the continuum low-density regime to the free molecule regime. The                4) The code allows the user to evaluate the quality of a computation
+                                                                                                   DSMC relies on the kinetic theory of gases and considers gas as made          by means of the evaluation of the adequacy of the numbers of
+                                                                                                   up of millions of simulated molecules, with each one representing             simulated molecules and of collision cells. The ratio between the
+                                                                                                   a large number of real molecules in the physical space. For example, in       molecule mean collision separation (MCS) and the mean free path λ,
+                                                                                                   the present computations, each simulated molecule represented                 in each collision cell, is the parameter making possible this evaluation;
+                                                                                                   109 –1012 real molecules in 2-D-axisymmetric computations and                 MCS∕λ has to be less than unity everywhere in the computational
+                                                                                                   1011 –1012 real molecules in 3-D computations.                                domain for a good quality of a computation. Bird [11] suggests that
+                                                                                                      The evolution of molecules in terms of velocity, spatial coordinates,      MCS∕λ should be less than 0.2 for an optimal quality of the compu-
+                                                                                                   and thermodynamic and chemical status is produced by molecule–                tation. DS2V provides in output the value of MCS∕λ averaged over
+                                                                                                   molecule collisions and molecule–surface interactions within the              the computing domain, whereas DS3V provides in output only the
+                                                                                                                                                                                 maximum value. The average values reported in the present paper,
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                   simulated physical space. This is divided into cells for both selecting
+                                                                                                   the colliding molecules and for sampling the thermofluid-dynamic              which are more meaningful than the maximum values, were deduced
+                                                                                                   quantities. The molecules in a cell represent those at the same location      from the maps of MCS∕λ in the meridian plane.
+                                                                                                   in the physical field. The method does not rely on integration of any            5) Both codes provide indication about the stabilization of a
+                                                                                                   differential equation; therefore, it does not suffer from numerical           computation. Stabilization is achieved when the profile of the number
+                                                                                                   instabilities but is inherently unsteady with a steady solution achiev-       of simulated molecules, as a function of the simulated time, becomes
+                                                                                                   able after a sufficiently long simulation time.                               jagged and included within a band, which defines the standard
+                                                                                                      The basic assumption of the method is the temporal decoupling of           deviation of the number of simulated molecules.
+                                                                                                   motion and collision of the simulated molecules. The motion and the
+                                                                                                   collision phases are computed by two distinct algorithms performed                             III.   Orion Geometric Parameters
+                                                                                                   sequentially. This assumption holds when the evolution time step of              Orion is a revolution body whose geometry [3,4] in the meridian
+                                                                                                   the aerodynamic system (or global time step) is shorter than the              plane (x, y) is shown in Fig. 1. The maximum diameter is
+                                                                                                   collision time or the time between two subsequent molecular colli-            D  5.03 m; therefore, the base area or the area of the maximum
+                                                                                                   sions. In the motion phase, the simulated molecules move ballistically        cross section is S  19.86 m2 , and the length is L  3.30 m. S and D
+                                                                                                   at their own velocity over the global time step. Molecules change             were used as the reference area and reference length for scaling forces
+                                                                                                   position in the flowfield and interact with the surface of the body           and moments to the related coefficients. The curvature radius of the
+                                                                                                   under study. In the collision phase, couples of colliding molecules are       rounded shoulder (i.e., the curve between points C and D) is 0.25 m;
+                                                                                                   selected in the cell. Chemical reactions take place, and both colliding       and the center of curvature is located at x  0.71 m, y  2.26 m.
+                                                                                                   molecules exchange energy among the translational and the interior            The curvature radius of the heat shield is 6.04 m, and the center is
+                                                                                                   degrees of freedom (rotation, vibration); thus, their velocity changes.       located on the x axis. The center of gravity of the capsule is located at
+                                                                                                      The gas macroscopic properties (density, temperature, etc.) and the        xCG  1.33 m, yCG  0.24 m. The computing domain of DS2V is a
+                                                                                                   surface macroscopic properties (pressure, shear stress, heat flux, etc.)      rectangle in the meridian plane: X  6.0 m, Y  3.5 m, and the
+                                                                                                   are computed by sampling, and then by averaging in each cell and on           capsule surface is approximated into 480 intervals.
+                                                                                                   each elemental area of the body surface molecular quantities: number             Since the DS3V computations were carried out in symmetric flight,
+                                                                                                   of molecules, gas composition, momentum, kinetic energy, internal             it was possible to consider only the half-capsule. Figures 2a and 2b
+                                                                                                   energy, etc. The macroscopic properties are calculated every 20–30            show the side view (i.e., in the meridian plane) and the front view [i.e.,
+                                                                                                   global time steps.                                                            in the azimuthal plane (y, z) of Orion] produced by Rhinoceros®
+                                                                                                      Both DS2V and DS3V are “sophisticated”; in the literature, a               software. Rhinoceros approximated the capsule half-surface into
+                                                                                                   sophisticated code is labeled also as DSMC07. A DSMC07 code                   31,068 triangles. The computing domain was a parallelepiped:
+                                                                                                   implements computing procedures achieving both greater efficiency             X  5.5 m, Y  7 m, and Z  3.5 m.
+                                                                                                   and accuracy with respect to a “basic” DSMC code; in the literature, a
+                                                                                                   basic code is also labeled as DSMC94. More specifically, a DSMC07
+                                                                                                   code [11–13] performs the following:                                                                   IV.    Test Conditions
+                                                                                                      1) The code divides the computing volume into two grids of cells              The present computations considered Mars atmosphere made up
+                                                                                                   (collision and sampling) with the possibility of cell adaptation. Both        of seven species and its composition constant with altitude. Table 1
+                                                                                                   codes automatically generate the number of cells and the structure of         reports the mass and the molar fractions of the chemical species.
+                                                                                                   the collision and sampling grids on the basis of the number of mega-             Because of dissociation along an entry path, atomic oxygen and
+                                                                                                   byte input to the code and of the freestream number density. In the           atomic nitrogen are also present; thus, in these simulations, the work-
+                                                                                                   present computations, the numbers of megabytes were 1250 for DS2V             ing gas is a mixture of nine chemical species. The chemical model,
+                                                                                                   and 450 for DS3V. The very different numbers of megabytes are due to
+                                                                                                   the fact that, as said before, DS2V (being a 64-bit code) can manage a
+                                                                                                   much larger number of molecules and cells than DS3V. DS3V, in fact,
+                                                                                                   is a 32-bit code. However, the user can change the number of cells, and
+                                                                                                   therefore the structure of both grids, by inputting the numbers of
+                                                                                                   molecules for the adaptation of the collision and sampling cells; the
+                                                                                                   lower the input number of molecules per cell, the higher the number of
+                                                                                                   cells after the adaptation process. In the present computations, the
+                                                                                                   adaptation procedure used eight and about 200 molecules for collision
+                                                                                                   and sampling cells, respectively.
+                                                                                                      2) The code provides an optimal global time step. This is computed
+                                                                                                   as a fraction (say, 0.2) of the current time step in each collision cell,
+                                                                                                   averaged over the computing domain. This time step is the smallest                    Fig. 1     Geometry of Orion in the meridian plane (x, y).
+                                                                                                                                                                            ZUPPARDI                                                                  533
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                                               a)                                                           b)
+                                                                                                                              Fig. 2 Triangle approximation of Orion surface in a) the meridian and in b) the azimuthal plane.
+
+
+
+                                                                                                   proposed by Bird both in the DS2V (Version 3.3) [14] and in DS3V                The entry velocity and flight-path angle are those of Pathfinder
+                                                                                                   (Version 2.6) [7] codes, has also been implemented in the current               [16]. The ballistic parameter was computed with CD  2.0.
+                                                                                                   version (4.5, 64 bits) of the DS2V code. This model is made of 54                  Table 3 reports the freestream input data to the DS2V/3V codes:
+                                                                                                   reactions: 40 dissociations plus seven forward (or endothermic)                 velocity V ∞, temperature T ∞ , and number density N ∞, as well as
+                                                                                                   exchanges and seven reverse (or exothermic) exchanges.                          Mach Ma∞ , Reynolds Re∞D , and Knudsen Kn∞D numbers, and the
+                                                                                                      The Global Reference Atmospheric Model 2001 (GRAM-2001)                      Reynolds number downstream of a normal shock wave Re2D . The
+                                                                                                   [15] provided the atmosphere parameters. This model is based on                 velocity and Mach number do not change meaningfully in the altitude
+                                                                                                   the NASA Ames Mars general circulation model in the interval                    interval. On the opposite, both Reynolds numbers reduce by three
+                                                                                                   of 0–80 km and on Mars thermosphere general circulation model                   orders of magnitude and the Knudsen number increases by four
+                                                                                                   at altitudes above 80 km. The parameters (temperature, density,                 orders of magnitude.
+                                                                                                   and therefore number density) used in the present computations are                 According to Vallerani [17], the transitional regime for a blunt
+                                                                                                   those reported by Justus and Johnson [15] in the altitude interval of           body is defined, in terms of the Reynolds number downstream of
+                                                                                                   −1.365–194.654 km with a step of about 5 km. The parameters at the              a normal shock wave, by 10−1 < Re2D < 104 ; according to Moss
+                                                                                                   intermediate altitudes in each step, used for the computation of the            [18], it is defined in terms of the global Knudsen number by
+                                                                                                   entry trajectory, were computed by linear interpolation.                        10−3 < Kn∞D < 50. Table 3 shows that Re2D and Kn∞D agree in
+                                                                                                      The entry trajectory of Orion was computed by integration of the             stating the flowfield in the transitional regime.
+                                                                                                   equations of dynamics of the capsule [5]. The capsule was considered               The gas–surface interaction model was diffusive, fully accommo-
+                                                                                                   at a zero angle of attack along the whole entry path, and therefore with        dated [i.e., in equilibrium with the surface temperature, T w  300 K,
+                                                                                                   no lift and in free entry, no thrusters, and no parachute:                      and constant along the whole capsule. Even though this value of
+                                                                                                                                                                                   surface temperature is not realistic for an entry trajectory, as is well
+                                                                                                                           dV 1 ρV SCD g                                           known, it is a conventional value to evaluate thermal problems along
+                                                                                                                                         −                              (1a)
+                                                                                                                           dh   2 sin γ m   V                                      entry trajectories.
+                                                                                                                                                                                      DS3V computations were carried out in the range of angle of attack
+                                                                                                                            dγ    1     g 1                                        of 0–180 deg with a spacing of 10 deg. To evaluate the influence of an
+                                                                                                                                     −                                  (1b)      uncertainty in the position of the center of gravity on the longitudinal
+                                                                                                                            dh R sin γ V 2 tgγ
+                                                                                                                                                                                   moment and on the stability derivative, a sensitivity analysis was
+                                                                                                                                                                                   carried out on the position of the capsule center of gravity. The
+                                                                                                   where V is velocity, ρ is density, γ is flight-path angle, g is gravity
+                                                                                                                                                                                   moment was computed considering as reduction pole the nominal
+                                                                                                   acceleration, R is the curvature radius of the trajectory, m is the capsule
+                                                                                                                                                                                   position of the center of gravity (xcg  1.33 m, ycg  0.24 m).
+                                                                                                   mass, and CD is the drag coefficient. The ratio m∕SCD  is the ballistic
+                                                                                                                                                                                   Furthermore, the moment was also computed considering four addi-
+                                                                                                   parameter. Equations (1a) and (1b) have been integrated numerically
+                                                                                                                                                                                   tional points as possible locations of the center of gravity: P1
+                                                                                                   by a forward scheme with a first-order approximation (Euler method).
+                                                                                                                                                                                   (xP1  1.10 m, yP1  0.50 m), P2 (xP2  1.50 m, yP2  0.50 m),
+                                                                                                   Integration started from h  100 km, and the step was 0.1 km. The
+                                                                                                                                                                                   P3 (xP3  1.10 m, yP3  0.0 m), and P4 (xP4  1.50 m,
+                                                                                                   initial data of the integration procedure are reported in Table 2.              yP4  0.0 m). The longitudinal shifts of the center of gravity were
+                                                                                                                                                                                   about −7 and 5% of the length of the capsule, and the transversal
+                                                                                                                                                                                   shifts were about −∕  5% of the diameter of the capsule.
+                                                                                                           Table 1    Chemical composition of the Mars atmosphere
+                                                                                                        Chemical species              Mass fraction     Molar fraction                      Table 2     Orion operative parameters at h  100 km
+                                                                                                        Oxygen (O2 )                    0.0013            0.00176
+                                                                                                        Nitrogen (N2 )                  0.0270            0.04173                         Parameter                                   Value
+                                                                                                        Nitric Oxide (NO)               0.0001            0.00014                         Entry velocity                            7260 m∕s
+                                                                                                        Carbon Monoxide (CO)            0.0007            0.00108                         Entry path angle                          14.06 deg
+                                                                                                        Carbon Dioxide (CO2 )           0.9500            0.93399                         Entry mass                                 8500 kg
+                                                                                                        Carbon (C)                      0.0049            0.00396                         Entry ballistic parameter                214 kg∕m2
+                                                                                                        Argon (Ar)                      0.0160            0.01734                         Entry angle of attack                       0 deg
+                                                                                                   534                                                                            ZUPPARDI
+
+
+                                                                                                                                                   Table 3     Input data to DS2V/3V and some aerodynamic parameters
+                                                                                                                         h, km         V ∞ , m∕s        T∞, K        N ∞ , 1∕m3       Ma∞          Re∞D                Kn∞D               Re2D
+                                                                                                                         100             7260            127        8.05 × 1017       39.3       3.17 × 102        1.69 × 10−1       3.77 × 100
+                                                                                                                         90              7265            125        3.66 × 1018       39.5       1.46 × 103        3.69 × 10−2       1.71 × 101
+                                                                                                                         80              7269            135        1.94 × 1019       38.1       7.20 × 103        7.20 × 10−3       9.07 × 101
+
+
+
+
+                                                                                                                       V.      Quality of the Results                                              Table 6 Drag coefficients from the DS2V and DS3V
+                                                                                                                                                                                                     codes at α  0 deg and percentage variations
+                                                                                                      Table 4 verifies the quality of the DS2V results; at the three
+                                                                                                   altitudes, the average value of MCS∕λ is less than the Bird criterion                 h, km             CD2-D          CD3-D              CD3-D − CD2-D ∕CD2-D %
+                                                                                                   for an optimal quality of a DSMC computation (MCS∕λ ≤ 0.2). For
+                                                                                                                                                                                         100               1.948          1.997                          2.53
+                                                                                                   the sake of completeness, the number of simulated molecules N M are                   90                1.784          1.814                          1.68
+                                                                                                   also reported. The achievement of a steady-state condition is also                    80                1.599          1.599                          0.00
+                                                                                                   satisfied. In fact, as is well known, a rule of thumb suggests consid-
+                                                                                                   ering an unsteady fluid-dynamic computation stabilized when the
+                                                                                                   ratio ts ∕tf is reasonably greater than unity, where ts the simulation
+                                                                                                   time and tf is the fluid-dynamic time computed as the time necessary                  defined by the condition CMzCG  0, between 75 and 95 deg; whereas
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                   for the fluid to cross the length of the body under study at the free-                αeq for the Moss et al. results is about 165 deg.
+                                                                                                   stream velocity: tf  L∕V ∞ . Increasing ts is also beneficial because                   The present results are in line with the “classical” trend. Indeed, the
+                                                                                                   the longer the simulation time, the larger the number of samples of the               decrease of Re∞D , Re2D and the increase of Kn∞D with altitude
+                                                                                                   molecular quantities for the computation of the macroscopic fluid-                    (see Table 3), i.e., the increase of rarefaction, involve a decrease of the
+                                                                                                   dynamic quantities. Thus, the fluctuations could even match those in                  magnitude of CL , an increase of the magnitude of CMzCG , an increase
+                                                                                                   real gas.                                                                             of CD therefore a decrease of the magnitude of the aerodynamic
+                                                                                                      Table 5 also verifies that the DS3V results satisfy the criteria of                efficiency. Finally, in agreement with what was found by Moss
+                                                                                                   good computation. In fact, the values of the parameters (reported in                  et al. [3], the magnitudes of both the axial and normal force
+                                                                                                   Table 5) are the maximum values of MCS∕λ and the minimum values                       coefficients increase with rarefaction.
+                                                                                                   of ts ∕tf over the whole range of angles of attack at each altitude.                     A characterization of equilibrium is possible by analyzing the sign
+                                                                                                                                                                                         and magnitude of the stability derivative or of the derivative of the
+                                                                                                                      VI.      Analysis of the Results                                   longitudinal moment coefficient with respect to the angle of attack
+                                                                                                                                                                                         (dCMzCG ∕dα 1∕ deg) at the equilibrium angle of attack. As is well
+                                                                                                      To evaluate the influence of the two codes on the computation
+                                                                                                                                                                                         known, the equilibrium is stable if the derivative is negative and
+                                                                                                   of drag at α  0 deg, Table 6 reports the drag coefficients at three
+                                                                                                                                                                                         unstable if the derivative is positive; and the magnitude of the
+                                                                                                   altitudes and the related percentage variations. Even though the
+                                                                                                                                                                                         derivative is a measure of the intensity of equilibrium. In the present
+                                                                                                   number of simulated molecules for DS2V is roughly one order of
+                                                                                                                                                                                         paper, derivatives were approximated by the slope of a straight line
+                                                                                                   magnitude larger than that for DS3V (see Tables 4 and 5), it seems
+                                                                                                                                                                                         best fitting CMzCG at the angles of attack before and after the change of
+                                                                                                   that the influence on force is almost irrelevant.
+                                                                                                      Figures 3a–3f provide an overall view of the aerodynamic behavior                  the sign of CMzCG .
+                                                                                                   of Orion in terms of lift CL , drag CD , longitudinal moment (computed                   Table 7 reports some aerodynamic parameters at the three altitudes:
+                                                                                                   by considering the center of gravity as the reduction pole CMzCG )                    the slope of the lift coefficient curve at α  0 deg, the equilibrium
+                                                                                                   coefficients, aerodynamic efficiency (CL ∕CD ), axial force CA , and                  angle of attack, and the related stability derivative. Increasing rar-
+                                                                                                   normal force CN coefficients at the three altitudes of 80, 90, and                    efaction, the slope of the lift coefficient decreases by 50% and the
+                                                                                                   100 km. For the sake of completeness and as a preliminary validation                  drag coefficient (see Table 6) increases by about 25%. The percentage
+                                                                                                   of the results, the trends of the global quantities are compared with                 decrease of the stability derivative is about 16%, the equilibrium
+                                                                                                   those computed by Moss et al. [3] in Earth reentry at h  105 km,                     angle of attack increases by about 20%, and the type of equilibrium
+                                                                                                   V ∞  7600 m∕s, and Kn∞D  6.29 × 10−2 . The match of the                             does not change.
+                                                                                                   present results with those from Moss et al. seems excellent for all                      Figures 4a–4c show the results of the sensitivity analysis on CMz in
+                                                                                                   quantities, except for CMzCG at α > 50 deg. As shown in Fig. 3c at                    terms of the position of the moment reduction pole at the three
+                                                                                                   the three altitudes, Orion shows an equilibrium angle of attack αeq ,                 altitudes, respectively. Even though, as seen before, both the longi-
+                                                                                                                                                                                         tudinal and the transversal shifts of the reduction pole to points P1 and
+                                                                                                                                                                                         P2 and to points P3 and P4 are only of a few percentage units of the
+                                                                                                                                                                                         length and of the diameter of the capsule, they strongly influence the
+                                                                                                                     Table 4    Quality of DS2V computations                             profiles of the moment compared with those computed considering
+                                                                                                               h, km           MCS∕λ       ts ∕tf            NM                          the center of gravity as the reduction pole. For example, both CMzP1
+                                                                                                                                                                                         and CMzP2 at α  0 deg change by 107% with respect to CMzCG at the
+                                                                                                               100             0.001       8.28        4.20 × 107                        three altitudes.
+                                                                                                               90              0.003       7.63        3.13 × 107                           The effects, produced by the transversal shift of the moment
+                                                                                                               80              0.017       5.43        3.28 × 107                        reduction pole, are much more relevant compared with those pro-
+                                                                                                                                                                                         duced by the longitudinal shift. In fact, considering points P3 and P4
+
+
+                                                                                                                                                                                             Table 7    Slopes of lift coefficient, equilibrium angles of attack, and
+                                                                                                                     Table 5    Quality of DS3V computations                                                          stability derivatives
+                                                                                                               h, km           MCS∕λ       ts ∕tf            NM                          h, km         dCL ∕dαα0 , deg−1      αeq , deg       dCMzCG ∕dααeq , deg−1
+                                                                                                               100              0.05        120        7.52 × 106                        100                  −0.009               94.4                 0.00294
+                                                                                                               90               0.3          90        5.69 × 106                        90                   −0.016               82.3                 0.00290
+                                                                                                               80               1.0          30        5.06 × 106                        80                   −0.018               78.4                 0.00350
+                                                                                                                                                                              ZUPPARDI                                                                          535
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                   Fig. 3 Profiles of a) lift, b) drag, c) longitudinal moment coefficients, d) aerodynamic efficiency, e) axial force, and f) normal force coefficients as functions
+                                                                                                   of angle of attack.
+
+
+                                                                                                   (both lying on the capsule axis) and because of the axisymmetry of                                            VII.     Conclusions
+                                                                                                   the flowfield, the capsule gains two further equilibrium positions at                  With a view to the next use of Orion for the transport of astronauts
+                                                                                                   α  0 and 180 deg. At h  80 and 90 km, the shift of the reduction                  and instruments on Martian soil, in this paper, a preliminary analysis
+                                                                                                   pole to P3 and P4 is beneficial because it makes equilibrium stable                 of the aerodynamic behavior of the capsule was performed. The study
+                                                                                                   at α  0 deg, whereas at h  100 it is unstable. Unfortunately,                     was carried out computationally at high altitude along an entry path in
+                                                                                                   equilibrium at α  180 deg is stable at each altitude.                              terms of global aerodynamic coefficients (lift; drag; longitudinal
+                                                                                                      Tables 8 and 9 quantify the effects of the longitudinal and the                  moment; and axial and normal forces at the altitudes of 80, 90, and
+                                                                                                   transversal movements on αeq , the type of equilibrium, and intensity.              100 km in the range of angles of attack of 0–180 deg).
+                                                                                                   The longitudinal and transversal shifts influence the values of αeq but                The analysis relied on three codes for the computation of the
+                                                                                                   leave equilibrium unstable. It seems that the longitudinal and the                  following:
+                                                                                                   transversal shifts involve an increase and a decrease of the stability                 1) The first is capsule entry trajectory by means of integration of
+                                                                                                   derivatives, respectively, and therefore an increase and a decrease of              the equations of dynamics of the capsule. The GRAM-2001 provided
+                                                                                                   equilibrium with respect to those calculated using for the reduction                the atmospheric parameters. The velocity and Mach number do not
+                                                                                                   pole the center of gravity.                                                         change meaningfully in the altitude interval of 80–100 km. Conversely,
+                                                                                                   536                                                                               ZUPPARDI
+
+
+
+
+                                                                                                                               a)                                                          b)
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                                                                              c)
+                                                                                                   Fig. 4 Profiles of longitudinal moment coefficients at three altitudes as functions of angle of attack using five points as reduction pole: the nominal position
+                                                                                                   of the center of gravity and four additional points P1, P2, P3, and P4.
+
+
+
+
+                                                                                                         Table 8      Equilibrium angle of attack and stability derivatives for             the freestream Reynolds number and the Reynolds number down-
+                                                                                                                                  points P1 and P2                                          stream of a normal shock wave reduce by three orders of magnitude,
+                                                                                                                                                                                            and the Knudsen number increases by four orders of magnitude.
+                                                                                                                                P1                                 P2                          2) The second are the global aerodynamic coefficients by DSMC
+                                                                                                     h, km         αeq , deg   dCMz ∕dα, deg−1    αeq , deg        dCMz ∕dα, deg−1          code DS3V. The problem of the longitudinal equilibrium was
+                                                                                                      100           103.7            0.00352        78.0                 0.00267            focused. The trends of the aerodynamic coefficients agree with those
+                                                                                                      90            93.8             0.00402        75.5                 0.00416            computed by Moss et al. in Earth reentry at h  105 km [3]. The
+                                                                                                      80            87.0             0.00437        75.0                 0.00499            match of the present coefficients with those computed by Moss et al.
+                                                                                                                                                                                            is excellent. The stability derivatives were also evaluated, and the
+                                                                                                                                                                                            equilibrium angles of attack were identified. A sensitivity analysis of
+                                                                                                                                                                                            the longitudinal moment with respect to the position of the center of
+                                                                                                                                                                                            gravity or the moment reduction pole was also carried out. By the shift
+                                                                                                                                                                                            of the center of gravity to the capsule axis (and thanks to the axisym-
+                                                                                                         Table 9      Equilibrium angle of attack and stability derivatives for             metry of the flowfield), the capsule gains two further equilibrium
+                                                                                                                                  points P3 and P4                                          conditions at the angles of attack of 0 and 180 deg. At the altitudes of
+                                                                                                                                P3                                  P4                      80 and 90 km, this shift is beneficial because it makes equilibrium
+                                                                                                                                                                                            stable at α  0 deg that, as is well known, is the most probable angle
+                                                                                                     H, km         αeq , deg   dCMz ∕dα, deg−1    αeq , deg        dCMz ∕dα, deg−1
+                                                                                                                                                                                            of attack. Unfortunately, equilibrium at α  180 deg is stable at each
+                                                                                                      100             0              0.00102         0                 0.00306              altitude.
+                                                                                                                     44              −0.00286       44                   NA                    3) The third is the drag coefficient in axisymmetric flows by the
+                                                                                                                     121             0.00269        121                  NA                 DS2V code at the three altitudes and in comparison with those by
+                                                                                                                     180             −0.00258       180               −0.00500              DS3V. This comparison can be considered as a further validation of
+                                                                                                         90           0              −0.00121        0                −0.00003              the present results because it verifies that even though DS2V is able to
+                                                                                                                     106             0.00114         7                 0.00009              operate with a number of simulated molecules of one order of magni-
+                                                                                                                     180             −0.00322       180               −0.00535              tude higher than DS3V, the drag coefficients are almost the same.
+                                                                                                         80           0              −0.00207        0                −0.00137
+                                                                                                                     92              0.00215        68                 0.00244
+                                                                                                                     180             −0.00449       180               −0.00635                                            References
+                                                                                                                                                                                                [1] NASA Orion Deep Space Explorer, 2019, https://www.nasa.gov/
+                                                                                                    NA = Not applicable.                                                                            exploration/systems/orion/index.html [retrieved 28 March 2020].
+                                                                                                                                                                               ZUPPARDI                                                                         537
+
+
+                                                                                                    [2] Artemis Program NASA, 2020, https://www.nasa.gov/specials/artemis/            [12] Bird, G. A., Gallis, M. A., Torczynski, J. R., and Rader, D. J., “Accuracy
+                                                                                                        [retrieved 28 March 2020].                                                         and Efficiency of the Sophisticated Direct Simulation Monte Carlo
+                                                                                                    [3] Moss, J. N., Boyles, K. A., and Greene, F. A., “Orion Aerodynamics for             Algorithm for Simulating Non-Continuum Gas Flows,” Physics of
+                                                                                                        Hypersonic Free Molecular to Continuum Conditions,” 14th AIAA                      Fluids, Vol. 21, No. 1, 2009, Paper 017103.
+                                                                                                        Space Planes and Hypersonic Systems and Technologies Conference,                   https://doi.org/10.1063/1.3067865
+                                                                                                        AIAA Paper 2006-8081, Nov. 2006, pp. 1–24.                                    [13] Gallis, M. A., Torczynski, J. R., Rader, D. J., and Bird, G. A.,
+                                                                                                    [4] Votta, R., Schettino, A., Ranuzzi, G., and Borrelli, S., “Hypersonic Low-          “Convergence Behavior of a New DSMC Algorithm,” Journal of
+                                                                                                        Density Aerothermodynamics of Orion-Like Exploration Vehicle,”                     Computational Physics, Vol. 228, No. 12, 2009, pp. 4532–4548.
+                                                                                                        Journal of Spacecraft and Rockets, Vol. 46, No. 4, 2009, pp. 781–787.              https://doi.org/10.1016/j.jcp.2009.03.021
+                                                                                                        https://doi.org/10.2514/1.42663                                               [14] Bird, G. A., The DS2V Program User’s Guide Version 3.3, G.A.B.
+                                                                                                    [5] Zuppardi, G., and Savino, R., “DSMC Aero-Thermo-Dynamic Analysis                   Consulting Pty, Ltd, Sydney, NSW, Australia, 2005.
+                                                                                                        of a Deployable Capsule for Mars Atmosphere Entry,” DSMC15 Work-              [15] Justus, C. G., and Johnson, D. L., “Mars Global Reference Atmospheric
+                                                                                                        shop, Sandia National Lab., Albuquerque, NM, Sept. 2015.                           Model 2001 (Mars-GRAM-2001) User Guide,” NASA TM 2001-
+                                                                                                    [6] Bird, G. A., Visual DSMC Program for Two-Dimensional Flows: The                    210961, 2001.
+                                                                                                        DS2V Program User’s Guide, Ver. 4.5, G.A.B. Consulting Pty, Ltd.,             [16] Braun, R. D., and Manning, R. D., “Mars Exploration Entry, Descent
+                                                                                                        Sydney, NSW, Australia, 2008.                                                      and Landing Challenges,” Proceedings of the Institute of Electrical
+                                                                                                    [7] Bird, G. A., Visual DSMC Program for Three-Dimensional Flows, the                  Electronics Engineers Aerospace Conference, IEEE Publ., Piscataway,
+                                                                                                        DS3V Program User’s Guide, Ver. 2.6, G.A.B. Consulting Pty Ltd.,                   NJ, March 2006, pp. 1–32.
+                                                                                                        Sydney, NSW, Australia, 2006.                                                      https://doi.org/10.1109/AERO.2006.1655790
+                                                                                                    [8] Bird, G. A., Molecular Gas Dynamics and Direct Simulation of Gas              [17] Vallerani, E., “A Review of Supersonic Sphere Drag from the Con-
+                                                                                                        Flows, Clarendon Press, Oxford, England, U.K., 1998.                               tinuum to the Free Molecular Flow Regime,” AGARD CPP 124, Paper
+                                                                                                    [9] Bird, G. A., The DSMC Method, Ver. 1.1, CreateSpace Independent                    22, Neuilly-Sur-Seine, France, 1973, pp. 1–15.
+Downloaded by BEIHANG UNIVERSITY on March 31, 2026 | http://arc.aiaa.org | DOI: 10.2514/1.A34825
+
+
+
+
+                                                                                                        Publ. Platform, Charleston, SC, 2013.                                         [18] Moss, J. N., “Rarefied Flows of Planetary Entry Capsules,” Capsule
+                                                                                                   [10] Shen, C., Rarefied Gas Dynamic: Fundamentals, Simulations and                      Aerothermodynamics, AGARD-R-808, Neuilly-Sur-Seine, France,
+                                                                                                        Micro Flows, Springer-Verlag, Berlin, 2005.                                        May 1997, pp. 95–129.
+                                                                                                   [11] Bird, G. A., “Sophisticated Versus Simple DSMC,” Proceedings
+                                                                                                        of the 25th International Symposium on Rarefied Gas Dynamics, St.                                                                           G. E. Palmer
+                                                                                                        Petersburg, Russia, July 2006.                                                                                                           Associate Editor
+

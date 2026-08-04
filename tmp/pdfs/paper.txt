@@ -1,0 +1,814 @@
+                                                Available online at www.sciencedirect.com
+
+                                                           ScienceDirect
+                                                Advances in Space Research 69 (2022) 2825–2835
+                                                                                                                              www.elsevier.com/locate/asr
+
+
+
+
+                    Aerothermochemical analysis of the Orion capsule in
+                     rareﬁed transitional ﬂow regime during Mars entry
+                                      Gennaro Zuppardi a,⇑, Giuseppe Mongelluzzo a,b
+       a
+           Department of Industrial Engineering – Aerospace Division, University of Naples ‘‘Federico II”, Piazzale Tecchio 80, 80125 Naples, Italy
+                              b
+                                INAF – Osservatorio Astronomico di Capodimonte, Salita Moiariello, 16, 80131 Naples, Italy
+
+                              Received 25 May 2021; received in revised form 15 November 2021; accepted 11 January 2022
+                                                           Available online 17 January 2022
+
+
+
+
+Abstract
+
+    It is well known that NASA developed the Orion project, besides for a rescue shuttle for the International Space Station, also for the
+transportation of instruments and astronauts to Moon, Mars and beyond. The forthcoming use of Orion for Mars landing stimulated
+Zuppardi to compute global aerodynamic coeﬃcients in rareﬁed, transitional ﬂow along a high altitude entry path. A Direct Simulation
+Monte Carlo (DSMC) code computed the coeﬃcients at the altitudes of 80, 90 and 100 km, in the range of angles of attack 0–180 deg.
+The aim of the present paper, that can be considered as the logic follow on of the previous paper by Zuppardi, is to evaluate, in high
+altitude entry path, the inﬂuence of: 1) chemical reactions on the ﬂow ﬁeld and on some local quantities (temperature, pressure and heat
+ﬂux) along the Orion surface, 2) typology of entry trajectory (direct and orbit) on both local quantities and drag coeﬃcient, 3) heat ﬂux
+associated to the surface recombination reactions. Computations were carried out in axisymmetric ﬂow and in the altitudes interval 60–
+100 km by means of a home made code for the computation of the entry trajectories and of the powerful and advanced two-dimentional/
+axisymmetric DSMC code (DS2V) for the solution of the ﬂow ﬁeld around Orion.
+Ó 2022 COSPAR. Published by Elsevier B.V. All rights reserved.
+
+
+Keywords: Orion capsule; Direct and orbit Orion Mars entry trajectories; Direct Simulation Monte Carlo method; Local quantities on Orion surface
+
+
+
+
+1. Introduction                                                                 are 5.03 m and 8500 kg, while diameter and mass of Apollo
+                                                                                CM are 3.90 m and 5557 kg. Orion can transport cargo and
+   Orion is a manned, partially reusable capsule for future                     four to six astronauts for as many as 21 days undocked and
+space exploration. It was conceived as a rescue shuttle for                     up to six months docked.
+the International Space Station (ISS). According to the                            NASA is currently still developing the Orion project.
+NASA Artemis program (2020), Orion will be used to                              The ﬁrst, unmanned ﬂight test took place on Dec. 5,
+transport instruments and astronauts in future manned                           2014. Orion was launched from Cape Canaveral, reached
+lunar and Martian missions. NASA originally started this                        an altitude of 5700 km, made two terrestrial orbits and
+project to replace the retired Space Shuttle as a link to/                      ﬁnally splashed down into Paciﬁc Ocean oﬀ the coast of
+from the ISS.                                                                   California. Aerodynamics of Orion in Earth atmosphere
+   Orion is similar in shape but larger than Apollo Com-                        entry from ISS was already studied by Moss et al. (2006)
+mand Module (CM). Indeed, diameter and mass of Orion                            in all hypersonic rareﬁed regimes i.e. from free molecular
+                                                                                ﬂow to continuum. Moss carried out the calculations in
+                                                                                rareﬁed ﬂow by two Direct Simulation Monte Carlo
+ ⇑ Corresponding author.
+                                                                                (DSMC) codes and in continuum by a Computational
+  E-mail addresses: gennaro.zuppardi@unina.it (G. Zuppardi), giuseppe.
+mongelluzzo@unina.it (G. Mongelluzzo).                                          Fluid Dynamic (CFD) code. Zuppardi (2021) computed
+
+https://doi.org/10.1016/j.asr.2022.01.013
+0273-1177/Ó 2022 COSPAR. Published by Elsevier B.V. All rights reserved.
+G. Zuppardi, G. Mongelluzzo                                                               Advances in Space Research 69 (2022) 2825–2835
+
+
+
+  Nomenclature
+
+  CD, Ch, Cp drag, heat ﬂux, pressure coeﬃcients                       RN      Orion nose radius, m
+  CFD Computational Fluid Dynamics                                     S       Orion base area, m2
+  CG      Center of Gravity                                            s       curvilinear abscissa, m
+  CM      Command Module                                               T       temperature, K
+  cp      speciﬁc heat at constant pressure, J/kg/K                    TPS     Thermal Protection System
+  D       Orion base area diameter, m or drag force, N                 t       time, s
+  DSMC Direct Simulation Monte Carlo                                   V       velocity, m∕s
+  FC      Fully Catalytic surface                                      X, Y    dimensions of computational domain, m
+  g       gravity acceleration, m∕s2                                   XS      molar fraction of the chemical species S
+  H       speciﬁc total enthalpy, J/kg                                 x, y    Cartesian coordinates, m
+  h       altitude, km                                                 c       ﬂight path angle, deg
+  IN      inert gas                                                    e       emissivity
+  IS      insulated surface                                            k       mean free path, m
+  ISS     International Space Station                                  q       density, kg∕m3
+  Kn      Knudsen number
+  L       Orion length, m                                              Subscripts
+  Ma      Mach number                                                  1       free stream
+  m       Orion mass, kg                                               c       convective
+  mcs     mean collision separation, m                                 f       ﬂuid dynamic
+  N       number density, 1∕m3                                         r       recombination
+  NC      Non Catalytic surface                                        s       simulation
+  p       pressure, Pa                                                 w       surface
+  q_      heat ﬂux, W/m2                                               2       downstream of a normal shock wave
+  R       trajectory curvature radius, m
+  Re      Reynolds number
+
+
+
+the global aerodynamic coeﬃcients along an entry path at               made spacecraft re-entry speed of 12.8 km/s, ii) Chinese
+the altitudes of 80, 90 and 100 km, in the range of angle of           Shenzhou lunar exploration capsule (Feng et al., 2018),
+attack 0–180 deg and fulﬁlled a sensitivity analysis of lon-           launched in 2014 and returned to Earth with a speed
+gitudinal moment and equilibrium angle of attack in terms              of 11.2 km/s, iii) Tiangong-1 Chinese target spacecraft
+of position of the center of gravity.                                  (Li et al., 2019).
+   The aim of the present paper is to evaluate, at the begin-             The present computations were carried out in the alti-
+ning of the entry path, the inﬂuence of:                               tude interval 60–100 km and in axisymmetric ﬂow or at
+                                                                       zero angle of attack. The choice of zero angle of attack is
+1. chemical reactions on the ﬂow ﬁeld and, more speciﬁ-                reasonable because Orion, as shown later, is a revolution
+   cally, on temperature around the capsule as well as the             body. Zero angle of attack maximizes the surface exposed
+   surface catalytic eﬀects on heat ﬂux,                               to the ﬂow and should maximize the aerodynamic drag,
+2. typology of entry trajectory (direct and orbit) on local            thus the capsule deceleration. It has to be pointed out that
+   quantities (such as temperature, pressure and heat ﬂux),            the trim angle of Orion is diﬀerent from zero. However, the
+   on the drag and on the related coeﬃcients.                          choice of zero angle of attack is proper for the purpose of
+3. heat ﬂux associated to the surface recombination reac-              this paper because this angle of attack produces the most
+   tions (or surface catalyticity).                                    severe conditions in terms of the above mentioned local
+                                                                       quantities.
+   Such local quantities were also analyzed at the stagna-                A home made code (Zuppardi and Savino, 2015) com-
+tion point which, as well known, is the most stressed point            puted the two Mars entry trajectories, direct and orbit,
+of a spacecraft during entry/reentry.                                  and a DSMC code DS2V (Ver. 4.5, 64 bits, Bird, 2008)
+   Such a kind of analysis in hypersonic, rareﬁed re-                  computed the axisymmetric ﬂow ﬁeld around Orion. Com-
+entry ﬂows is not recent and is still in progress. See,                putations were performed considering the two trajectories
+for example, the study of thermo-chemical, non-                        and four conditions: 1) inert gas, 2) chemically active gas
+equilibrium ﬂow around: i) American Stardust capsule                   and non catalytic surface, 3) chemically active gas and fully
+(Boyd et al., 2007) to collect samples of material from                catalytic surface, 4) chemically active gas and insulated
+comet Wild-2. This capsule recorded the fastest man-                   surface.
+
+                                                                2826
+G. Zuppardi, G. Mongelluzzo                                                                  Advances in Space Research 69 (2022) 2825–2835
+
+2. Direct simulation Monte Carlo method and DS2V code                     (4) allows the user to evaluate the quality of a computa-
+                                                                              tion by means of the evaluation of the adequacy of
+   The Direct Simulation Monte Carlo (DSMC) method                            the numbers of simulated molecules and of collision
+(Bird, 1998, 2013, Shen, 2005) is a stochastic method, solv-                  cells. The ratio between the molecule mean collision
+ing ﬂow ﬁelds in transitional regime i.e. from continuum                      separation (mcs) and the mean free path (k), in each
+low density to free molecule regimes. As well known, the                      collision cell, is the parameter that makes this evalu-
+DSMC method is an indispensable tool for solving rareﬁed                      ation possible; mcs/k has to be less than unity every-
+ﬂow ﬁelds. In such conditions, using the Navier-Stokes                        where in the computational domain for a good
+equations is not correct because of the failure of the                        quality of a computation. Bird (2006) suggests that
+Chapman-Enskog theory for the computation of transport                        mcs/k should be less than 0.2 for an optimal quality
+coeﬃcients. On the other hand, the solution of the Boltz-                     of a DSMC computation. DS2V outputs the value
+mann equation is very diﬃcult. Furthermore, the Boltz-                        of mcs/k, both averaged over the computational
+mann equation can not consider chemical reactions; these                      domain and the maximum value.
+are very important in highly energized ﬂows like those                    (5) provides indication about the stabilization of a com-
+met along an entry path.                                                      putation. Stabilization is achieved when the proﬁle of
+   Fundamentals of the method are now well known and                          the number of simulated molecules, as a function of
+widely accepted by the scientiﬁc community so they will                       the simulated time, becomes jagged and included
+be not described here. On the opposite, some computing                        within a band that represents the standard deviation
+procedures, making a DSMC code more eﬃcient and accu-                         of the number of simulated molecules.
+rate than a ‘‘basic” code, will be here described. A DSMC
+code, implementing these procedures, like the two-
+dimentional/axisymmetric DS2V code, is labeled in litera-                3. Orion geometry
+ture as DSMC07 (Bird, 2006; Bird et al., 2009; Gallis
+et al., 2009). A basic code is labeled as DSMC94. More                      Orion is a revolution body whose geometry (Moss et al.,
+speciﬁcally, DS2V:                                                       2006) in the meridian plane (x, y) is shown in Fig. 1. Max-
+                                                                         imum diameter is D = 5.03 m; therefore, the base area or
+  (1) divides the computation volume into two grids of                   the area of the maximum cross section is S = 19.86 m2. S
+      cells (collision and sampling) with the possibility of             is used as reference area for scaling the (axial) force to
+      adapting the cells. DS2V automatically generates                   the drag coeﬃcient. The curvature radius of the rounded
+      the number of cells and the structure of both collision            shoulder, i.e. the curve between points C and D, is
+      and sampling grids on the basis of the input number                0.25 m. The center of curvature is located at x = 0.71 m,
+      of megabytes and of the free stream number density.                y = 2.26 m. The curvature radius of the heat shield (which
+      In the present computations, the number of mega-                   is also the radius of the nose RN) is 6.04 m, the center is
+      bytes was about 1250. The user can change, during                  located on the x axis. The center of gravity (CG) is located
+      a computation, the number of cells and therefore                   at xCG = 1.33 m, yCG = 0.24 m (Moss et al., 2006), i.e. not
+      the structure of both grids by inputting the numbers               on the x-axis therefore the Orion capsule has a non-zero
+      of molecules for the adaptation of collision and sam-              trim angle of attack. For example, Andersen and
+      pling cells; the lower the input number of molecules               Whitmore (2007) computed, by means of a CFD code, a
+      per cell, the higher the number of cells after the adap-           trim angle of about 20 deg, considering no ﬂap and in
+      tation process. In the present computations, the                   continuum Earth re-entry.
+      adaptation procedure used 8 and about 200 molecules                   The computational domain was a rectangle in the merid-
+      for collision and sampling cells, respectively.                    ian plane: X = 6.0 m, Y = 3.5 m. The capsule surface was
+  (2) provides an optimal global time step. This is com-                 approximated in 480 intervals of which 350 were for the
+      puted as a fraction (say 0.2) of the current time step             Thermal Protection System (TPS), i.e. between points C
+      in each collision cell, averaged over the computa-                 and E.
+      tional domain. This time step is the smallest between
+      the collision time and the transit time or the time nec-           4. Mars atmosphere and entry trajectories
+      essary to a molecule for transiting the collision cell at
+      its own velocity. In a DSMC94 code, the global time                   The present computations considered the Mars atmo-
+      step is an input datum, kept constant during the evo-              sphere made up of 7 species and its composition constant
+      lution of the system, therefore irrespective of the                with altitude. Table 1 reports the mass and the molar frac-
+      actual, evolving ﬂuid dynamic conditions.                          tions of the chemical species.
+  (3) avoids sequential collisions between the same mole-                   Due to dissociation along an entry path, atomic oxygen
+      cules. This, in fact, would be physically impossible               and atomic nitrogen are also present thus, in these simula-
+      because the molecules, after a collision, move away                tions, the working gas is a mixture of 9 chemical species.
+      in opposite directions.                                            The chemical model, proposed by Bird in the version 3.3
+                                                                         of DS2V code (Bird, 2005), has been implemented also in
+                                                                  2827
+G. Zuppardi, G. Mongelluzzo                                                                             Advances in Space Research 69 (2022) 2825–2835
+
+
+
+
+                                                                                             Point       x [m] y [m]
+                                                                                               A        3.3020 0.0000
+                                                                                               B        3.3020 0.8838
+                                                                                               C        0.8477 2.4752
+                                                                                               D        0.7126 2.5146
+                                                                                               E        0.0000 0.0000
+                                                                                              CG        1.3300 0.2400
+
+
+
+                                              Fig. 1. Geometry of Orion in the meridian plane (x, y).
+
+
+the present version (4.5). This model is made of 54 reac-                        nolds number downstream a normal shock wave. Equa-
+tions: 40 dissociations, 7 forward (or endothermic)                              tions were integrated numerically by a forward scheme
+exchanges, 7 reverse (or exothermic) exchanges.                                  with a ﬁrst order approximation (Euler method). Integra-
+   The Mars Global Reference Atmospheric Model 2001                              tion started from h = 100 km and the step was 0.1 km.
+(GRAM-2001, Justus and Johnson, 2001) provided the                               The initial data of the integration procedure are reported
+atmosphere parameters. The parameters (temperature,                              in Table 2 for direct and orbit entry trajectories. The initial
+density therefore number density) used in the present com-                       values of speed and angle of entry are those of Pathﬁnder
+putations are those reported by Justus and Johnson in the                        for the calculation of the direct reentry trajectory and those
+altitude interval 1.365  194.654 km with a step of about                       of Viking 1/2 for the calculation of the orbit reentry trajec-
+5 km. The parameters at the intermediate altitudes in each                       tory (Braun and Manning, 2006). In order to consider the
+step were computed by linear interpolation.                                      proper values of the drag coeﬃcient at each altitude, the
+   The entry trajectories of Orion were computed by the                          solution of Eqs. 1(a), 1(b) has to rely on the iterative pro-
+integration of the equations of the capsule dynamics                             cedure already used by Zuppardi (2019) in computing the
+(Zuppardi and Savino, 2015). As said before, the capsule                         Pathﬁnder entry trajectory in Mars atmosphere. The ﬁrst
+was considered at zero angle of attack along the whole                           step is computing a preliminary entry trajectory using
+entry path i.e. with no lift and in free entry or with no                        CD = 1.0 at each altitude. This step produces input data
+thrusters and no parachutes:                                                     to a CFD and/or DSMC code for the computation of the
+dV 1 qV SCD g                                                                    updated values of the drag coeﬃcient at each altitude. This
+  ¼                                                              ð1:aÞ          step is iterated until the entry trajectory no longer changes
+dh 2 sinc m   V
+                                                                                 signiﬁcantly. Zuppardi veriﬁed, in the study of the entry
+dc   1    g   1                                                                  trajectory of Pathﬁnder, that the procedure can stop at
+   ¼                                                            ð1:bÞ
+dh Rsinc V2 tgc                                                                  the ﬁrst step; the same has been made in the present
+                                                                                 computations.
+being: V velocity, q density, c ﬂight path angle, g gravity
+                                                                                    Fig. 2(a), 2(b) and 2(c) show the proﬁles of free stream
+acceleration, R curvature radius of the trajectory, m cap-
+                                                                                 velocity, Mach and Reynolds numbers as functions of alti-
+sule mass, CD drag coeﬃcient. The ratio m/SCD is the bal-
+                                                                                 tude. Table 3 reports the free stream input data to DS2V:
+listic parameter.
+                                                                                 temperature (T1), number density (N1). Free stream den-
+    Integration of Eqs. 1(a), 1(b) makes possible the compu-
+                                                                                 sity (q1), pressure (p1) and Knudsen number (Kn1D) are
+tation of entry trajectory (or velocity) as function of alti-
+                                                                                 also reported. Tables 4(a) and 4(b) report for both direct
+tude. The code provides both input data to DS2V and
+                                                                                 and orbit entry: free stream velocity (V1), Mach number
+free stream Mach and Reynolds numbers as well as Rey-
+                                                                                 (Ma1), Reynolds number (Re1D) and Reynolds number
+                                                                                 downstream a normal shock wave (Re2D).
+Table 1
+Chemical composition of Mars atmosphere.
+                                                                                 Table 2
+Chemical species              Mass fraction             Molar fraction
+                                                                                 Orion operative parameters at h = 100 km.
+O2                            0.0013                    0.00176
+                                                                                 Entry trajectory                            Direct              Orbit
+N2                            0.0270                    0.04173
+NO                            0.0001                    0.00014                  Entry velocity, m/s                         7260                4700
+CO                            0.0007                    0.00108                  Entry Path Angle, deg                       14.06               17.00
+CO2                           0.9500                    0.93399                  Entry mass, kg                              8500                8500
+C                             0.0049                    0.00396                  Entry ballistic parameter, kg/m2            214                 214
+Ar                            0.0160                    0.01734                  Entry angle of attack, deg                  0                   0
+
+                                                                          2828
+G. Zuppardi, G. Mongelluzzo                                                                                                                                    Advances in Space Research 69 (2022) 2825–2835
+
+                     0      2000          4000          6000   8000                      0          10              20        30                  40                   0.0E+000 4.0E+006 8.0E+006 1.2E+007 1.6E+007
+               100                                                 100             100                                                                 100            100                                        100
+                                Direct                                                              Direct                                                                          Direct
+                                Orbit                                                               Orbit                                                                           Orbit
+               80                                                 80               80                                                                  80              80                                          80
+
+
+               60                                                 60               60                                                                  60              60                                          60
+
+
+
+
+                                                                                                                                                             h [km]
+      h [km]
+
+
+
+
+                                                                          h [km]
+               40                                                 40               40                                                                  40              40                                          40
+
+
+               20                                                 20               20                                                                  20              20                                          20
+
+
+                0                                                  0                0                                                                  0               0                                        0
+                     0      2000          4000          6000   8000                      0          10          20            30                  40                  0.0E+000 4.0E+006 8.0E+006 1.2E+007 1.6E+007
+                                         V [m/s]                                                                Ma                                                                       Re D
+                                           (a)                                                                (b)                                                                             (c)
+                                               Fig. 2. Proﬁles of Orion free stream velocity (a), Mach number (b), Reynolds number (c).
+
+
+
+Table 3
+Input data to DS2V, free stream density, pressure and Knudsen number.
+h [km]                                   T1 [K]                        N1 [1/m3]                                         q1 [kg/m3]                                         p1 [Pa]                            Kn1D
+100                                      127                           8.05  10         17
+                                                                                                                         5.88  108                                        1.48  103                        1.69  101
+90                                       125                           3.66  1018                                       2.67  107                                        6.70  103                        3.69  102
+80                                       135                           1.94  1019                                       1.42  106                                        3.74  102                        7.20  103
+70                                       146                           8.09  1019                                       5.92  106                                        1.64  101                        1.78  103
+60                                       143                           3.20  1020                                       2.34  105                                        6.18  101                        4.46  104
+
+
+
+
+Table 4a                                                                                                                                          -2              -1.6       -1.2      -0.8     -0.4   0
+Free stream velocity and some aerodynamic parameters for direct entry.                                                                    30000                                                            30000
+h [km]                   V1 [m/s]                Ma1           Re1D                          Re2D
+100                      7260                    39.3          3.17  102                    3.77  100                                   25000                                                            25000
+90                       7265                    39.5          1.46  103                    1.71  101
+80                       7269                    38.1          7.20  103                    9.07  101                                   20000                                                            20000
+70                       7272                    36.7          2.80  104                    3.79  102
+                                                                                                                              H [kJ/kg]
+
+
+
+
+60                       7270                    37.1          1.13  105                    1.50  103                                   15000                                                            15000
+
+                                                                                                                                          10000                                                            10000
+    Direct entry velocity is about 50% higher than orbit                                                                                               Open Symb.: Direct entry
+entry velocity. The same occurs for free stream Mach and                                                                                  5000
+                                                                                                                                                       Filled Symb.: Orbit entry
+                                                                                                                                                                 h=100 km                                  5000
+Reynolds numbers. For both entry trajectories, velocity                                                                                                          h=80 km
+                                                                                                                                                                 h=60 km
+and Mach number do not change meaningfully in the alti-                                                                                      0                                                             0
+tude interval. On the opposite, Reynolds number reduces                                                                                           -2              -1.6       -1.2      -0.8     -0.4   0
+                                                                                                                                                                                 x [m]
+by three orders of magnitude and Knudsen number
+increases by four orders of magnitude. According to                                                                       Fig. 3. Proﬁles of total enthalpy along the Orion stagnation line.
+Vallerani (1973), the transitional regime for a blunt body
+is deﬁned in terms of Reynolds number downstream a nor-
+                                                                                                                    (1995), it is deﬁned in terms of global Knudsen number by
+mal shock wave, by 101 < Re2D < 104. According to Moss
+                                                                                                                    103 < Kn1D < 50. Table 3 shows that Re2D and Kn1D
+                                                                                                                    agree in stating that the ﬂow ﬁeld is in transitional regime.
+Table 4b
+Free stream velocity and some aerodynamic parameters for orbit entry.                                               5. Test conditions
+h [km]                   V1 [m/s]                Ma1           Re1D                          Re2D
+100                      4700                    25.4          2.00  102                    2.32  100                For all DSMC computations, the gas-surface interaction
+90                       4707                    25.6          9.20  102                    1.05  101             model was diﬀusive, fully accommodated i.e. in equilibrium
+80                       4715                    24.7          4.55  103                    5.57  101             with surface temperature (Tw). In order to evaluate the
+70                       4722                    23.8          1.77  104                    2.32  102             chemical eﬀects, computations were carried out considering
+60                       4727                    24.1          7.17  104                    9.17  102
+                                                                                                                    only the direct entry trajectory because, as shown in Fig. 3,
+                                                                                                             2829
+G. Zuppardi, G. Mongelluzzo                                                                          Advances in Space Research 69 (2022) 2825–2835
+
+the ﬂow ﬁeld is much more energized than that of the orbit                       6. Quality of results
+entry. Flow energy is quantiﬁed by the total enthalpy H
+(H = V2/2 + cpT, J/kg, cp = 667.6 J/kg/K). H, along a                               Tables 6a and 6b verify the quality of the DS2V results
+direct entry trajectory, is more than twice than that along                      for direct and orbit trajectories, respectively. The value of
+an orbit entry trajectory.                                                       mcs/k, averaged over the ﬂow ﬁeld, is less than unity at
+    Computations were carried out to evaluate the contribu-                      each altitude and the Bird’s criterion for an optimal quality
+tion of the surface recombination reactions on heat ﬂux                          of a DSMC computation (mcs/k  0.2, Bird, 2006) is fully
+(surface catalyticity). For both non catalytic (NC) and fully                    satisﬁed at altitudes higher than 70 km.
+catalytic (FC) surface, the surface temperature                                     A steady state condition is also achieved. In fact, as well
+(Tw = 300 K) was constant along the whole capsule. Even                          known, a rule of thumb suggests considering an unsteady,
+though this surface temperature is not realistic for an entry                    ﬂuid dynamic computation stabilized when the ratio ts/tf is
+trajectory, it is a conventional value to evaluate thermal                       reasonably greater than unity, being ts the simulation time
+problems along an entry trajectory. The ﬁve surface recom-                       and tf the ﬂuid dynamic time. The latter is computed as the
+bination reactions, reported in Table 5 with the related                         time necessary for the ﬂuid to cross the length (L) of the
+exothermic energies (taken from Bird, 2005), were imple-                         body under study at the free stream velocity: tf = L/V1
+mented. DS2V carries out the surface recombination reac-                         (for the present case, L = 3.30 m). Increasing ts is beneﬁcial
+tions on the base of a pre-stated probability; the conditions                    because the longer ts the larger the number of samples of
+of FC and NC surface are simulated by ﬁxing this proba-                          the molecular quantities for the computation of the macro-
+bility to unity and to zero, respectively. When a molecule                       scopic ﬂuid dynamic quantities. Furthermore, increasing
+impacts onto a surface, it remains on the surface. If a sec-                     the number of samples is equivalent to a calculation with
+ond molecule, that impacts onto the same elemental area,                         a larger number of simulated molecules, making possible
+can recombine with the ﬁrst one, they do and the recom-                          in principle, that the ﬂuctuations are the same as those in
+bined molecule returns to the ﬂow, otherwise each molecule                       the real gas.
+leaves the surface separately. If a recombination reaction
+happens, all energy from the reaction is transferred to the                      7. Analysis of the results
+surface thus heat ﬂux increases. Therefore, heat ﬂux
+includes convective heat ﬂux (kinetic and internal energies)                     7.1. Eﬀects of chemistry
+and heat ﬂux from surface catalytic reactions, if any:
+q_ ¼ q_ c þ q_ r .                                                                   The comparison of Fig. 4(a) and 4(b) provides a qualita-
+    To evaluate chemical and thermal eﬀects, four sets of                        tive evaluation of the eﬀects of chemistry (or of dissocia-
+simulations were carried out at each altitude: 1) chemically                     tion) in terms of temperature in the ﬂow ﬁeld. This
+inert gas (IN), 2) chemically active gas and non catalytic                       evaluation has been made at altitude of h = 60 km where
+surface (NC), 3) chemically active gas and fully catalytic                       the chemical eﬀects are more relevant compared with those
+surface (FC), 4) chemically active gas and insulated surface                     at higher altitudes. As expected, due to the endothermic
+(IS). The second and third test cases were carried out to                        nature of the dissociation reactions, temperature down-
+evaluate the inﬂuence of the surface catalyticity on heat                        stream a shock wave is higher when gas is considered chem-
+ﬂux. The fourth test case was carried out for a preliminary                      ically inert.
+evaluation of the proﬁle of surface temperature. For this                            Fig. 5(a) shows the proﬁles of temperature along the
+case, DS2V considers the surface with zero thermal con-                          Orion stagnation line computed at the three altitudes with
+ductivity and takes into account, in thermal balance, also                       and without chemistry. Fig. 5(b) shows the eﬀects of chem-
+thermal radiation from the surface. The surface emissivity                       istry by the relative increase of temperature: DT/T = (TIN-
+(e) is required in input for each elemental area. In the pre-                    T)/T, being TIN and T local temperatures calculated con-
+sent computations, the realistic value of e = 0.8, constant                      sidering gas inert and chemically reactive. As expected,
+along the capsule, was used. According to what said before,                      the maximum value of DT/T is obtained at h = 60 km
+only the NC and IS surface were considered for the orbit                         and is located in the shock wave.
+entry computations.                                                                  The eﬀect of chemical reactions or of dissociation can
+                                                                                 also be evaluated by the proﬁles of the percentage molar
+                                                                                 fraction of the greatest component of Martian atmosphere
+                                                                                 (CO2) and of the products of its dissociation. Fig. 6(a) and
+Table 5                                                                          6(b) show the proﬁles of XCO2% and, for example, of XC%
+Surface recombination reactions and exothermic energy.                           along the Orion stagnation line at the three altitudes. The
+Surface reactions             Molecule [J]               Speciﬁc [J/kg]          proﬁles of DT/T, XCO2% and XC% reproduce the proﬁle
+#1: O + O->O2                 8.197  1019              1.543  107             of a shock wave. In fact, like the shock wave thickness,
+#2: N + N->N2                 1.561  1018              3.357  107             these proﬁles are narrow at lower altitude (h = 60 km)
+#3: N + O->NO                 1.042  1018              2.089  107             and gradually widen with increasing altitude.
+#4: CO + O->CO2               7.248  1019              9.915  106                 Fig. 3 already veriﬁed the beneﬁcial eﬀect of dissocia-
+#5: C + O->CO                 1.781  1018              3.830  107
+                                                                                 tion. In fact, since dissociation reactions are endothermic,
+                                                                          2830
+G. Zuppardi, G. Mongelluzzo                                                                                  Advances in Space Research 69 (2022) 2825–2835
+
+Table 6a
+Quality of computations for direct entry trajectory.
+                     IN                                        NC                                    FC                              IS
+h [km]               mcs/k                   ts/tf             mcs/k             ts/tf               mcs/k              ts/tf        mcs/k             ts/tf
+100                  0.001                   9.53              0.001             8.28                0.001              8.78         0.001             9.15
+90                   0.003                   8.90              0.003             7.63                0.003              8.33         0.003             8.53
+80                   0.013                   7.17              0.017             5.43                0.014              5.44         0.015             5.81
+70                   0.045                   5.85              0.069             4.38                0.063              3.47         0.067             5.74
+60                   0.182                   3.32              0.285             4.54                0.256              2.76         0.257             3.04
+
+
+
+Table 6b                                                                              7.2. Eﬀects of the entry trajectory
+Quality of computations for orbit entry trajectory.
+                   NC                                  IS                                Fig. 8(a), 9(a), and 10(a) show the proﬁles of tempera-
+h [km]             mcs/k             ts/tf             mcs/k           ts/tf          ture, pressure and heat ﬂux along the Orion TPS, at the
+100                0.001             7.39              0.001           8.95           altitudes of h = 60, 80 and 100 km for the two entry trajec-
+90                 0.003             8.39              0.003           9.24           tories. The corresponding Fig. 8(b), 9(b) and 10(b) show
+80                 0.016             6.10              0.014           6.79           the proﬁles of the same quantities at the stagnation point
+70                 0.071             3.61              0.064           3.93           as functions of altitude in the interval 60–100 km. Temper-
+60                 0.266             2.45              0.263           2.31
+                                                                                      ature increases from h = 100 km to h = 60 km by one order
+                                                                                      of magnitude, pressure and heat ﬂux by three orders of
+                                                                                      magnitude. Heat ﬂux at the stagnation point computed
+H decreases at each altitude by one order of magnitude.
+                                                                                      considering NC, FC surface and direct entry, already
+The amount of energy per unit time and surface (or heat
+                                                                                      reported in Table 7, are shown also in Fig. 10(b). For the
+ﬂux q_ r [W/m2]), supplied by the ﬁve surface recombination
+                                                                                      sake of completeness, the convective heat ﬂux by DS2V
+reactions as functions of altitude is shown in Fig. 7. Reac-
+                                                                                      has been compared with the convective heat ﬂux from the
+tions #1 (O + O->O2) and #4 (CO + O->CO2) are the
+                                                                                      engineering formula by West and Brandis (2020):.
+main contributors to the surface catalytic heat ﬂux at each
+altitude. The resultant heat ﬂux provided to the whole sur-                           q_ c ð0Þ ¼ 7:207  104 q0:47 R0:54 V 3:5                        ð2Þ
+                                                                                                                    N       1
+face by all reactions decreases by four orders of magnitude
+from h = 60 to h = 100 km. Table 7 reports the stagnation
+                                                                                      where V1 is the free stream velocity in km/s, q is the free
+point heat ﬂux for FC and NC surface at each altitude.
+                                                                                      stream density in kg/m3 and RN is the radius of the nose
+Heat ﬂuxes increase by two orders of magnitude from
+                                                                                      in m. West and Brandis obtained Eq.2 by correlating 390
+h = 100 km to h = 60 km. The percentage variation
+                                                                                      CFD computations in a wide interval of free stream density
+between the two sets of heat ﬂux can be considered as a
+                                                                                      (from 105 to 103 kg/m3), nose radius (from 1 to 20 m)
+measure of catalyticity. As expected, due to a decrease of
+                                                                                      and free stream velocity (from 2 to 8 km/s). This formula
+the rate of recombination reactions with rarefaction, the
+                                                                                      computes the convective heat ﬂux at the stagnation point
+catalytic eﬀect decreases with altitude.
+                                                                                      of an axisymmetric body in Mars entry. The comparison
+
+
+
+
+Fig. 4. Two-dimensional maps of temperature in the ﬂow ﬁeld around Orion with (a) and without (b) chemical reactions: h = 60 km, direct entry, NC
+surface.
+                                                                               2831
+G. Zuppardi, G. Mongelluzzo                                                                                                               Advances in Space Research 69 (2022) 2825–2835
+
+                                    -2        -1.6     -1.2         -0.8   -0.4   0                                       -2       -1.6       -1.2      -0.8          -0.4           0
+                      40000                                                           40000                       60                                                                     60
+                                                                                                                                       h=100 km
+                                                                                                                                       h=80 km
+                                                                                                                  50                   h=60 km                                           50
+                      30000                                                           30000
+                                                                                                                  40                                                                     40
+              T [K]
+
+
+
+
+                                                                                                           T/T
+                      20000              Filled Symb.: No Chem.                       20000                       30                                                                     30
+                                         Void Symb.: Chem.
+                                                  h=100 km
+                                                  h=80 km                                                         20                                                                     20
+                      10000                       h=60 km                             10000
+                                                                                                                  10                                                                     10
+
+                               0                                                      0                              0                                                                   0
+                                    -2        -1.6     -1.2      -0.8      -0.4   0                                       -2       -1.6       -1.2      -0.8          -0.4           0
+                                                           x [m]                                                                                  x [m]
+                                                              (a)                                                                                    (b)
+Fig. 5. Proﬁles of temperature along the Orion stagnation line with and without chemistry (a) and of relative increment along the stagnation line (b): NC
+surface, direct entry.
+
+                                                                                                                            1E-006         0.0001       0.01             1               100
+of the convective heat ﬂux is excellent for direct entry and                                                              100                                                                  100
+reasonably good for orbit entry.
+   As expected, higher velocity by direct entry involves
+higher values of local quantities (temperature, pressure                                                                   90                                                                  90
+and heat ﬂux) and of Mach and Reynolds numbers. How-
+ever, as shown in Fig. 11(a), 11(b) and 11(c), the values of
+                                                                                                                 h [km]
+
+
+
+
+the corresponding coeﬃcients, as well as the drag coeﬃ-                                                                    80                                                                  80
+cient, do not present meaningful variations. Drag (CD),
+heat ﬂux (Ch) and pressure (Cp) coeﬃcients are, by
+                                                                                                                                            #1: O+O->O2
+deﬁnition:                                                                                                                 70               #2: N+N->N2                                        70
+                                                                                                                                            #3: N+O->NO
+                                                                                                                                            #4: CO+O->CO2
+C D ¼ D=ð0:5q1 V 21 SÞ                                                            ð3:aÞ                                                     #5: C+O->CO
+                                                                                                                                            All reactions
+                                                                                                                           60                                                                  60
+                                                                                                                            1E-006         0.0001         0.01           1               100
+      _
+C h ¼ q=ð0:5q 1V 1Þ
+                 3
+                                                                                  ð3:bÞ                                                               qr [W/m2]
+
+                                                                                                   Fig. 7. Proﬁles of energy for unit time and unit surface from each
+C p ¼ ðp  p1 Þ=ð0:5q1 V 21 Þ                                                     ð3:cÞ            recombination reaction and from all reactions.
+
+                                    -2         -1.6    -1.2         -0.8   -0.4   0                                -2           -1.6      -1.2       -0.8      -0.4          0
+                              100                                                     100                  14                                                                    14
+                                                                                                                                  h=100 km
+                                                                                                                                  h=80 km
+                                                                                                           12                     h=60 km
+                                                                                                                                                                                 12
+                              80                                                      80
+                                                                                                           10                                                                    10
+
+                              60                                                      60                     8                                                                   8
+                      XCO2%
+
+
+
+
+                                                                                                     XC%
+
+
+
+
+                                                                                                             6                                                                   6
+                              40                                                      40
+                                                                                                             4                                                                   4
+                              20                 h=100 km                             20
+                                                 h=80 km                                                     2                                                                   2
+                                                 h=60 km
+                               0                                                      0                      0                                                                   0
+                                    -2         -1.6    -1.2      -0.8      -0.4   0                                -2           -1.6      -1.2      -0.8       -0.4          0
+                                                           x [m]                                                                              x [m]
+                                                              (a)                                                                             (b)
+                      Fig. 6. Proﬁles of CO2 (a) and C (b) molar fractions along the Orion stagnation line at three altitudes: direct entry.
+                                                                                            2832
+G. Zuppardi, G. Mongelluzzo                                                                                                        Advances in Space Research 69 (2022) 2825–2835
+
+Table 7
+Heat ﬂux at the Orion stagnation point for FC and NC surface and percentage diﬀerence: direct entry.
+h [km]                                   _ FC [kW/m2]
+                                         qð0Þ                                                            _ NC [kW/m2]
+                                                                                                         qð0Þ                                                         _ NC Þ=qð0Þ
+                                                                                                                                                               _ FC  qð0Þ
+                                                                                                                                                              ðqð0Þ          _ NC %
+100                                        9.0                                                             8.5                                                  5.9
+90                                        30.0                                                            23.7                                                 26.2
+80                                        71.4                                                            37.8                                                 88.9
+70                                       217.1                                                            72.2                                                200.7
+60                                       706.2                                                           193.1                                                265.8
+
+
+
+
+                                                                                                                       400   600   800     1000      1200   1400    1600
+                               0   0.4         0.8           1.2        1.6            2
+                        1800                                                               1800                  100                                                    100
+                                                       Void Symb.: Direct entry                                                                         Direct entry
+                                                       Filled Symb.: Orbit entry                                                                        Orbit entry
+                        1600                                    h=100 km                   1600
+                                                                h=80 km                                           90                                                      90
+                                                                h=60 km
+                        1400                                                               1400
+
+                        1200                                                               1200
+
+
+
+                                                                                                        h [km]
+               Tw [K]
+
+
+
+
+                                                                                                                  80                                                      80
+                        1000                                                               1000
+
+                        800                                                                800                    70                                                      70
+
+                        600                                                                600
+
+                        400                                                                400                    60                                                       60
+                               0   0.4         0.8           1.2        1.6            2                               400   600   800     1000      1200   1400       1600
+                                                     s [m]                                                                               Tw(0) [K]
+                                                      (a)                                                                                   (b)
+            Fig. 8. Proﬁles of temperature along the Orion heat shield surface (a) and at the stagnation point as function of altitude (b).
+
+
+
+
+                               0   0.4         0.8           1.2       1.6             2                                1          10             100           1000
+                      10000                                                                10000                  100                                                     100
+                                   Void Symb.=Direct entry, Filled Symb.=Orbit entry
+                                            h=100 km                                                                                                    Direct entry
+                                            h=80 km                                                                                                     Orbit entry
+                                            h=60 km
+                        1000                                                               1000                   90                                                      90
+             p [Pa]
+
+
+
+
+                                                                                                         h [km]
+
+
+
+
+                         100                                                               100                    80                                                      80
+
+
+
+                          10                                                               10                     70                                                      70
+
+
+
+                           1                                                               1                      60                                                      60
+                               0   0.4         0.8           1.2       1.6             2                                1          10            100            1000
+                                                     s [m]                                                                               p(0) [Pa]
+                                                      (a)                                                                                   (b)
+                Fig. 9. Proﬁles of pressure along the Orion heat shield surface (a) and at the stagnation point as function of altitude (b).
+
+
+
+
+   Since, as reported in Tables 4(a) and 4(b), Mach number                                              Mach number independence principle (Anderson, 1989).
+is higher than 20, the low variability of the coeﬃcients                                                Table 8 quantiﬁes what said in terms of drag force and
+between the two entry trajectories is certainly due to the                                              of drag coeﬃcient as functions of altitude.
+
+                                                                                                 2833
+G. Zuppardi, G. Mongelluzzo                                                                                                                                       Advances in Space Research 69 (2022) 2825–2835
+
+                                           0         0.4         0.8           1.2                 1.6        2                          1              10                        100                1000
+                                      80                                                                          80               100                                                                   100
+                                                                                                                                                                                  Direct entry, FC
+                                                                                                                                                                                  Direct entry, NC
+                                                                                                                                                                                  Orbit entry, NC
+                                      60                 h=80 km                                                  60               90                                             Direct entry, Eq.2           90
+                                                          Direct entry, NC                                                                                                        Orbit entry, Eq.2
+                                                          Direct entry, FC
+                          q [kW/m2]
+
+
+
+                                                          Orbit entry, NC
+
+
+
+
+                                                                                                                          h [km]
+                                      40                                                                          40               80                                                                          80
+
+
+
+                                      20                                                                          20               70                                                                          70
+
+
+
+                                      0                                                                           0                60                                                                    60
+                                           0         0.4         0.8           1.2                 1.6        2                          1              10           100                             1000
+                                                                       s [m]                                                                              q(0) [kW/m2]
+                                                                        (a)                                                                                             (b)
+               Fig. 10. Proﬁles of heat ﬂux along the Orion heat shield surface at h = 80 km (a) and at the stagnation point as function of altitude (b).
+
+
+
+
+                  1.85   1.9           1.95          2       2.05       2.1                        0     0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9                                0       0.4      0.8         1.2          1.6       2
+               100                                                            100            100                                                       100            100                                                           100
+                            Direct entry
+                            Orbit entry
+
+                90                                                            90             90                                                        90             90                                                            90
+      h [km]
+
+
+
+
+                                                                                    h [km]
+
+
+
+
+                                                                                                                                                             h [km]
+
+                80                                                            80             80                                                        80             80                                                            80
+
+
+
+                70                                                            70             70                                                        70             70                                                            70
+                                                                                                                                    Direct entry, NC
+                                                                                                                                    Orbit entry, NC                                                             Direct entry
+                                                                                                                                    Direct entry, FC                                                            Orbit entry
+                60                                                            60             60                                                        60             60                                                            60
+                  1.85   1.9           1.95     2            2.05       2.1                        0     0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9                                1.6       1.7          1.8              1.9         2
+                                          Cp(0)                                                                       Ch(0)                                                                        CD
+
+                                               (a)                                                                        (b)                                                                      (c)
+                Fig. 11. Proﬁles of the pressure (a), heat ﬂux (b) at the Orion stagnation point and Orion drag (c) coeﬃcients as functions of altitude.
+
+
+
+
+Table 8
+Orion drag, drag coeﬃcient and related percentage diﬀerences as functions of altitude.
+h [km]                        D [N]                                    D [N]                                      DD=D%                         CD                                        CD                                   DC D =C D %
+                              Direct entry                             Orbit entry                                                              Direct entry                              Orbit entry
+100                           61.2                                     25.6                                       139.1                         1.99                                      1.98                                  0.22
+90                            254.4                                    104.7                                      143.0                         1.82                                      1.78                                  2.02
+80                            1219                                     504.8                                      141.5                         1.64                                      1.62                                  1.59
+70                            5083                                     2130                                       138.6                         1.64                                      1.63                                  0.58
+60                            20,020                                   8540                                       134.4                         1.63                                      1.65                                 0.98
+
+
+
+8. Conclusions                                                                                                                (temperature, pressure and heat ﬂux) in the ﬂow ﬁeld and
+                                                                                                                              on the capsule surface. The study also took into account
+   In the present work, a preliminary aerothermochemical                                                                      the eﬀects of surface catalyticity. and was carried out in
+analysis of the axisymmetric ﬂow ﬁeld around Orion cap-                                                                       the altitude interval 60–100 km by two codes for the com-
+sule was carried out at high altitude Mars entry. The anal-                                                                   putation of:
+ysis provided information about local quantities
+
+                                                                                                                       2834
+G. Zuppardi, G. Mongelluzzo                                                                               Advances in Space Research 69 (2022) 2825–2835
+
+  (1) the capsule entry trajectory by means of integration                         Bird, G.A., 2008. Visual DSMC Program for Two-Dimensional Flows,
+      of the equations of the capsule dynamics. Both direct                            the DS2V Program User’s Guide, Ver. 4.5. G.A.B. Consulting Pty Ltd,
+                                                                                       Sidney, Australia.
+      and orbit entry trajectories were considered. The                            Bird, G.A., 2013. The DSMC Method, Version 1.1, CreateSpace
+      GRAM-2001 provided the atmospheric parameters.                                   Independent Publ. Platform, Charleston, USA.
+  (2) the ﬂow ﬁeld around the capsule, local quantities                            Boyd, I.D., Trumble, K., Wright, M.J., 2007. Non-equilibrium Particle
+      along the TPS and drag. Computations were carried                                and Continuum Analyses of Stardust Entry for Near-Continuum
+      out by the DSMC code DS2V-4.5, 64 bits.                                          Conditions. In: Proceedings of the 39th AIAA Thermophysics
+                                                                                       Conference, Miami, USA.
+                                                                                   Braun, R.D., Manning, R.D., 2006. In: Mars Exploration Entry, Descent
+   The analysis relied on four test conditions: 1) chemically                          and Landing Challenges. Big Sky, USA, pp. 1–32.
+inert gas, 2) chemically active gas and non catalytic surface,                     Fang, M., Li, Zhihui, Li, Zhonghua, Li, Chunxuan, 2018. DSMC
+3) chemically active gas and fully catalytic surface, 4) chem-                         Approach for Rareﬁed Air Ionization During Spacecraft Reentry.
+ically active gas and insulated surface. Temperature at the                            Commun. Comput. Phys. 23 (4), 1167–1190. https://doi.org/
+                                                                                       10.4208/cicp.OA-2016-0186.
+stagnation point, where the most critical conditions occur,                        Gallis, M.A., Torczynski, J.R., Rader, D.J., Bird, G.A., 2009. J.
+increases, from h = 100 km to h = 60 km, by one order of                               Computational Phys. 228 (12), 4532–4548.
+magnitude while pressure and heat ﬂux increase by three                            Justus, C.G., Johnson, D.L., 2001. Mars Global Reference Atmospheric
+orders of magnitude. The increase of heat ﬂux due to sur-                              Model 2001 (Mars-GRAM-2001) User Guide, NASA TM 2001-
+face recombination reactions was also evaluated. As                                    210961.
+                                                                                   Li, Z.-H., Peng, A.-P., Ma, Q., Dang, L.-N., Tang, X.-W., Sun, X.-Z.,
+expected, direct entry velocity, being higher than orbit                               2019. Gas-kinetic uniﬁed algorithm for computable modeling of
+entry velocity, involves higher values of all local quantities.                        Boltzmann equation and application to aerothermodynamics for
+However, due to the principle of independence of Mach                                  falling disintegration of uncontrolled Tiangong-No.1 spacecraft.
+number, the values of the corresponding coeﬃcients,                                    Adv. Aerodynamics 1 (1), 1–21.
+including the global drag coeﬃcient, do not show meaning-                          Moss, J.N., 1995. Rareﬁed ﬂows of planetary entry capsules, AGARD-R-
+                                                                                       808, 95-129, Special course on ‘‘Capsule aerothermodynamics”.
+ful variations.                                                                        Rhode-Saint-Genèse, Belgium.
+                                                                                   Moss, J.N., Boyles, K.A., Greene, F.A., 2006. Orion Aerodynamics for
+Declaration of Competing Interest                                                      Hypersonic Free Molecular to Continuum Conditions. In: 14th AIAA
+                                                                                       Space Planes and Hypersonic Systems and Technologies Conference,
+  The authors declare that they have no known competing                                AIAA paper 2006-8081.
+                                                                                   NASA Artemis Program: https://www.nasa.gov/specials/artemis/ (2020).
+ﬁnancial interests or personal relationships that could have                       Shen, C., 2005. Rareﬁed Gas Dynamic: Fundamentals, Simulations and
+appeared to inﬂuence the work reported in this paper.                                  Micro Flows. Springer-Verlag, Berlin, Germany.
+                                                                                   Vallerani, E., 1973. A review of supersonic sphere drag from the
+References                                                                             continuum to the free molecular ﬂow regime. AGARD CPP 124,
+                                                                                       Paper 22, 1-15.
+Andersen, B.M., Whitmore, S.A., 2007. Aerodynamic Control on a Lunar               West, T.K., Brandis, A.M., 2020. Stagnation-Point Aero-heating Corre-
+   Return Capsule using Trim-Flaps. In: Proceedings of the 45th AIAA                   lations for Mars Entry. J. Spacecraft Rockets 57 (2), 319–327. https://
+   Aerospace Sciences Meeting and Exhibit, 2007, Reno, USA. DOI:                       doi.org/10.2514/1.A34602.
+   10.2514/6.2007-855.                                                             Zuppardi, G., Savino, R., 2015. DSMC Aero-thermo-dynamic Analysis of
+Anderson, J.D., 1989. Hypersonic and High Temperature Gas Dynamics.                    a Deployable Capsule for Mars Atmosphere Entry. In: Proceedings of
+   Mc Graw Hill Book Company, New York, USA.                                           the DSMC15 Workshop, Kauai, USA.
+Bird, G.A., 1998. Molecular Gas Dynamics and Direct Simulation Monte               Zuppardi, G., 2019. Inﬂuence of the Mars Atmosphere Model on
+   Carlo. Clarendon Press, Oxford, United Kingdom.                                     Aerodynamics of an Entry Capsule. Advances in Aircraft and
+Bird, G.A., 2005. The DS2V Program User’s Guide Ver. 3.3. G.A.B.                       Spacecraft Science. An International Journal 6(3) 239-256. DOI:
+   Consulting Pty Ltd, Sydney, Australia.                                              10.12989/aas.2019.6.3.239.
+Bird, G.A., Gallis, M.A., Torczynski, J.R., Rader, D.J., 2009. Physics of          Zuppardi, G., 2021. Aerodynamics of Orion in Rareﬁed Flow Along a
+   Fluids 21, 1. https://doi.org/10.1063/1.3067865.                                    Mars Entry Path. Journal of Spacecraft and Rockets, 58(2) 531-537.
+Bird, G.A., 2006. Sophisticated Versus Simple DSMC. In: Proceedings of                 DOI: 10.2514/1.A34825.
+   the 25th International Symposium on Rareﬁed Gas Dynamics
+   (RGD25), Saint Petersburg, Russia.
+
+
+
+
+                                                                            2835
+

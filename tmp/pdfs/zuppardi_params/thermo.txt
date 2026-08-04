@@ -1,0 +1,748 @@
+Advances in Aircraft and Spacecraft Science, Vol. 8, No. 1 (2021) 1-15
+DOI: https://doi.org/10.12989/aas.2021.8.1.001                                                                           1
+
+
+
+
+                    Thermodynamic non-equilibrium and anisotropy
+                             in Mars atmosphere entry
+                                               Gennaro Zuppardi
+
+                          Department of Industrial Engineering – Aerospace Division
+                   University of Naples “Federico II”, Piazzale Tecchio 80, 80125 Naples, Italy
+
+              (Received April 20, 2020, Revised September 3, 2020, Accepted September 8, 2020)
+
+Abstract. Mars exploration demands aerodynamic computations for a proper design of missions of spacecraft
+carrying instruments and astronauts to Mars. Both Computational Fluid Dynamics (CFD) and Direct Simulation
+Monte Carlo (DSMC) method play a key role for this purpose. To the author’s knowledge, the altitude separating the
+fields of applicability of CFD and DSMC in Mars atmosphere entry is not yet clearly defined. The limitations in
+using DSMC at low altitudes are due to technical limitations of the computer. The limitations in using CFD at high
+altitudes are due to thermodynamic non-equilibrium. Here, this problem is studied in Mars atmosphere entry,
+considering the Mars Pathfinder capsule in the altitude interval 40-80 km, by means of a DSMC code. Non-
+equilibrium is quantified by the relative differences between translational temperature and: rotational (t-r), vibrational
+(t-v), overall (t-ov) temperatures, anisotropy is quantified by the relative difference between the translational
+temperature component along x and those along y (x-y) and along z (x-z). The results showed that t-r, t-v, x-y, x-z
+are almost equivalent. The altitude of 45 km should be the limit altitude for a proper use of a CFD code and the
+altitude of 40 km should be the limit altitude for a reasonable use of a DSMC code.
+Keywords:       thermodynamic non-equilibrium; anisotropy; Mars entry; direct simulation Monte Carlo
+method
+
+
+1. Introduction
+
+    The forthcoming Mars exploration and colonization demand precise aerodynamic computations
+aimed at a proper design of the missions of spacecraft that will carry instruments and astronauts to
+Mars. Both Computational Fluid Dynamics (CFD) for the solution of the Navier-Stokes (NS)
+equations and the Direct Simulation Monte Carlo (DSMC) method play a key role for this
+purpose: CFD for the solution of flow fields at low altitude or in continuum, DSMC for the
+solution of rarefied flow fields or at high altitude. In Mars atmosphere, the altitude separating the
+fields of applicability of CFD and DSMC and therefore the altitude interval in which both methods
+work, are not yet clearly defined.
+    The limitations of DSMC in solving flow fields at low altitudes are due to technical limitations
+of the computer i.e., memory capacity and processing speed. The failure of the NS equations in
+simulating rarefied flow fields is due to loss of equilibrium. The NS equations rely on the
+
+
+Corresponding author, Lecturer, E-mail: zuppardi@unina.it
+
+Copyright © 2021 Techno-Press, Ltd.
+http://www.techno-press.org/?journal=aas&subpage=7                   ISSN: 2287-528X (Print), 2287-5271 (Online)
+2                                           Gennaro Zuppardi
+
+
+hypothesis that the thermal or peculiar velocity distribution function of the molecules is a small
+perturbation of the Maxwell distribution f0 (Bird 1998) which was obtained in equilibrium
+hypothesis; f0 is a function of thermodynamic temperature T:
+
+                                             1 1          C' 2 
+                                     f0             exp   2                                 (1)
+                                            3/ 2 c3       c 
+being: C’ the molecule thermal velocity, c the most probable molecule thermal velocity:
+
+                                              c  2RT                                             (2)
+   The NS equations were obtained by the first order Chapman-Enskog expansion of a
+perturbation parameter  which has to be small compared with unity (Bird 1998):
+                                             f  f 0 (1  )                                      (3)
+
+    is a function of local Knudsen numbers KnLu0 and KnLT and increases with them therefore
+with rarefaction:
+                                                                        
+                             Kn Luo                           Kn LT                             (4)
+                                        Lu0 ,                            LT
+
+where:  is the local mean free path, Lu0 and LT are the scale lengths of the macroscopic gradients
+of the x-component of local stream velocity (u0) and of temperature (T) (Bird 1998), respectively:
+                                      u0                                T
+                            Lu0                               LT                                (5)
+                                    u 0 y ,                         T / y
+
+    Mathematical processing of Eq. (3) provides “simple” equations for the computation of shear
+stress, heat flux and diffusion velocity of chemical species. These equations (known also as
+phenomenological equations) consist of the products of the gradients of stream velocity,
+temperature and concentration of chemical species by the related transport coefficient: viscosity 
+(law of Newton), thermal conductivity K (law of Fourier), diffusivity D (law of Fick). Since 
+increases with rarefaction, the Chapman-Enskog equation (Eq. (3)) breaks down with altitude and
+consequently also the phenomenological equations of Newton, Fourier and Fick therefore of the
+NS equations.
+    Failure of the NS equations can be due also to failure of the Maxwell equation because of: i)
+thermodynamic non equilibrium, thermodynamic temperature is not definable and translational
+(Tt), rotational (Tr) and vibrational (Tv) temperatures are different (TtTrTv,), ii) anisotropy,
+components of translational temperature in the three directions are different (TtxTtyTtz).
+    Thermodynamic non-equilibrium and anisotropy are two aspects of the same problem. Both are
+generated in the shock wave and increase with increasing shock wave intensity. Physical process,
+generating non-equilibrium and anisotropy (Pham Van-Diep et al. 1989), (Candler and Boyd
+1994), consists of the conversion of the free stream kinetic energy being primarily converted, by
+means of molecular collisions, to thermal energy in the direction perpendicular to the shock wave
+front. Thermal energy is then transferred, by subsequent collisions, to the directions parallel to the
+shock wave front and finally to the interior degrees of freedom (rotation and vibration) of
+molecules. Increasing rarefaction is synergic with the shock wave intensity in generating non-
+               Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry                 3
+
+
+equilibrium and anisotropy. Restoring equilibrium and isotropy occurs only by means of molecular
+collisions. Thus, as rarefaction increases, the collision number decreases and the flow field could
+restore neither equilibrium nor isotropy.
+   The study of the problem of non-equilibrium flows is topical and a very large number of
+scientific works has been recently published; see, for example, the works by Gao et al. (2018a, b
+and 2019) and by Seguin et al. (2018) and referenced papers. The research group made of Gao,
+Seguin and co-workers developed a parallel finite element solver for chemical and thermal non-
+equilibrium hypersonic flows. A finite-rate chemistry model and a two-temperature thermal non-
+equilibrium model are used to account for non-equilibrium processes. Good agreement was found
+with solutions available in literature.
+   As well known, DSMC can inherently deal with non-equilibrium flows therefore it does not
+suffer from need of specific computational methodologies like the NS equations do. This allowed
+Zuppardi (2004) to easily study this problem. The flow field around a “classical” sphere-cone
+capsule re-entering Earth atmosphere from an interplanetary mission in the altitude interval 60-80
+km was simulated by means of the DSMC code DS2G (Bird 1999).
+   In the present paper, the flow field around the Mars Pathfinder capsule (Braun and Manning
+2006) has been simulated, during entry Mars atmosphere in the altitude interval 40-80 km, by
+means of the much more powerful DSMC code DS2V-4.5 64 bits (Bird 2008). The study in Mars
+atmosphere is even more interesting because, as well known, Mars atmosphere is less dense
+(Knudsen numbers are higher) and the shock waves are more intense (Mach numbers are higher)
+compared with those of Earth atmosphere. Non-equilibrium and anisotropy have been quantified
+and correlated with flow field rarefaction, evaluated by local and global Knudsen numbers and by
+Reynolds number downstream a normal shock wave.
+
+
+2. Direct simulation Monte Carlo method and DS2V-4.5 64 bits code
+    It is well known that the Direct Simulation Monte Carlo (DSMC) method (Bird 1998, 2013),
+(Shen 2005) is currently the only available tool for the solution of rarefied flow fields from
+continuum low density regime (or slip flow) to free molecules regime. DSMC considers a gas as
+made up of discrete molecules; it is based on the kinetic theory of gases and computes the
+evolution of millions of simulated molecules, each one representing a large number of real
+molecules in the physical space, in the present computations between 6109 and 51011. Molecule-
+molecule collisions and molecule-surface interactions are computed. The computation domain is
+divided into cells, used both for selecting the colliding molecules and for sampling the
+macroscopic, fluid-dynamic quantities. The most important advantage of the method is that it does
+not suffer from numerical instabilities and does not directly rely on similarity parameters (i.e.,
+Mach, Reynolds and Knudsen numbers). However, it is inherently unsteady and a steady solution
+is achieved after a sufficiently long simulation time.
+    The DSMC code, used in the present study, is the 2-D/axisymmetric DS2V-4.5 64 bits code
+(Bird 2008). This code is “sophisticated”. As widely reported in literature (Bird 2006), (Bird et al.
+2009), (Gallis et al. 2009), a DSMC code is defined sophisticated if it implements computing
+procedures providing higher efficiency and accuracy with respect to a basic DSMC code. A
+sophisticated code, in fact, considers two sets of cells (collision and sampling) with the related cell
+adaptation and implements methods promoting “nearest neighbor” collisions. A sophisticated code
+automatically generates computation parameters such as numbers of cells and of simulated
+4                                         Gennaro Zuppardi
+
+
+molecules by the input numbers of megabytes and of the free stream number density. It uses a
+“radial weighting factor” routine in solving axisymmetric flow fields and provides optimal time
+step. Finally, the same collision pair cannot have sequential collisions.
+   Besides being sophisticated, DS2V-4.5 64 bits is also advanced. The user, in fact, can verify
+that the numbers of simulated molecules and of collision cells are adequate by means of the on line
+visualization of the ratio between the molecule mean collision separation (mcs) and the local mean
+free path (λ) in each collision cell. In addition, the code allows the user to change (or to increase),
+during a computation, the number of simulated molecules. The ratio mcs/λ has to be less than unity
+everywhere in the computation domain for an acceptable quality of the results. Bird (2006)
+suggests 0.2 as a limit value for an optimal quality of the results. Furthermore, the code gives the
+user information about the stabilization of a computation by means of the profile of the number of
+simulated molecules as a function of the simulated time. According to Bird (2006), the
+stabilization of a DSMC calculation is achieved when this profile becomes jagged and included
+within a band defining the standard deviation of the number of simulated molecules.
+
+
+3. Basic equations
+
+    Translational, kinetic energy of a molecule (Et [J]), due to thermal motion, reads (Bird 1998):
+
+                           Et 
+                                   1
+                                   2
+                                           1
+                                           2
+                                                              3
+                                     mC'2  m U'2  V'2  W'2  kTt
+                                                               2
+                                                                                                  (6)
+
+being: m mass of a molecule [kg], U’, V’, W’ components of C’ [m/s] in the x-, y- and z-
+directions, a bar for average, k the Boltzmann constant [J/K], T t [K] translational temperature. The
+three components of Tt read:
+                                   m 2        m         m
+                           Ttx      U ' Tty  V'2 Ttz  W'2                                       (7)
+                                   k    ,     k   ,     k
+    Energies associated with rotation (Er) and vibration (Ev) read:
+                                    1                       1
+                               E r  r kTr          Ev       v kTv                              (8)
+                                    2       ,               2
+where  is the number of degrees of freedom and subscripts r and v are for rotation and vibration.
+Overall temperature (Tov) represents the total energy of a stationary, non-equilibrium gas. Tov is an
+average of translational, rotational and vibrational temperatures, weighted by the numbers of
+freedom degrees:
+                                              3Tt  r Tr  v Tv
+                                      Tov                                                         (9)
+                                                 3  r   v
+   From the equation of state of an ideal gas (p=nkT [N/m2]), normal components of the pressure
+tensor read:
+                             p xx  nkTtx , p yy  nkTty , pzz  nkTtz                            (10)
+               Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry                     5
+
+
+where: n [1/m3] is the molecular number density. Eqs. (6), (7), (8) and (10), written for a simple
+gas, can be generalized for a mixture by including, in the averaging process, the molecular mass of
+each chemical species and the related molar fraction.
+   Since translational temperature and its x-component are prevalent, they have been considered
+as reference quantities in the definition of the parameters quantifying non-equilibrium and
+anisotropy. The relative differences between the gas macroscopic translational temperature with
+the macroscopic rotational and vibrational temperatures quantify non-equilibrium and, similarly,
+the relative differences between the macroscopic translational temperature component along x with
+those along y and z quantify anisotropy. Since in a non-equilibrium gas, translational temperature
+plays the role of thermodynamic temperature, a further non-equilibrium parameter is provided by
+the relative difference between Tt and Tov:
+
+                               Tt                  Tt                    T      
+                     t r       1      tv       1      t  ov   t  1                    (11a)
+                               Tr    ,
+                                                   Tv    ,                Tov   
+
+                                               Tx                  Tx
+                                     x y       1     x z                                       (11b)
+                                               Ty                  Tz
+    Obviously, the higher  the higher non-equilibrium and anisotropy. Equilibrium and isotropy,
+i.e., Tt=Tr, Tt=Tv, Tt=Tov and Tx=Ty, Tx=Tz, are defined by =0 and the common value of
+temperature is the thermodynamic temperature (T).
+
+4. Test conditions and quality of the results
+
+   Mars atmosphere, considered in the present computations, is made of 7 species (O2, N2, NO,
+CO, CO2, C, Ar) and its composition is constant with altitude. Table 1 reports both the mass
+fraction and the molar fraction of each chemical species. Due to dissociation reactions along an
+entry path, atomic oxygen and atomic nitrogen are also present. Therefore, for these calculations,
+Mars atmosphere is a mixture of 9 chemical species. The chemical model proposed by Bird in the
+version 3.3 of the DS2V code (Bird 2005) was used. This model is made of 54 reactions: 40
+dissociations, 7 forward (or endothermic) exchanges, 7 reverse (or exothermic) exchanges.
+   Computations were carried out in the altitude interval between 40 and 80 km with a step of 5
+km and relied on atmospheric parameters from the GRAM-2001 Mars model reported by Justus
+
+Table 1 Chemical composition of Mars atmosphere
+         Chemical species                         Mass fraction                      Molar fraction
+               O2                                   0.0013                             0.00176
+               N2                                   0.0270                             0.04173
+              NO                                    0.0001                             0.00014
+              CO                                    0.0007                             0.00108
+              CO2                                   0.9500                             0.93399
+               C                                    0.0049                             0.00396
+               Ar                                   0.0160                             0.01734
+6                                         Gennaro Zuppardi
+
+
+Table 2 DS2V input data and aerodynamic parameters
+    h [km]        V [m/s]       T [K]         n [1/m3]         Ma          KnD          Re2D
+      80           7269          135.4          1.941019         38.1       1.3610-2        10.0
+      75           7269          143.3          4.081019         37.0       6.6510-3        21.0
+      70           7268          146.2          8.091019         36.7       3.3810-3        41.7
+      65           7264          146.8          1.561020         36.6       1.7610-3        80.3
+      60           7253          142.7          3.201020         37.0       8.4710-4       164.8
+      55           7226          134.9          7.131020         37.9       3.7110-4       368.9
+      50           7161          133.0          1.531021         37.9       1.7210-4       798.1
+      45           7024          137.6          2.991021         36.5       8.9010-5      1587.6
+      40           6763          146.6          5.451021         34.1       5.0210-5      2085.1
+
+
+
+
+    Fig. 1 Geometrical characteristics of the Mars Pathfinder capsule in the meridian plane (x, y)
+
+
+and Johnson (2001). The influence of the model computing atmospheric or free stream parameters
+is very critical for the evaluation of every aerodynamic parameters and therefore “a fortiori” of the
+ parameters. The GRAM-2001 is far more reliable than the NASA Glenn model (NASA Glenn
+Research Center (1996)) as verified by specific studies carried out by Zuppardi (2019a, b, 2020).
+    Zuppardi verified that free stream velocities (V) along the two entry trajectories (or for each
+atmosphere model) at the altitudes of interest for this paper were equivalent: V7260 m/s. The
+most significant difference between the NASA Glenn model and the GRAM-2001 is in
+temperature and consequently in density. The point of greatest weakness of the Glenn model is in
+the linear decrease of temperature with altitude (h) for h greater than 7000 m. For example, deep
+space temperature (4 K) and limit temperature (0 K) would be reached at h=110.6 km and 112.4
+km, respectively. The difference in temperature and in density strongly influences aerodynamic
+parameters such as free stream Mach (Ma), Knudsen (KnD) numbers and Reynolds number
+downstream a normal shock wave (Re2D); Knudsen and Reynolds numbers are based on the
+Pathfinder’s diameter. For example, at h=80 km, Ma =38.1 and 51.7, KnD=1.4010-2 and
+3.9010-4, Re2D=10.0 and 267.9, for the GRAM-2001 and the NASA Glenn model, respectively.
+Table 2 reports input data to DS2V: free stream velocity, temperature (T ), number density (n) as
+                Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry                  7
+
+
+Table 3 DS2V quality of computations
+            h [km]                             mcs/                                 ts/tf
+              80                               0.008                                 7.95
+              75                               0.015                                 8.05
+              70                               0.030                                 6.77
+              65                               0.059                                 5.06
+              60                               0.119                                 5.54
+              55                               0.276                                 3.56
+              50                               0.598                                 3.86
+              45                               1.042                                 2.41
+              40                               1.957                                 1.59
+
+
+well as Mach, Knudsen numbers and Reynolds number downstream a normal shock wave.
+    Pathfinder capsule (Braun and Manning 2006) is a revolution body whose geometry, in the
+meridian plane (x, y), is shown in Fig. 1. The heat shield is a 70 deg cone, the nose curvature
+radius, i.e., the curve between points F and E, is 0.664 m and the diameter of the base area is
+D=2.65 m. The Pathfinder’s entry trajectory has been computed by the integration of the equations
+of dynamics of the capsule (Zuppardi and Savino 2015). The capsule was considered at zero angle
+of attack along the whole entry path i.e. with no lift and in free entry i.e., with no thrusters and no
+parachute.
+    The evaluation of rarefaction relies both on local Knudsen numbers, such as KnLV, KnL, KnLT
+and on global parameters such as Reynolds number downstream a normal shock wave (Re2D) and
+global Knudsen number (KnD). For the purpose of this paper, the scale length of a generic
+macroscopic quantity G (velocity V, density  and translational temperature Tt) is computed in the
+shock layer along the Pathfinder’s stagnation line as: LG=G/(dG/dx).
+    According to: i) Bird (1998), the condition for the NS equations to be valid is that the local
+Knudsen numbers have to be less than 0.1 and the upper limit at which the continuum model has
+to be replaced by the molecular model is 0.2, ii) Vallerani (1973), the transitional regime for a
+blunt body is defined by 10-1<Re2D<104, iii) Moss (1995), the transitional regime is defined by
+10-3<KnD<50. Table 2 shows that Re2D and KnD agree in stating the flow field in transitional
+regime.
+    Table 3 verifies the quality of the results: i) the criterion by Bird for an optimal quality of a
+DSMC computation (mcs/0.2) is fully satisfied at altitudes higher than 55 km. Even though at
+the altitude of 40 and 45 km, mcs/ is slightly greater than unity however the results have been
+included in the analysis, ii) the achievement of a steady state condition is also satisfied. In fact, as
+well known, a rule of thumb suggests considering an unsteady, fluid-dynamic computation
+stabilized when the ratio ts/tf is reasonably greater than unity, being ts the simulation time and tf the
+fluid-dynamic time, computed as the time necessary for the fluid to cross the length (L) of the
+body under study at the free stream velocity: tf = L/V. In this case L = 1.506 m.
+
+
+5. Analysis of the results
+
+   DS2V provides in output both mixture data, such as translational, rotational, vibrational
+8                                                                             Gennaro Zuppardi
+
+                          -0.3    -0.25     -0.2   -0.15   -0.1   -0.05   0                                  -0.3     -0.25      -0.2   -0.15    -0.1   -0.05   0
+              30000                                                           30000              60000                                                              60000
+                                 h=65 km                                                                             h=65 km
+                                      Tt                                                                                   Ttx
+              25000                   Tr                                      25000              50000                                                              50000
+                                                                                                                           Tty
+                                      Tv                                                                                   Ttz
+              20000                   Tov                                     20000              40000                                                              40000
+      T [K]
+
+
+
+
+                                                                                         T [K]
+              15000                                                           15000              30000                                                              30000
+
+
+              10000                                                           10000              20000                                                              20000
+
+
+                   5000                                                       5000               10000                                                              10000
+
+
+                      0                                                       0                          0                                                          0
+                          -0.3    -0.25     -0.2   -0.15   -0.1   -0.05   0                                  -0.3     -0.25      -0.2   -0.15    -0.1   -0.05   0
+                                                   x [m]                                                                                x [m]
+                                                   (a)                                                                                  (b)
+    Fig. 2 Profiles of translational, rotational, vibrational and overall temperatures (a) and of the components
+    of the translational temperature (b) along the Pathfinder’s stagnation line: h=65 km
+
+                          -0.3    -0.25     -0.2   -0.15   -0.1   -0.05   0                                   -0.3     -0.25     -0.2    -0.15   -0.1   -0.05   0
+                   1200                                                        1200                     250                                                         250
+                                 h=65 km                                                                             h=65 km
+                   1000                U'                                      1000                                        pxx
+                                       V'                                                               200                pyy                                      200
+                                       W'                                                                                  pzz
+                    800                                                        800
+
+                                                                                                        150                                                         150
+                                                                                             p [N/m2]
+        C' [m/s]
+
+
+
+
+                    600                                                        600
+
+                    400                                                        400                      100                                                         100
+
+                    200                                                        200
+                                                                                                         50                                                         50
+                      0                                                        0
+
+                   -200                                                        -200                       0                                                         0
+                          -0.3    -0.25     -0.2   -0.15   -0.1   -0.05   0                                   -0.3     -0.25     -0.2    -0.15   -0.1   -0.05   0
+                                                   x [m]                                                                                x [m]
+                                                   (a)                                                                                  (b)
+    Fig. 3 Profiles of the CO2 components of diffusion velocity (a) and of pressure (b) along the Pathfinder’s
+    stagnation line: h=65 km
+
+
+temperatures, etc. and data for each chemical species, such as components of translational
+temperature, of diffusion velocity, etc.. The components of translational temperature have to be
+averaged over the chemical species to obtain the same quantities for the mixture. Here, data related
+to CO2 have been considered as representative of those of the whole mixture. On the other hand
+this approximation is not very strong because, as said before, Mars atmosphere is practically made
+of CO2.
+    In order to provide a view or a qualitative evaluation of thermodynamic non-equilibrium and
+anisotropy, Figs. 2(a) and 2(b) show the profiles of translational, rotational, vibrational, overall
+temperature and of the components of translational temperature along the Pathfinder’s stagnation
+line at the intermediate altitude of 65 km, respectively. Due to the link between the components of
+Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry               9
+
+
+
+
+         (a)                                                         (b)
+
+
+
+
+         (c)                                                         (d)
+
+
+
+
+                                       (e)
+ Fig. 4 2-D maps of t-r (a), t-v (b), x-y (c), x-z (d) and t-ov (e): h=65 km
+10                                                           Gennaro Zuppardi
+
+               -0.3    -0.25   -0.2   -0.15   -0.1   -0.05   0                      -0.3    -0.25   -0.2   -0.15   -0.1   -0.05   0
+          10                                                     10           10                                                      10
+                      h=65 km                                                              h=65 km
+                            t-v                                                                 x-y
+           8                t-r                                 8              8                x-z                                 8
+                            t-ov
+           6                                                     6              6                                                     6
+
+
+           4                                                     4              4                                                     4
+      
+
+
+
+
+                                                                          
+           2                                                     2              2                                                     2
+
+
+           0                                                     0              0                                                     0
+
+
+          -2                                                     -2           -2                                                      -2
+               -0.3    -0.25   -0.2   -0.15   -0.1   -0.05   0                      -0.3    -0.25   -0.2   -0.15   -0.1   -0.05   0
+                                      x [m]                                                                x [m]
+                                      (a)                                                                  (b)
+ Fig. 5 Profiles of non-equilibrium (a) and anisotropy (b) parameters along the Pathfinder stagnation line:
+ h=65 km
+
+Table 4 Maximum non-equilibrium and anisotropy parameters
+     h [km]                    (t-r)max                 (t-v)max      (t-ov)max                  (x-y)max                 (x-z)max
+       80                       15.60                     11.76           1.30                       63.91                     30.93
+       75                       14.64                      8.42           1.17                       37.23                     25.21
+       70                       10.85                      7.16           1.16                       10.11                     13.76
+       65                        9.35                      5.57           1.06                        8.29                     10.31
+       60                        7.55                      5.57           1.01                        4.21                      4.90
+       55                        5.08                      3.81           0.91                        3.61                      3.91
+       50                        3.86                      0.69           0.49                        3.02                      3.86
+       45                        1.14                      1.40           0.47                        5.47                      5.30
+       40                        0.58                      0.07           0.10                        2.41                      2.44
+
+
+temperature and the components of diffusion velocity (Eq. (7)) and of pressure (Eq. (10)),
+anisotropy manifests itself also through the difference of the components of diffusion velocity and
+of pressure. Figs. 3(a) and 3(b) show the profiles of U’, V’, W’ and of pxx, pyy, pzz, respectively.
+Since, as well known, the output from any DSMC code is rather scattered, in order to improve the
+readability of the plots, data are represented, where ever necessary, by means of “running average”
+fits.
+    Figs. 4(a) to 4(e) show the 2-D maps of t-r (a), t-v (b) and x-y (c), x-z (d) and t-ov at h=65 km.
+As said before, all maps show that non-equilibrium and anisotropy are concentrated in the shock
+wave. Figs. 5(a) and 5(b) show more in details the profiles of t-r, t-v, t-ov and x-y, x-z along the
+Pathfinder’s stagnation line at h=65 km. Because of the axisymmetry of the flow field, the profiles
+of x-y and x-z are almost equivalent.
+    Both Figs. 4 and 5 clearly show that: i) maximum values of  are got in the shock wave, ii) t-r,
+t-v, x-y, x-z are comparable, iii) flow is in equilibrium before and after the shock wave. The
+influence of altitude on non-equilibrium and anisotropy can be evaluated by means of the
+                            Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry                                                                        11
+
+                    0   2      4      6     8   10            12   14   16                                    0       0.2    0.4   0.6     0.8      1   1.2   1.4
+               80                                                            80                          80                                                         80
+                               t-r
+                                                                                                         75                                                         75
+               75              t-v                                          75
+               70                                                                                        70                                                         70
+                                                                             70
+               65                                                                                        65                                                         65
+
+
+
+
+                                                                                                h [km]
+      h [km]
+
+
+
+
+               60                                                            65                          60                                                         60
+
+               55                                                                                        55                                                         55
+                                                                             60
+               50                                                                                        50                                                         50
+                                                                             55
+               45                                                                                        45                                                         45
+
+               40                                                            50                          40                                                         40
+                    0   2      4      6     8   10            12   14   16                                    0       0.2    0.4   0.6     0.8      1   1.2   1.4
+                                             max                                                                                         t-ov
+                                                                                                                                                  max
+                                          (a)                                                                                      (b)
+                                                                   0    10    20   30     40     50           60      70
+                                                              80                                                            80
+
+                                                              75
+                                                                                                                            75
+                                                              70
+                                                                                                                            70
+                                                              65
+                                                     h [km]
+
+
+
+
+                                                              60                                                            65
+
+                                                              55
+                                                                                                                            60
+                                                              50
+                                                                                                               x-z         55
+                                                              45                                               x-y
+                                                              40                                                            50
+                                                                   0    10    20   30      40    50           60      70
+                                                                                         max
+                                                                                   (c)
+   Fig. 6 Profiles of the maximum values of t-r, t-v (a), t-ov (b) and x-y, x-z (c) as functions of altitude
+
+
+maximum values of t-r, t-v, t-ov, x-y and x-z along the stagnation line, reported in Table 4 and,
+for the sake of completeness, also plotted in Figs.6(a), 6(b) and 6(c). Unfortunately, due to an
+unknown reason, Ttmax and consequently (t-v)max and (t-ov)max assumes at h=50 km a smaller value
+than expected. As reported in Table 4, non-equilibrium and anisotropy are equivalent up to an
+altitude of about 70 km where the maximum values of t-r, t-v x-y and x-z are: 10.9, 7.2, 10.1 and
+13.8, respectively. At higher altitudes, anisotropy increases dramatically (Fig. 6(c)), much more
+than non-equilibrium does; for example at h=80 km, x-y and t-v achieve values of 63.9 and 11.8,
+respectively.
+    As expected, non-equilibrium and anisotropy parameters increase with altitude. These
+increments are due both to: i) a decrease of the number of molecular collisions, quantified by the
+rate of molecular collisions (number of collisions per second) in the whole computation dominion
+(Fig. 7(a)), ii) an increase of intensity of the shock wave, quantified by the maximum value along
+the stagnation line at each altitude, of the translational temperature made non-dimensional by the
+free stream temperature (Fig. 7(b)). Figs. 7(a) and 7(b) show that, in the whole altitude interval,
+12                                                                    Gennaro Zuppardi
+
+                 1E+012           1E+013            1E+014      1E+015                               40      80       120       160    200     240
+                 80                                                    80                       80                                                   80
+
+
+
+                 70                                                    70                       70                                                   70
+
+
+
+
+                                                                                       h [km]
+        h [km]
+
+
+
+
+                 60                                                    60                       60                                                   60
+
+
+
+                 50                                                    50                       50                                                   50
+
+                                                                                                                                         Overall
+                                                                                                                                         Transl.
+                 40                                                    40                       40                                                   40
+                 1E+012           1E+013            1E+014      1E+015                               40      80       120       160    200     240
+                                          Nc [1/s]                                                                     Tmax/T
+                                          (a)                                                                           (b)
+ Fig. 7 Profiles of the number of collisions per second (a) and of the maximum values of translational and
+ overall temperatures (b) as functions of altitude
+
+                       -0.1     -0.075      -0.05      -0.025     0                             -0.1         -0.075         -0.05     -0.025         0
+                 0.4                                                  0.4              0.4                                                                0.4
+                              h=45 km                                                                     h=55 km
+                                  KnLT                                                                        KnLT
+                                  KnL                                                                        KnL 
+                 0.3                                                  0.3              0.3                    KnLV                                        0.3
+                                  KnLV
+        KnL
+
+
+
+
+                                                                                 KnL
+
+
+
+
+                 0.2                                                  0.2                                                                                 0.2
+                                                                                       0.2
+
+
+
+                 0.1                                                  0.1
+                                                                                       0.1                                                                0.1
+
+
+
+                  0                                                   0
+                       -0.1     -0.075      -0.05      -0.025     0                       0                                                               0
+                                           x [m]                                                -0.1         -0.075         -0.05     -0.025         0
+                                                                                                                        x [m]
+                                          (a)                                                                           (b)
+     Fig. 8 Profiles of local Knudsen numbers along the Pathfinder stagnation line at h=45 (a) and 55 (b) km
+
+
+the number of molecular collisions per second reduces of about three orders of magnitude and the
+shock wave intensity increases of about 177%, respectively. For the sake of completeness, the
+profile of the maximum values of overall temperature along the stagnation line, made non-
+dimensional by free stream temperature, is also shown in Fig. 7(b). The difference between the
+maximum values of Ttmax/T and Tov/T provides a further qualitative indication of non
+equilibrium. As expected the difference increases with altitude; it ranges from 2.6 to 111.8 in the
+altitude interval.
+    Figs. 8(a) and 8(b) show the profiles of the local Knudsen numbers (KnLT, KnL and KnLV)
+along the stagnation line. It seems that, along Mars entry path, altitude of 45 km can be roughly
+considered as the limit altitude for a proper use of a NS code. In fact, the values of the local
+Knudsen numbers at this altitude (Fig. 8(a)) satisfy the condition of a complete validity of the NS
+               Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry              13
+
+
+equations; all Knudsen numbers along the stagnation line are lower than 0.1. Correspondingly, the
+maximum values of t-r, t-v and x-y, x-z along the stagnation line are of the order of magnitude
+unitary (see Table 4). An uncertainty situation exists at h=55 km (Fig.8(b)). In fact, all Knudsen
+numbers exceed even the limit value for the assumption of continuum but the  parameters are still
+of unitary order of magnitude (see Table 4).
+    DSMC calculation at h=40 km by a computer, provided with a single processor (i5, 28 GHz),
+required a very long time (5.38105 s or 6 days and about 6 hours). Thus it can be stated that the
+altitude of 40 km is the lower limit altitude for a reasonable use of a DSMC code; the overlapping
+altitude interval, where both CFD and DSMC hold, is roughly 40-45 km.
+
+
+6. Conclusions
+
+    The forthcoming Mars exploration and colonization, by means of aero-space-planes entering
+the Mars atmosphere and flying in it, stimulated the author to face the problem of defining the
+altitude limit for a proper use of a Navier-Stokes (NS) solver. The failure of the NS equations with
+increasing altitude is due to the failure of the Chapman-Enskog theory or of the Maxwell equation
+due to thermodynamic non-equilibrium (i.e., different translational, rotational and vibrational
+temperatures) and to anisotropy (i.e., different components in the three directions of the
+translational temperature). Thermodynamic non-equilibrium and anisotropy increase with
+increasing shock wave intensity and rarefaction.
+    The study has been carried out by means of a Direct Simulation Monte Carlo (DSMC) code
+which, as well known, can simulate non-equilibrium flow fields. Computations have been carried
+out by the DS2V-4.5 64 bits code, considering the entry trajectory of Mars Pathfinder in the
+altitude interval 40-80 km. The GRAM-2001 provided the atmosphere parameters. Non-
+equilibrium and anisotropy have been quantified by the relative differences of the rotational and
+vibrational temperatures with respect to the translational temperature and of the components of
+translational temperature along y and z with respect to the component along x. The relative
+difference between the overall temperature and the translational one has been also considered like
+a non-equilibrium index.
+    It seems that in Mars atmosphere entry, altitude of 45 km can be reasonably considered as the
+upper limit altitude for a safe, correct use of a NS code. This remark is also supported by a
+rarefaction analysis carried out in terms of local Knudsen numbers along the Pathfinder’s
+stagnation line. The altitude of 40 km, by using a current technology computer and with single
+processor, can be considered as the lower altitude for a reasonable use of a DSMC code. Therefore
+the altitude interval, where both CFD and DSMC can be used, is roughly 40-45 km. Further tests
+will be carried out to state more precise correlation between rarefaction and non-equilibrium
+parameters, considering other spacecraft, such as aero-space-planes or winged bodies, therefore
+other possible entry trajectories.
+
+References
+
+Bird, G.A. (1998), Molecular Gas Dynamics and Direct Simulation Monte Carlo, Clarendon Press, Oxford,
+  U.K.
+Bird, G.A. (1999), The DS2G Program User’s Guide, Version 3.2, G.A.B. Consulting Pty Ltd, Killara,
+  Australia.
+14                                           Gennaro Zuppardi
+
+
+Bird, G.A. (2005), The DS2V Program User’s Guide, Version 3.3, G.A.B. Consulting Pty Ltd, Sydney,
+  Australia.
+Bird, G.A. (2006), “Sophisticated versus simple DSMC”, Proceedings of the 25th International Symposium
+  on Rarefied Gas Dynamics (RGD25), Saint Petersburg, Russia, July.
+Bird, G.A. (2008), The DS2V Program User’s Guide, Version 4.5, G.A.B. Consulting Pty Ltd, Sydney,
+  Australia.
+Bird, G.A. (2013), The DSMC Method, Version 1.1, Amazon, ISBS 9781492112907, Charleston, South
+  Carolina, U.S.A.
+Bird, G.A., Gallis, M.A., Torczynski, J.R. and Rader, D.J. (2009), “Accuracy and efficiency of the
+  sophisticated direct simulation Monte Carlo algorithm for simulating non-continuum gas flows”, Phys.
+  Fluids, 21(1). https://doi.org/10.1063/1.3067865.
+Braun, R.D. and Manning, R.M. (2006), “Mars exploration entry, descent and landing challenges”,
+  Proceedings of the 2006 IEEE Aerospace Conference, Big Sky, Montana, U.S.A., March.
+Candler, G.V. and Boyd, I.D. (1994), “A multiple translational temperature gas dynamics model”, Phys.
+  Fluids, 6(11), 3776-3786.
+Gallis, M.A., Torczynski, J.R., Rader, D.J. and Bird, G.A. (2009), “Accuracy and efficiency of the
+  sophisticated direct simulation Monte Carlo algorithm for simulating non-continuum gas flows”, J.
+  Comput. Phys., 228(12), 4532-4548. https://doi.org/10.1016/j.jcp.2009.03.021.
+Gao, S, Habashi, W.G., Isola, D., Baruzzi, G.S., Fossati, M. and Uribarri, L. (2018a), “An edge-based
+  Galerkin formulation for thermal non-equlibrium flows”, Proceedings of the 56th AIAA Aerospace
+  Sciences Meeting, Kissimmee, Florida, U.S.A., January.
+Gao, S., Seguin, J., Habashi, W.G., Isola, D. and Baruzzi, G.S. (2018b), “A finite solver for hypersonic flows
+  in thermo-chemical non-equilibrium”, Proceedings of the 26th Annual Conference of the Computational
+  Fluid Dynamics Society of Canada, Winnipeg, Canada, June.
+Gao, S., Seguin, J., Habashi, W.G., Isola, D. and Baruzzi, G.S. (2019), “A finite solver for hypersonic flows
+  in thermo-chemical non-equilibrium, Part II”, Int. J. Numer. Meth. Heat Fluid Flow, 29(9), 3148-3168.
+  https://doi.org/10.1108/HFF-12-2018-0725.
+Justus, C.G. and Johnson, D.L. (2001), Mars Global Reference Atmospheric Model 2001 (Mars-GRAM
+  2001) User Guide, NASA TM 2001-210961.
+Moss, J.N. (1995), “Rarefied flows of planetary entry capsules”, AGARD-R-808, 95-129, Special Course on
+  “Capsule aerothermodynamics”, Rhode-Saint-Genèse, Belgium.
+NASA Glenn Research Center, Mars Atmosphere Model (1996), https://www.grc.nasa.gov/WWW/K-
+  12/airplane/atmosmre.html.
+Pham Van-Diep, G., Erwin, D. and Muntz, E.P. (1989), “Nonequilibrium molecular motion in a hypersonic
+  shock wave”, Science, 245(4918), 624-626. https://doi.org/10.1126/science.245.4918.624.
+Seguin, J., Habashi, W.G., Isola, D., Baruzzi, G.S. and Fossati, M. (2018), “Decoupled finite-element
+  approach for high-Mach flows with finite-rate chemistry”, Proceedings of the 56th AIAA Aerospace
+  Sciences Meeting, Kissimmee, Florida, U.S.A., January.
+Shen, C. (2005), Rarefied Gas Dynamic: Fundamentals, Simulations and Micro Flows, Springer-Verlag,
+  Berlin, Germany.
+Vallerani, E. (1973), “A review of supersonic sphere drag from the continuum to the free molecular flow
+  regime”, AGARD CPP 124, 1-15.
+Zuppardi, G. (2004), “Evaluating anisotropy and thermodynamic non-equilibrium in hypersonic transitional
+  regime”, Proceedings of the 24th International Symposium on Rarefied Gas Dynamics (RGD24),
+  Monopoli, Italy, July.
+Zuppardi, G. (2019a), “Influence of the Mars atmosphere model on aerodynamics of an entry capsule”, Adv.
+  Aircraft Spacecraft Sci., 6(3), 239-256. https://doi.org/10.12989/aas.2019.6.3.239.
+Zuppardi, G. (2019b), “Influence of the Mars atmosphere model on 3-D aerodynamics of an entry capsule”,
+  Proceedings of the Direct Simulation Monte Carlo Workshop DSMC19, Santa Fe, New Mexico, U.S.A.,
+  September.
+Zuppardi, G. (2020), “Influence of the Mars atmosphere model on aerodynamics of an entry capsule: Part
+               Thermodynamic non-equilibrium and anisotropy in Mars atmosphere entry           15
+
+
+  II”, Adv. Aircraft Spacecraft Sci., 7(3), 229-249. https://doi.org/10.12989/aas.2020.7.3.229.
+Zuppardi, G. and Savino, R. (2015), “DSMC aero-thermo-dynamic analysis of a deployable capsule for
+  Mars atmosphere entry”, Proceedings of the Direct Simulation Monte Carlo Workshop DSMC15, Kauai,
+  Hawaii, U.S.A.
+
+
+EC
+

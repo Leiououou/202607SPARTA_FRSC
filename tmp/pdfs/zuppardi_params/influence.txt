@@ -1,0 +1,977 @@
+Advances in Aircraft and Spacecraft Science, Vol. 6, No. 3 (2019) 239-256
+DOI: https://doi.org/10.12989/aas.2019.6.3.239                                                                 239
+
+
+
+
+ Influence of the Mars atmosphere model on aerodynamics of
+                       an entry capsule
+                                            Gennaro Zuppardi
+
+        Department of Industrial Engineering – Aerospace Division, University of Naples “Federico II”,
+                                 Piazzale Tecchio, 80 – 80125 Naples, Italy
+
+             (Received August 3, 2018, Revised December 28, 2018, Accepted January 10, 2019)
+
+Abstract. This study develops a dual purpose: i) evaluating the effects of two different Mars atmosphere models
+(NASA Glenn and GRAM-2001) on aerodynamics of a capsule (Pathfinder) entering the Mars atmosphere, ii)
+verifying the feasibility of evaluating the ambient density and pressure by means of the methods by McLaughlin and
+Cassanto, respectively and therefore to re-build the values provided by the models. The method by McLaughlin relies
+on the evaluation of the capsule drag coefficient, the method by Cassanto relies on the measurement of pressure at a
+point on the capsule surface in aerodynamic shadow. The study has been carried out computationally by means of: i)
+a code integrating the equations of dynamics of the capsule for the computation of the entry trajectory, ii) a DSMC
+code for the solution of the flow field around the capsule in the altitude interval 50-100 km. The models show
+consistent differences at altitudes higher than about 40 km. It seems that the GRAM-2001 model is more reliable
+than the NASA Glenn model. In fact, the NASA Glenn model produces, at high altitude, temperatures that seem to
+be too low compared with those from the GRAM-2001 model and correspondingly very different aerodynamic
+conditions in terms of Mach, Reynolds and Knudsen numbers. This produces pretty different capsule drag
+coefficients by the two models as well as pressure on its surface, making not feasible neither the method by
+McLaughlin nor that by Cassanto, until a single, reliable model of the Mars atmosphere is not established. The
+present study verified that the implementation of the Cassanto method in Mars atmosphere should rely (such as it is
+currently) on pressure obtained experimentally in ground facilities.
+Keywords:    Mars atmosphere models; pathfinder capsule; computation of entry trajectory; methods
+evaluating ambient density and pressure; DSMC method
+
+
+1. Introduction
+
+   It is well known that the success of the exploration of a planet, provided with atmosphere, relies
+also on the knowledge of the atmosphere parameters. For the survey of the Mars atmosphere, a
+number of successful missions started longer than 40 years ago and are still today carried on for
+the detection of its parameters such as the missions: Viking 1 and 2 (both in 1976), Pathfinder
+(1997), Spirit and Opportunity (both in 2004), Mars Phoenix Lander (2008) and others. Despite
+these missions, to the author's knowledge, an unique, definitive and completely reliable model for
+the calculation of the Mars atmosphere parameters seems to be not yet available. On the other
+hand, the knowledge of these parameters, with particular regard to density, strongly influences the
+
+
+Corresponding author, Lecturer, E-mail: zuppardi@unina.it
+
+Copyright © 2019 Techno-Press, Ltd.
+http://www.techno-press.org/?journal=aas&subpage=7               ISSN: 2287-528X (Print), 2287-5271 (Online)
+240                                      Gennaro Zuppardi
+
+
+landing procedure and its technology. For example, the low values of density of the Mars
+atmosphere makes inefficient the use of parachutes, thus the airbag technology was developed and
+implemented in Pathfinder, in order to mitigate the impact of the capsule with the soil. It is
+obvious that the knowledge of these parameters will become even more imperative for the future
+manned missions; the next frontier of the space exploration is the man's journey to Mars and then
+its colonization.
+    Having a reliable atmosphere model makes possible performing reliable calculations both of
+the entry trajectory and of the aerodynamic quantities of a capsule along the entry path, as per drag
+coefficient and pressure on the capsule surface. These data can be used, in turn, for correcting
+density and pressure from the atmosphere model, respectively. Thus a reconstruction of density
+and pressure can be performed. More specifically according to:
+    1) McLaughlin et al. (2011) and Desai et al. (2008), the ambient or the free stream density ()
+can be evaluated from the measurements of: i) the drag (D), to which the capsule is subjected
+along the entry path. As the capsule mass (m) is known, the drag can be obtained by the
+measurement of the capsule deceleration (a) by means of an Inertial Measurement Unit (IMU)
+installed on the capsule, ii) the free stream velocity (V) by means of telemetric techniques. The
+atmospheric density can be easily derived from
+                                          1    2C S
+                                  D = ma =  V D                                                (1)
+                                          2
+where CD is the drag coefficient and S is the reference surface. In space applications, the reference
+surface is the frontal area of the spacecraft. The main cause of uncertainty of this procedure is the
+drag coefficient. This, in fact, depends on the: shape of the capsule, kind of interaction of the gas
+molecules with the surface or momentum accommodation coefficients, free stream fluid-dynamic
+conditions (Mach, Reynolds and Knudsen numbers).
+    2) Cassanto (1973), Cassanto and Lane (1976), the free stream pressure (p) can be evaluated
+by means of empirical curves correlating the measured pressure in a point of the surface of a
+capsule in aerodynamic shadow to the free stream pressure. Cassanto proposed measuring the base
+pressure (pb) on the capsule. For safety reasons, in fact, a pressure tap can not be located on the
+surface exposed to the flow; the presence of holes through the fore-body, or the Thermal Protection
+System (TPS), is dangerous for the integrity of the capsule. Cassanto evaluated experimentally the
+ratio pb/p by means of ground facilities. The evaluation of the free stream pressure of a planet
+atmosphere is eventually obtained from the base pressure measured on the capsule during the
+planet entry and a function correlating the ratio pb/p. Cassanto deeply analyzed this problem
+considering the influence of a number of parameters on pb, such as fore/after-body configuration,
+free stream Reynolds and Mach numbers, gas composition and so on. Cassanto obtained the
+correlation formulae (pb/p) in terms of the free stream Reynolds or Mach numbers. As the success
+of the procedure is strictly linked to a reliable correlation formula and to accurate measurements of
+pb, a preliminary analysis needs to be done for an appropriate location of the pressure tap. In fact,
+the pressure on a surface in the aerodynamic shadow, which is of the order of magnitude of the
+free stream one (Cassanto (1973), Cassanto and Lane (1976)), could be below the accuracy of the
+instrumentation.
+    The study of aerodynamics in Mars atmosphere started with the Viking missions and is still
+today in progress, as it can be verified by the large number of papers, relying on computing codes
+and/or on experimental tests. For example, a number of recent papers are here cited: i) Fei et al.
+               Influence of the Mars atmosphere model on aerodynamics of an entry capsule         241
+
+
+(2016) analyzed, by means of a Direct Simulation Monte Carlo (DSMC) code, the impact of the
+uncertainties of the Mars atmosphere parameters on hypersonic, rarefied aerodynamics of entry
+vehicles, ii) Wei et al. (2015) analyzed aerodynamics of complex geometry lifting vehicles for
+precise landing performance during the entry of the Mars Science Laboratory, iii) Desert et al.
+(2017) studied, by means of a 3-D Computational Fluid-Dynamics (CFD) code, aerodynamics of a
+Martian micro-vehicle, iv) Raju (2015) carried out 2-D CFD computations for evaluating the
+aerodynamic characteristics of the Phoenix capsules entering the Mars atmosphere at zero angle of
+attack, v) Viviani and Pezzella (2013), besides performing 3-D CFD computations on a Mars aero-
+space-plane, evaluated also the effects of chemical reactions, vi) Anyoji et al. (2017) and Jiang et
+al. (2018) made tests in wind tunnels besides CFD computations.
+    The present paper can be considered as a contribution to the long series of papers on the subject
+“aerodynamics in Mars atmosphere”. More specifically, the aim of the present paper is twofold: i)
+computing the trajectories of a capsule entering the Mars atmosphere by using two different
+atmosphere models and solving the aerodynamic flow field around the capsule, ii) verifying the
+feasibility of using the above mentioned methods by McLaughlin and Cassanto.
+    The present computations considered the Pathfinder capsule (Braun and Manning (2006),
+Mehta (2011), Williams (2016)) and two atmosphere models, reported in open literature: NASA
+Glenn (1996), Global Reference Atmosphere Model (GRAM-2001) by Justus and Johnson (2001).
+The study has been carried out in the altitude interval 50-100 km. Since the rarefaction level of the
+flow fields from both models in this altitude interval is pretty high, the computations were done by
+the DSMC code DS2V-4.5 64 bits (Bird (2012)). For the sake of comparison, the atmosphere
+parameters are also shown for Earth in the altitude interval 0-100 km and the remarkable
+differences between the two Mars models are pointed out.
+
+
+
+
+            Fig. 1 Geometrical characteristics of the Pathfinder in the meridian plane (x, y)
+
+Table 1 Pathfinder operative parameters
+                              Type of entry                                           Direct
+                              Entry velocity                                         7260 m/s
+                             Entry Path Angle                                        14.06 deg
+                               Entry mass                                             585 kg
+                            Touchdown mass                                            360 kg
+                         Entry ballistic parameter                                  106 [kg/m2]
+                       Touchdown ballistic parameter                                65 [kg/m2]
+                           Entry angle of attack                                       0 deg
+242                                     Gennaro Zuppardi
+
+
+2. Mars pathfinder
+
+   Mars Pathfinder is an American capsule launched by NASA on December 4, 1996 and landed
+on Mars on July 4, 1997. Pathfinder carried to Mars a base station with a lightweight (10.6 kg),
+wheeled robotic Mars rover. The rover conducted a number of experiments on the Mars surface
+and analyzed the composition of the soil and the morphology of the rocks. Pathfinder carried also
+scientific instruments and probes for sounding the Mars atmosphere.
+   Pathfinder is a revolution body whose geometry, in the meridian plane (x, y), is shown in Fig.
+1. The curvature radius of the nose, i.e., the curve between points F and E, is 0.664 m. The
+curvature radius of the rounded shoulder, i.e., the curve between points D and C, is 0.0662 m, the
+center of curvature is located at x=0.499 m, y=1.206 m. The diameter and the base area surface
+are: D=2.65 m, S=5.52 m2, respectively. The heat shield is a 70 deg cone. Pathfinder is provided of
+a parachute whose opening altitude is 9.4 km. Table 1 summarizes some operative parameters
+(Braun and Manning (2006)) necessary for the present computations.
+
+
+3. Mars atmosphere models
+
+   Both the NASA Glenn and the Global Reference Atmosphere Model (GRAM-2001) do not
+provide information about the atmosphere composition. As reported by Williams (2016), the Mars
+atmosphere is made up of 7 species and its composition is constant with altitude. Table 2 reports
+both the mass and the molar fractions of each chemical species. Due to dissociation of O2, N2 and
+NO, atomic Oxygen and Nitrogen are also present thus the Mars atmosphere during entry is a
+mixture of 9 chemical species. For the purpose of the present paper, the chemical model of the
+Mars atmosphere, used by Bird (2005) in the previous version 3.3 of the DS2V code, has been
+implemented in the current version of the code. This chemical model relies on 54 reactions: 40
+dissociations, 7 forward (or endothermic) exchanges, 7 reverse (or exothermic) exchanges.
+   According to the NASA Glenn model, pressure decreases exponentially with altitude (h)
+                                  p = 0.699 exp(-0.00009 h)                                   (2a)
+and temperature (T) decreases linearly. The Mars atmosphere is divided in two zones: a lower zone
+up to 7000 m and an upper zone at higher altitudes. Temperature is evaluated by the following
+equations
+                              h ≤ 7000 m: T = -31 - 0.000998 h                                (2b)
+
+                              h > 7000 m: T = -23.4 - 0.00222 h                               (2c)
+where: temperature is in Celsius degrees, pressure is in kilo-Pascal and altitude is in meters. In
+each zone, density ( [kg/m3]) is computed by the equation of state
+                                  = p / [0.1921 (T + 273.1)]                                 (2d)
+   The GRAM-2001 model is an engineering-oriented model widely used for many Mars mission
+applications. It is based on the NASA Ames Mars General Circulation Model in the interval 0-80
+km and on the Mars Thermosphere General Circulation Model at altitudes above 80 km. Early
+GRAM-2001 versions were based on “ad hoc” parameterization of data by the Mariner and Viking
+missions. Recent applications of GRAM-2001 include aero-braking operations of Mars Global
+                       Influence of the Mars atmosphere model on aerodynamics of an entry capsule                                             243
+
+
+Table 2 Chemical composition of the Mars atmosphere
+                     Chemical species                                    Mass fraction                              Molar fraction
+                           O2                                              0.0013                                     0.00176
+                           N2                                              0.0270                                     0.04173
+                          NO                                               0.0001                                     0.00014
+                          CO                                               0.0007                                     0.00108
+                          CO2                                              0.9500                                     0.93399
+                           C                                               0.0049                                     0.00396
+                           Ar                                              0.0160                                     0.01734
+
+            1E-008    1E-006      1E-004      1E-002   1E+000                          1E+017    1E+019    1E+021     1E+023    1E+025
+          100                                                       100               100                                                 100
+                                               Mars: NASA Glenn
+          90                                   Mars: GRAM-2001      90                90                                                  90
+                                               Earth: US76
+          80                                                        80                80                                                  80
+          70                                                        70                70                                                  70
+          60                                                        60                60                                                  60
+ h [km]
+
+
+
+
+                                                                            h [km]
+
+
+
+
+          50                                                        50                50                                                  50
+          40                                                        40                40                                                  40
+          30                                                        30                30                                                  30
+          20                                                        20                20                                                  20
+                                                                                                   Mars: NASA Glenn
+          10                                                        10                             Mars: GRAM-2001
+                                                                                      10                                                  10
+                                                                                                   Earth: US76
+            0                                                       0                   0                                                 0
+            1E-008    1E-006      1E-004      1E-002   1E+000                          1E+017 1E+019 1E+021 1E+023 1E+025
+                                   [kg/m3]                                                           N [1/m3]
+                                     (a)                                                                     (b)
+                0     50      100     150      200     250    300                       1E-003    1E-001     1E+001      1E+003      1E+005
+          100                                                       100               100                                                 100
+                                                                                                                       Mars: NASA Glenn
+           90                                                       90                 90                              Mars: GRAM-2001    90
+                                                                                                                       Earth: US76
+           80                                                       80                 80                                                 80
+
+           70                                                       70                 70                                                 70
+
+           60                                                       60                 60                                                 60
+                                                                             h [km]
+ h [km]
+
+
+
+
+           50                                                       50                 50                                                 50
+
+           40                                                       40                 40                                                 40
+
+           30                                                       30                 30                                                 30
+
+           20                                                       20                 20                                                 20
+                           Mars: NASA Glenn
+           10              Mars: GRAM-2001                          10                 10                                                 10
+                           Earth: US76
+            0                                                       0                   0                                                 0
+                0     50      100     150      200     250    300                       1E-003    1E-001     1E+001      1E+003      1E+005
+                                     T [K]                                                                 p [N/m2]
+
+
+ Fig. 2 Profiles of density (a), number density (b), temperature (c), pressure and (d) from the Mars and
+ Earth atmosphere models as functions of altitude
+244                                        Gennaro Zuppardi
+
+
+Table 3(a) Mars atmosphere parameters at h=0 km
+                                NASA Glenn                     GRAM-2001                     US76
+         T [K]                      242                            238                        288
+        [kg/m3]                 1.5010-2                      1.7310-2                     1.23
+       p [N/m2]                     699                            779                     1.01105
+       N [1/m3]                  2.061023                      2.361023                  2.551025
+
+Table 3(b) Mars atmosphere parameters at h=100 km
+                                 NASA Glenn                    GRAM-2001                     US76
+         T [K]                       28                            127                        196
+        [kg/m3]                  1.6210-5                     5.8810-8                  5.6310-7
+       p [N/m2]                   8.6310-2                     1.4810-3                  3.2210-2
+       N [1/m3]                   2.221020                     8.051017                  1.191019
+
+
+
+Surveyor, prediction and validation of the Pathfinder hypersonic aerodynamics and entry dynamics
+studies for Mars Polar Lander.
+    Data used in the present paper (temperature, pressure and density) are those computed and
+reported by Justus and Johnson (2001). The output is provided in terms of altitude in the interval
+-1.365194.654 km with a step of about 5 km. For the present computations, the parameters at the
+intermediate altitudes in each step are computed by a linear interpolation.
+    Figs. 2(a)-2(d) show the profiles of density (a), number density (b), temperature (c), and
+pressure (d) from the two models as functions of altitude. For the sake of completeness, the
+profiles of the same quantities for Earth are also shown. The latter are provided by a computer
+version of the US standard Atmosphere 1976.
+    The two Mars models are almost equivalent in the altitude interval 0-40 km. For a direct
+comparison of the models, Tables 3(a) and 3(b) report the values of the parameters at h = 0 and
+100 km, respectively. The most evident difference, at h=100 km, is in temperature and
+correspondingly in density and in number density where the difference is about three orders of
+magnitude.
+
+4. Pathfinder entry trajectory
+   The Pathfinder entry trajectory has been computed by the integration of the equations of
+dynamics of the capsule, already used by Zuppardi and Savino (2015), considering the capsule at
+zero angle of attack, i.e., with no lift and in free entry, i.e., with no thrusters and with no parachute:
+                                      dV 1 V SC D g
+                                        =          −                                                   (3a)
+                                      dh 2 sin  m   V
+
+                                       d    1     g 1
+                                          =      − 2                                                   (3b)
+                                       dh R sin  V tg
+where: γ is the flight path angle, g is the gravity acceleration, R is the curvature radius of the
+                        Influence of the Mars atmosphere model on aerodynamics of an entry capsule                                                        245
+
+
+Table 4 Velocities [m/s] and related variations at three altitudes
+                           NASA Glenn                                  GRAM-2001                                           US76
+    h                m=585   m=360                               m=585 m=360                                 m=585         m=360
+                                                 V/V                            V/V                                                           V/V
+  [km]                [kg]    [kg]                                [kg]    [kg]                                [kg]          [kg]
+   80                 7200    7157               0.006            7269   7268    0.0001                       7274          7266                0.001
+   50                 6642    6271               0.059            7161   7085     0.011                       6393          5864                0.090
+   20                 2693    1550               0.737            3065   1844     0.662                       167           128                 0.305
+
+                 0       2000       4000              6000       8000                      0   10   20   30   40     50    60   70     80       90
+           100                                                        100            100                                                             100
+                          Mars: NASA Glenn
+            90            Mars: GRAM-2001                             90              90                                                             90
+                          Earth: US76
+            80                                                        80              80                                                             80
+            70                                                        70              70                                                             70
+            60                                                        60              60                                                             60
+  h [km]
+
+
+
+
+                                                                            h [km]
+
+
+            50                                                        50              50                                                             50
+
+            40                                                        40              40                                                             40
+
+            30                                                        30              30                                                             30
+
+            20                                                        20              20                                                             20
+                                                                                                                          Mars: NASA Glenn
+                                                                                      10                                  Mars: GRAM-2001            10
+            10                                                        10
+                                                                                                                          Earth: US76
+             0                                                        0                0                                                             0
+                 0       2000       4000              6000       8000                      0   10   20   30   40 50        60   70     80       90
+                                   V [m/s]                                                                      M
+                                    (a)                                                                        (b)
+            1E-003        1E+000          1E+003             1E+006                   1E-008        1E-006     1E-004       1E-002        1E+000
+           100                                                        100            100                                                             100
+                                                                                                     Mars: NASA Glenn
+            90                                                        90              90             Mars: GRAM-2001                                 90
+                                                                                                     Earth: US76
+            80                                                        80              80                                                             80
+            70                                                        70              70                                                             70
+            60                                                        60              60                                                             60
+  h [km]
+
+
+
+
+                                                                            h [km]
+
+
+
+
+            50                                                        50              50                                                             50
+            40                                                        40              40                                                             40
+                          Mars: NASA Glenn
+            30            Mars: GRAM-2001                             30              30                                                             30
+                          Earth: US76
+                                                                                                                          Transitional regime
+            20                                                        20              20                                                             20
+                                Transitional regime
+            10                                                        10              10                                                             10
+
+             0                                                        0                0                                                             0
+            1E-003        1E+000          1E+003             1E+006                   1E-008        1E-006     1E-004       1E-002        1E+000
+                                    Re2D                                                                       Kn D
+
+                                    (c)                                                                        (d)
+ Fig. 3 Profiles of velocity (a), Mach number (b), Reynolds number downstream a normal shock wave (c),
+ free stream Knudsen number and (d) along the Mars and Earth atmosphere entry
+
+
+trajectory and m is the capsule mass. The ratio SCD/m is the ballistic parameter. Integration started
+from h=100 km and the step was 0.1 km. The initial data are reported in Tables 1 and 3(b). The
+246                                       Gennaro Zuppardi
+
+
+equations have been integrated numerically by a forward scheme with a first order approximation
+(Euler method). For a preliminary evaluation of the trajectories, the aerodynamic drag coefficient
+has been assumed to be constant and equal to unit (CD=1).
+    The trajectories have been preliminary computed to evaluate the influence of the variation of
+the Pathfinder mass and therefore of the ballistic parameter. As reported in Table 1, due to the heat
+shield ablation, the Pathfinder mass reduces from 585 kg to 360 kg along the entry trajectory. Once
+again, for the sake of comparison, a similar analysis was made also for the Earth re-entry
+trajectory, hypothetically simulating the entry of Pathfinder into the Earth atmosphere. Since the
+law of mass variation along the trajectory is not known, the calculations of the trajectories have
+been done at the extreme conditions of m = 585 kg and m = 360 kg. In order to quantify the effect
+of the mass variation, Table 4 reports the values of velocity (in m/s) at three altitudes using the two
+masses and the three atmosphere models, as well as the relative variations. At high altitudes, or at
+altitudes higher than 50 km, the effects of the mass variation is negligible.
+    Figs. 3(a)-3(d) show the profiles of: free stream velocity (a), free stream Mach number (b),
+Reynolds number downstream a normal shock wave (Re2D=VD/2, c), free stream Knudsen
+number (KnD=/D, d). The very low values of temperature from the Glenn model are
+responsible for the very high values of the Mach number. For example, at h=100 km M =84 while
+the Mach number by the GRAM-2001 model is 39. According to: i) Vallerani (1973), the
+transitional regime for a blunt body is defined, in terms of the Reynolds number downstream a
+normal shock wave, by 10-1<ReD2<104, ii) Moss (1995) in terms of the global Knudsen number by
+10-3<KnD<50. In the altitude interval 50-100 km and by both models, Pathfinder can be
+reasonably considered in continuum low density regime thus the flow field around the Pathfinder
+has to be solved by means of a DSMC code.
+
+
+5. Direct simulation Monte Carlo method and DS2V-4.5 64 bits code
+
+    The Direct Simulation Monte Carlo (DSMC) method (Bird (1998, 2013) and Shen (2005)) is a
+statistical and stochastic method, solving flow fields in transitional regime i.e., from the continuum
+low-density regime to the free molecule regime. DSMC relies on the kinetic theory of gases and
+considers the gas as made up of millions of simulated molecules, each one representing a large
+number of real molecules in the physical space (in the present computations between 109 and 1011).
+    The evolution of the molecules, in terms of velocity, spatial coordinates and internal
+thermodynamic/chemical status, is produced by intermolecular collisions and molecule-surface
+interactions within the simulated physical space. This is divided into cells both for selecting the
+colliding molecules and for sampling the thermo-fluid-dynamic quantities. The molecules in a cell
+represent those at the same location in the physical field. The method does not rely on integration
+of differential equation therefore it does not suffer from numerical instabilities but is inherently
+unsteady with a steady solution achievable after a sufficiently long simulation time.
+    The basic assumption of the method is the temporal decoupling of motion and collision of the
+simulated molecules. The motion and the collision phases are computed by two distinct
+algorithms, performed sequentially. This assumption holds when the evolution time step of the
+aerodynamic system (or global time step), is shorter than the collision time or the time between
+two subsequent molecular collisions. In the motion phase, the simulated molecules move
+ballistically at their own velocity over the global time step. Molecules change position in the flow
+field and interact with the surface of the body under study. In the collision phase, a couple of
+              Influence of the Mars atmosphere model on aerodynamics of an entry capsule           247
+
+
+colliding molecules are selected in the cell. Chemical reactions take place, both colliding
+molecules exchange energy among the translational and the interior degrees of freedom (rotation,
+vibration) and their velocity change. The macroscopic gas properties (density, temperature, etc.)
+and the macroscopic surface properties (pressure, shear stress, heat flux, etc.) are computed by
+sampling and then by averaging in each cell and on each surface elemental area, respectively,
+molecular quantities (number density, gas composition, momentum, kinetic energy, internal
+energy, etc.) over a pre-fixed number (say 2030) of global time steps.
+    The DSMC code, used in the present study, is the general 2D/axisymmetric code DS2V-4.5 64
+bits (Bird (2012)). DS2V-4.5 64 bits is “sophisticated”; in literature, a sophisticated code is labeled
+also as DSMC07. A DSMC code is defined sophisticated if it implements computing procedures
+achieving both greater efficiency and accuracy with respect to a “basic” DSMC code; in literature,
+a basic code is labeled also as DSMC94. More specifically, a DSMC07 code (Bird (2006), Bird et
+al. (2009), Gallis et al. (2009)):
+    1) divides the computational volume into two grids of cells (collision and sampling) with the
+related cell adaptation. The DS2V-4.5 64 bits code automatically generates the number of cells and
+the structure of the collision and sampling grids on the basis of the input megabytes (1300 in the
+present computations) and of the free stream number density. However, the user can change the
+number of cells and therefore the structure of both grids by inputting the number of molecules for
+the adaptation of the collision and of the sampling cells; the lower the input number of molecules
+per cell, the higher the number of cells after the adaptation process,
+    2) implements the “nearest neighbor” procedure for the selection of the pair of colliding
+molecules in the collision cell. This procedure is aimed at fulfilling the physical condition that a
+molecule collides with the molecule closest to it. This implies that, when a molecule is chosen at
+random in the collision cell, the collision partner is the molecule closest to it. In the DSMC94
+method, the collision partner was selected at random in the same computing cell,
+    3) provides an optimal global time step. This is computed as a fraction (say 0.2) of the current,
+collision time, averaged over the computing dominion. In the DSMC94 method, the global time
+step was an input to the code and then kept constant during the evolution of the system, therefore
+irrespective of the actual, evolving fluid-dynamic conditions,
+    4) avoids sequential collisions between the same collision pair. This procedure does not allow a
+second collision between the same collision partners; this is, in fact, physically impossible because
+after a collision, the molecules move away in opposite directions,
+    5) allows the user to state the quality of a computation by means of the evaluation of the
+adequacy of the numbers of simulated molecules and of collision cells. The ratio between the
+molecule mean collision separation (mcs) and the mean free path (λ), in each collision cell, is the
+parameter making possible this evaluation; mcs/λ has to be less than unity everywhere in the
+computational domain for a good quality of a DSMC computation. Bird (2006) suggests that the
+mcs/λ ratio should be less than 0.2 for an optimal quality of the computation.
+    6) provides indication about the stabilization of the computation. Stabilization is achieved when
+the profile of the number of the simulated molecules, as a function of the simulated time, becomes
+jagged and included within a band which defines the standard deviation of the number of
+simulated molecules.
+
+6. Test conditions, computation parameters and quality of the results
+   The analysis relies on 22 DS2V computations: 11 altitudes between 50 and 100 km with a
+248                                         Gennaro Zuppardi
+
+
+spacing of 5 km and 2 Mars atmosphere models. All computations considered the molecule/surface
+interaction fully accommodated and the surface non-catalytic.
+    Tables 5(a) and 5(b) report for the two models and for each altitude: i) input data to DS2V, i.e.,
+free stream velocity V, number density N, temperature T, ii) computation parameters, i.e.,
+number of simulated molecule Nm, number of real molecules represented by each simulated
+molecule FN, number of sampling cells NS, number of collision cells NC, iii) parameters
+quantifying the quality of the results i.e., ratios of mean collision separation on mean free path
+mcs/ and of simulation time on the fluid-dynamic time ts/tf. The fluid dynamic time is calculated
+as the time necessary to the fluid to cross the length (L) of the body under study (in this case
+L = 1.506 m, see Fig.1) at the free flow velocity: tf = L / V.
+    For both models, the computing parameters do not change meaningfully with altitude, while the
+best values of the parameters, quantifying the quality of the results (i.e., the lowest values of mcs/
+and the highest values of ts/tf), are obtained by the GRAM-2001 model. This is due to the lower
+
+
+Table 5(a) Input data, computation parameters, quality of the results parameters: Glenn model
+ H [km]     V [m/s]   N [1/m3] T [K]         Nm         FN           NS          NC          mcs/   ts/tf
+  100        7260      2.221020   28        3.60107   5.871010    8.43104    1.91106       0.084   5.54
+   95        7250      2.4810 20  39        3.59107   6.571010    8.42104    1.88106       0.093   5.28
+   90        7238      3.0310 20  50        3.62107   8.021010    9.37104    2.18106       0.115   5.46
+   85        7222      3.881020   61        3.57107   1.031011    9.55104    2.11106       0.148   4.82
+   80        7200      5.1510 20  72        3.49107   1.361011    9.56104    2.00106       0.197   4.16
+   75        7169      7.0110 20  83        3.58107   1.851011    9.11104    1.95106       0.269   4.69
+   70        7125      9.691020   94        3.45107   2.571011    9.28104    1.83106       0.380   3.82
+   65        7062      1.3610 21 105        3.31107   3.601011    9.15104    1.68106       0.546   3.16
+   60        6969      1.9310 21 117        3.58107   3.831011    8.49104    2.03106       0.666   3.43
+   55        6836      2.761021  128        3.28107   5.481011    9.36104    2.30106       1.031   2.12
+   50        6642      3.991021  139        3.17107   7.911011    9.07104    2.14106       1.528   2.20
+
+Table 5(b) Input data, computation parameters, quality of the results parameters: GRAM-2001 model
+ H [km]     V [m/s]   N [1/m3] T [K]         Nm         FN           NS          NC      mcs/       ts/tf
+  100        7260      8.051017  127        3.84107   3.20108     9.03104    1.15106   0.0004      10.9
+   95        7262      1.6410 18 126        3.25107   6.50108     8.09104    2.36106   0.0008      10.4
+   90        7265      3.6610 18 125        3.54107   1.12109     8.62104    2.46106    0.002      15.0
+   85        7267      8.6110 18 127        4.09107   2.02109     1.20105    2.50106    0.001      12.9
+   80        7269      1.9410 19 135        3.10107   5.92109     8.28104    2.17106    0.007      11.8
+   75        7269      4.0810 19 143        3.22107   1.251010    8.78104    2.19106    0.015      10.9
+   70        7268      8.0910 19 146        3.21107   2.471010    8.76104    2.10106    0.030      8.20
+   65        7264      1.561020  147        3.14107   4.761010    8.37104    1.97106    0.057      6.10
+   60        7253      3.2010 20 143        3.18107   9.761010    8.45104    1.85106    0.120      5.81
+   55        7226      7.131020  135        3.07107   2.181011    8.37104    1.61106    0.280      4.23
+   50        7161      1.5310 21 133        2.79107   4.681011    8.20104    1.34106    0.641      2.70
+              Influence of the Mars atmosphere model on aerodynamics of an entry capsule        249
+
+
+values of density and therefore of the number density (see Figs.2(a), 2(b)), compared with those by
+the Glenn model; decreasing the free stream number density favors any DSMC calculation and
+improves the related quality of the results. Even though the computations with the Glenn model at
+h=50 and 55 km should not be rigorously accepted (mcs/ are lightly higher than 1) however, for
+the sake of completeness, the results have been included in the present analysis.
+
+
+7. Analysis of results
+
+   Fig. 4(a) shows the profiles of the Pathfinder drag as functions of altitude. As expected, the
+higher values of the free stream density by the NASA Glenn model, compared with those by the
+GRAM-2001 model, produce higher values of the aerodynamic drag. On the contrary, the drag
+coefficients by both models (Fig. 4(b)) do not show significant differences up to an altitude of 75
+km; the difference is on the second decimal digit. The difference between the models starts from
+75 km and increases with altitude; this is due to the very different fluid-dynamic conditions or
+Mach, Reynolds and Knudsen numbers. For a direct comparison, Tables 6(a) and 6(b) report the
+values of: drag, drag coefficient, free stream Mach, Reynolds and Knudsen numbers from the two
+models at the altitudes of 50, 65, 80, 90 and 100 km. The Mach number by the Glenn model
+increases strongly with altitude while the Reynolds and Knudsen numbers do not change
+meaningfully. An opposing fluid-dynamic condition occurs for the GRAM-2001 model. The much
+lower values of the Reynolds number by the GRAM-2001 model involve higher values of the drag
+coefficient.
+   The small variability of CD with altitude by the Glenn model facilitates the use of the following
+polynomial, best-fit curve for the evaluation of CD as function of altitude
+                                NASA Glenn, 50  h  100 km:
+                                                                                               (4a)
+               CD = 1.5796 – 1.2202×10-3 h + 1.7538×10-5 h2 – 9.329410-8 h3
+    Interpolation of the drag coefficients from GRAM-2001 model is fulfilled by means the two
+following best fit curves
+                                 GRAM-2001, 50 h  75 km:
+                                                                                               (4b)
+               CD = 2.0648 – 2.3228×10-2 h + 3.4533×10-4 h2 – 1.734010-6 h3
+
+                                GRAM-2001, 75 < h  100 km:
+                                                                                               (4c)
+               CD = 12.6941 – 4.4824×10-1 h + 5.7542×10-3 h2 – 2.352410-5 h3
+where h is in km. The correlation coefficients are high enough: 0.9975 for Eq. (4a), 0.9830 for
+Eq.(4b) and 0.9946 for Eq.(4c).
+   As mentioned in the Introduction, Eqs.(4a, 4b, 4c) can be used for the correction of density,
+provided by the atmosphere models and for refining the calculation of the entry trajectories, as
+well. For example, Figs. 5(a) and 5(b) show for both models the comparison of the profiles of the
+entry velocity, computed both with constant, unitary drag coefficient (CD=1) and with variable
+drag coefficient (CD= CD(h)) and, for the sake of completeness, also of a characteristic number as
+per the Reynolds number. The influence of a variable drag coefficient seems to be negligible for
+both models. For this reason, the data shown below are those calculated with CD=1.
+250                                               Gennaro Zuppardi
+
+               10   100       1000      10000     100000
+                                                                             1.4   1.5    1.6   1.7   1.8      1.9       2
+         110                                           110             110                                                   110
+
+         100                                           100             100                                                   100
+
+          90                                           90               90                                                   90
+
+          80                                           80               80                                                   80
+h [km]
+
+
+
+
+                                                              h [km]
+          70                                           70               70                                                   70
+
+                                                                                                            NASA Glenn
+          60                                           60               60                                                   60
+                                                                                                            Eq.(3.a)
+                                                                                                            GRAM-2001
+          50                                           50               50                                  Eq.(3.b)         50
+                     NASA Glenn
+                                                                                                            Eq.(3.c)
+                     GRAM-2001
+                                                                        40                                                   40
+          40                                           40
+                                                                             1.4   1.5    1.6   1.7   1.8      1.9       2
+               10   100       1000      10000     100000                                        CD
+                              D [N]
+                              (a)                                                      (b)
+                    Fig. 4 Profiles of drag (a) and drag coefficient and (b) as function of altitude
+
+Table 6(a) Pathfinder drag and drag coefficient, free stream Mach, Reynolds and Knudsen numbers from the
+Glenn model
+          h [km]            D [N]                CD              M                        ReD                   KnD
+           100            3.63103              1.54             84.1                    1.90105               6.0410-4
+            90            4.94103              1.54             62.5                    1.49105               5.6910-4
+            80            8.33103              1.55             51.7                    1.80105               3.9210-4
+            65            2.12104              1.55             41.9                    3.27105               1.7510-4
+            50            5.50104              1.55             34.4                    6.98105               6.7110-5
+
+Table 6(b) Pathfinder drag and drag coefficient, free stream Mach, Reynolds and Knudsen umbers from the
+GRAM-2001 model
+          h [km]            D [N]                CD              M                        ReD                   KnD
+           100            1.61101              1.88             39.3                    1.67102               3.2010-1
+            90            7.12101              1.83             39.5                    7.68102               7.0110-2
+            80            3.29102              1.59             38.1                    3.80103               1.3710-2
+            65            2.55103              1.54             36.6                    2.83104               1.7610-3
+            50            2.45104              1.55             37.9                    3.00105               1.7210-4
+
+
+
+    For an entry capsule, pressure (p(0)) and heat flux ( q (0)) at the capsule stagnation point are
+important aerodynamic parameters. These parameters, in fact, can heavily influence the structural
+design of the TPS. Figs. 6(a) and 6(b) show the profiles of p(0) and of the related coefficient C p(0).
+Figs. 7(a) and 7(b) show the profiles of q (0) and the related coefficient Ch(0), all as functions of
+altitude for both models. These profiles are similar to those of drag and of drag coefficient (see
+                          Influence of the Mars atmosphere model on aerodynamics of an entry capsule                                         251
+
+                      0    2000         4000      6000   8000                       0E+000          1E+006           2E+006         3E+006
+             100                                            100                    100                                                   100
+                           NASA Glenn, CD=1                                                                   NASA Glenn, CD=1
+              90           NASA Glenn, CD=CD(h)             90                      90                        NASA Glenn, CD=CD(h)       90
+                           GRAM 2001, CD=1                                                                    GRAM 2001, CD=1
+              80                                            80                      80                                                   80
+                           GRAM 2001, CD=CD(h)                                                                GRAM 2001, CD=CD(h)
+              70                                            70                      70                                                   70
+
+              60                                            60                      60                                                   60
+
+
+
+
+                                                                          h [km]
+    h [km]
+
+
+
+
+              50                                            50                      50                                                   50
+
+              40                                            40                      40                                                   40
+
+              30                                            30                      30                                                   30
+
+              20                                            20                      20                                                   20
+
+              10                                            10                      10                                                   10
+
+                  0                                         0                           0                                                0
+                      0    2000     4000          6000   8000                       0E+000          1E+006           2E+006         3E+006
+                                   V [m/s]                                                                   Re D
+                                    (a)                                                                      (b)
+ Fig. 5 Influence of variable drag coefficient on the Mars entry trajectory in terms of free stream velocity
+ (a) and free stream Reynolds number (b)
+
+                      1   10      100      1000    10000 100000                         1.8   1.9       2            2.1      2.2      2.3
+         110                                                    110            110                                                           110
+
+         100                                                    100            100                                                           100
+
+             90                                                 90                 90                                                        90
+
+             80                                                 80                 80                                                        80
+                                                                      h [km]
+h [km]
+
+
+
+
+             70                                                 70                 70                                                        70
+
+             60                                                 60                 60                                                        60
+
+             50            NASA Glenn                           50                 50                                          GLENN         50
+                           GRAM-2001                                                                                           GRAM
+             40                                                 40                 40                                                        40
+                      1   10      100     1000     10000 100000                         1.8   1.9       2            2.1      2.2      2.3
+                                  p(0) [N/m2]                                                                Cp(0)
+                                    (a)                                                                      (b)
+ Fig. 6 Profiles of pressure (a) and pressure coefficient and (b) at the Pathfinder stagnation point as
+ functions of altitude
+
+
+Fig. 4(a) and 4(b)). The values of p(0) and q (0) for the Glenn model are higher than those from
+the GRAM-2001 model. This had to be expected because strictly linked to higher values of the
+free stream dynamic pressure (V2) and kinetic energy flux (V3) of the Glenn model. For
+example for a direct quantification, Tables 7(a) and 7(b) report the values of p(0), Cp(0), q (0),
+Ch(0), (V2) and (V3) the two models at h=50 and 100 km.
+252                                                    Gennaro Zuppardi
+
+                 0   1000   2000       3000    4000    5000                        0       0.04    0.08     0.12     0.16       0.2
+           110                                             110              110                                                       110
+                                              NASA Glenn
+           100                                GRAM-2001    100              100                                                       100
+
+            90                                             90                90                                                       90
+
+            80                                             80                80                                                       80
+
+
+
+
+                                                                   h [km]
+  h [km]
+
+
+
+
+            70                                             70                70                                                       70
+
+            60                                             60                60                                                       60
+
+            50                                             50                50                                    NASA Glenn         50
+                                                                                                                   GRAM-2001
+            40                                             40                40                                                       40
+                 0   1000   2000    3000       4000    5000                        0       0.04    0.08    0.12      0.16       0.2
+                            q(0) [kW/m2]                                                              Ch(0)
+                                 (a)                                                                  (b)
+ Fig. 7 Profiles of heat flux (a) and heat flux coefficient and (b) at the Pathfinder stagnation point as
+ functions of altitude
+
+Table 7(a) Pressure and heat flux at the capsule stagnation point: GLENN model
+                                         V2                                    q (0) [kW/m2]           V3
+   h [km]            p(0) [N/m2]                           Cp(0)                                                            Ch(0)
+                                         [N/m2]                                                           [kW/m2]
+           100        8.10102          8.54102            1.90                       3.50102           6.20106           0.02
+            50        1.23104          1.29104            1.90                       4.70103           8.54107           0.02
+
+Table 7(b) Pressure and heat flux at the capsule stagnation point: GRAM 2001 model
+                                         V2                                q (0) [kW/m2]           V3
+   h [km]            p(0) [N/m2]                           Cp(0)                                                            Ch(0)
+                                         [N/m2]                                                       [kW/m2]
+           100          3.50              3.10             2.26                    1.05101           2.25104              0.169
+            50        5.47103          5.74103           1.90                    1.33103           4.11107              0.012
+
+
+    The DSMC simulations provide useful information about the localization of the pressure tap on
+the capsule surface in areas in aerodynamic shadow. Fig. 8(a) shows the pressure profiles along the
+Pathfinder surface computed by both models at the extreme altitudes of 50 and 100 km. Figure
+clearly shows also that the measurement of the base pressure, i.e., the measurement of the pressure
+on the surface between points A and B (see Fig. 1), as suggested by Cassanto, seems to be not
+feasible because the computed pressure is almost zero even at h=50 km. This can be verified also
+by Figs. 8(b) and 8(c), showing the 2-D maps of pressure in the flow field around Pathfinder at the
+intermediate altitude of h=75 km computed by the GRAM-2001 model (Fig. 8(b)) and by the
+Glenn model (Fig. 8(c)), respectively. The stream lines pattern clearly verifies a flow recirculation
+at the base surface of Pathfinder (zone A-B) and that the flow is attached near point C (the
+coordinates of points A thru F are reported in Fig.1). Thus, the positioning of the pressure tap on
+the frustum after-body was assumed at x=0.60 m (s=1.53 m), i.e., only slightly downstream point
+C. For this reason, the pressure at this point will be labeled as pC.
+                           Influence of the Mars atmosphere model on aerodynamics of an entry capsule      253
+
+                 0   0.2    0.4   0.6   0.8   1   1.2   1.4   1.6   1.8
+         14000                                                            14000
+
+
+         12000                                                            12000
+
+
+         10000                                                            10000
+                            NASA GLENN, h=100 km
+                            NASA GLENN, h=50 km
+         8000                                                             8000
+p [Pa]
+
+
+
+
+                            GRAM-2001, h=100 km
+                            GRAM-2001, h=50 km
+         6000                                                             6000
+
+
+         4000                                                             4000
+
+
+         2000                                                             2000
+
+
+             0                                                            0
+                 0   0.2    0.4   0.6   0.8   1   1.2   1.4   1.6   1.8
+                                         s [m]
+                                        (a)                                             (b)
+
+
+
+
+                                                                              (c)
+  Fig. 8 Pressure distribution on the Pathfinder surface (a), 2-D maps of pressure and stream lines pattern in
+  the meridian plane of Pathfinder from the GRAM-2001 (b) and the Glenn model (c) at h=75 km
+
+
+   Fig. 9(a) shows the profiles of pressure (pC) as functions of altitude. As reported by Russo
+(2011), the current pressure sensors are able to measure, in laboratory, very low pressures even up
+to 10-9 [Pa]. Therefore, measuring a pressure (pC) of about 410-4 [Pa] even though on a capsule
+“flying” in space therefore in a difficult situation, seems to be reasonable, hence the Cassanto
+method could be used in the whole altitude range for re-building the values of pressure computed
+by both models. Eqs. 4(a), 4(b) and 4(c) are the polynomial curves best fitting the ratio p C/p as
+functions of altitude. Eq. 4(a) interpolates pC/p by the Glenn model as functions of altitude in the
+whole altitude range. Eqs. 4(b) and 4(c) interpolate pC/p by the GRAM-2001 model in the altitude
+range 50-80 km and 80-100, respectively. The present computations verify the condition, reported
+by Cassanto (1973) and Cassanto and Lane (1976), that the pressure in areas of the capsule in
+aerodynamic shadow is of the same order of magnitude of the ambient pressure (p C/pO(1)).
+254                                                 Gennaro Zuppardi
+
+             0.0001   0.001   0.01      0.1     1    10                        0   2   4           6         8            10
+           110                                            110            110                                                   110
+
+
+           100                                            100            100                                                   100
+
+
+            90                                            90              90                                                   90
+
+
+            80                                            80              80                                                   80
+  h [km]
+
+
+
+
+                                                                h [km]
+            70                                            70              70                                                   70
+
+
+            60                                            60              60                                                   60
+                                                                                                       NASA Glenn
+                                                                                                       Eq.(4.a)
+            50           NASA Glenn                       50              50                                                   50
+                                                                                                       GRAM-2001
+                         GRAM-2001                                                                     Eqs.(4.b), (4.c)
+            40                                            40              40                                                   40
+             0.0001   0.001   0.01      0.1     1    10                        0   2   4           6         8            10
+                               pC [N/m2]                                                   pC/p
+                                 (a)                                                       (b)
+ Fig. 9 Pressure distributions on the Pathfinder surface at x=0.60, y=1.20 (a), ratio of pC/p and (b) as
+ functions of altitude
+
+
+
+                                              NASA Glenn, 50h100 km:
+                                                                                                                               (5a)
+                          pC/p=-30.1155 +1.3962 h -2.137810-2 h2 + 1.120810-4 h3
+
+                                              GRAM-2001, 50h80 km:
+                                                                                                                               (5b)
+                                      pC/p=21.3086 - 0.8105 h + 7.986210-3 h2
+
+                                              GRAM-2001, 80h100 km:
+                                                                                                                               (5c)
+                                     pC/p=207.9087 - 4.2265 h + 2.151610-2 h2
+where h is in km. The correlation coefficient are high enough also for these best fit curves: 0.9853
+for Eq. (5a), 0.9939 for Eq. (5b) and 0.9997 for Eq. (5c). Being the correlation formulae
+substantially different and strongly dependent on the atmosphere model, the use of these formulae
+is impractical for implementing the Cassanto method in the altitude interval 50 and 100 km.
+Therefore the implementation of the Cassanto method should rely, as it is currently, on correlation
+formulae obtained experimentally in ground facilities.
+
+
+7. Conclusion
+
+   The influence of the Mars atmosphere models NASA Glenn and GRAM-2001 have been
+evaluated both on the entry trajectory, computed by a code integrating the equations of dynamics
+of a capsule, and on the solution of the flow field around the capsule Mars Pathfinder with the
+computation of aerodynamic parameters by means of the DSMC code DS2V-4.5 64 bits.
+   The models showed consistent difference at altitudes higher than about 40 km. For this reason
+              Influence of the Mars atmosphere model on aerodynamics of an entry capsule             255
+
+
+the aerodynamic analysis has been carried out in the altitude interval 50-100 km. It seems that the
+GRAM-2001 model is more reliable than the NASA Glenn model. In fact, a linear decrease in
+temperature with altitude for the NASA Glenn model is not realistic, because producing, at high
+altitude, excessively low temperatures with corresponding high density. This generates, in turn,
+fluid-dynamic conditions or numbers of Mach, Reynolds and Knudsen very different from those
+by the GRAM-2001 model.
+    The feasibility of correcting the ambient density and pressure by the models, by means of the
+methods by McLaughlin and by Cassanto was also evaluated. The very different fluid-dynamic
+conditions by the two models generated very different values of both drag coefficients of
+Pathfinder and pressure on its surface, making not feasible both methods. The effective
+reconstruction and refinement of the Mars atmosphere density and pressure from both methods is
+entrusted to when a single, reliable Mars atmosphere model will be available. Therefore until then,
+the implementation of the Cassanto method should rely, as it is currently, on correlation formulae
+obtained experimentally in ground facilities.
+
+
+References
+
+Anyoji, M., Okamoto, M., Fujita, K., Nagai, H. and Oyama, A. (2017), “Evaluation of aerodynamic
+   performance of Mars airplane in scientific balloon experiment”, Fluid Mech. Res. Int., 1(3), 1-7.
+   https://doi.org/10.15406/fmrij.2017.01.00012.
+Bird, G.A. (1998), Molecular Gas Dynamics and Direct Simulation Monte Carlo Method, Clarendon Press,
+   Oxford, U.K.
+Bird, G.A. (2005), Visual DSMC Program for Two-Dimensional Flows, DS2V Program User’s Guide Ver.
+   3.3, G.A.B. Consulting Pty Ltd, Sydney, Australia
+Bird, G.A. (2006), “Sophisticated versus simple DSMC”, Proceedings of the 25th International Symposium
+   on Rarefied Gas Dynamics, Saint Petersburg, Russia, July.
+Bird, G.A., Gallis, M.A., Torczynski, J.R. and Rader, D.J. (2009), “Accuracy and efficiency of the
+   sophisticated direct simulation Monte Carlo algorithm for simulating non-continuum gas flows”, Phys.
+   Fluids, 21(1), https://doi.org/10.1063/1.3067865.
+Bird, G.A. (2012), Visual DSMC program for Two-Dimensional Flows, DS2V Program User’s Guide, Ver.
+   4.5., G.A.B. Consulting Pty Ltd, Sidney, Australia.
+Bird, G.A. (2013), The DSMC Method, Version 1.1, Amazon, ISBS 9781492112907, Charleston, U.S.A.
+Braun, R.D. and Manning, R.M. (2006), “Mars exploration entry, descent and landing challenges”, IEEE
+   0075, 1-32.
+Cassanto, J.M. (1973), “A base pressure experiment for determining the atmospheric pressure profile of
+   planets”, J. Spacecraft, 10(4), 253-261. https://doi.org/10.2514/3.61875.
+Cassanto, J.M. and Lane, J.W. (1976), “A high-altitude base pressure experiment”, AIAA J., 14(8), 1050-
+   1053. https://doi.org/10.2514/3.61440.
+Desai, P.N., Prince, J.L., Queen, E.M., Cruz, J.R. and Grover, M.R. (2008), “Entry, descent, and landing
+   performance of the mars phoenix lander”, J. Spacecraft Rockets, 48(5), 798-808.
+   https://doi.org/10.2514/1.48239.
+Desert, T., Moschetta, J.M. and Bezard, H. (2017), “Aerodynamic design of a Martian micro air vehicle”,
+   Proceedings of the 7th European Conference for Aeronautics and Aerospace Sciences, Milan, Italy, July.
+Fei, H., Jin, X.H.., Lv, J.M. and Cheng, X.L. (2016), “Impact of Martian parameter uncertainties on entry
+vehicles aerodynamics for hypersonic rarefied conditions”, AIP Conference Proc., 1786, 190006.
+Gallis, M.A., Torczynski, J.R., Rader, D.J. and Bird, G.A. (2009), “Convergence behavior of a new DSMC
+   algorithm”, J. Comput. Phys., 228(12), 4532-4548. https://doi.org/10.1016/j.jcp.2009.03.021.
+Jiang, H., Liu, X., Han, G. and Chen, X. (2018), “Hypersonic simulation of Mars entry atmosphere based on
+256                                        Gennaro Zuppardi
+
+
+  gun tunnel”, Proceedings of the 5th International Conference on Experimental Fluid Mechanics (ICEFM
+  2018), Munich, Germany, July.
+Justus, C.G. and Johnson, D.L. (2001), Mars Global Reference Atmospheric Model 2001 (Mars-GRAM
+  2001) User Guide, NASA TM 2001-210961.
+McLaughlin, C.A., Mance, S. and Lechtenberg, T. (2011), “Drag coefficient estimation in orbit
+  determination”, J. Astronaut. Sci., 58(3), 513-530. https://doi.org/10.1007/BF03321183.
+Mehta, R.C. (2011), “Computations of flow field over re-entry modules at high speed”, Comput. Simul.
+  Appl., http://www.intechopen.com/articles/show/title/computations-of-flowfield-over-reentry-modules-at-
+  high-speed.
+Moss, J.N. (1995), “Rarefied flows of planetary entry capsules”, AGARD-R-808, 95-129, Special course on
+  “Capsule aerothermodynamics”, Rhode-Saint-Genèse, Belgium.
+NASA Glenn Research Center (1996), Mars Atmosphere Model, file:///C:/MARS/MARS-
+  ATMOSPHERE/Mars%20Atmosphere%20Model%20%20Metric%20Units.htm.
+Raju, M. (2015), “CFD analysis of Mars Phoenix capsules at Mach number 10”, J. Aeronaut. Aerospace
+  Eng., 4(1), 1-4.
+Russo, G.P. (2011), Aerodynamic Measurements: from Physical Principles to Turnkey Instrumentation, 1st
+  Edition, Woodhead Publishing Limited, Suffolk, U.K.
+Shen, C. (2005), Rarefied Gas Dynamic: Fundamentals, Simulations and Micro Flows, Springer-Verlag,
+  Berlin, Germany.
+Vallerani, E. (1973), “A review of supersonic sphere drag from the continuum to the free molecular flow
+  regime”, AGARD CPP 124, Paper 22, 1-15.
+Viviani, A. and Pezzella, G. (2013), “Non-equilibrium computational flowfield analysis for the design of
+  Mars manned entry vehicles”, Prog. Flight Phys., 5, 493-516.
+Tang, W., Yang, X.F., Gui, Y.W. and Du, Y.X. (2015), “Aerodynamic prediction and performance analysis for
+  mars science laboratory entry vehicle”, Int. J. Aerospace Mech. Eng., 9(6), 1040-1045.
+Williams, D.R. (2016), “Mars fact sheet”, https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html.
+Zuppardi, G. and Savino, R. (2015), “DSMC aero-thermo-dynamic analysis of a deployable capsule for mars
+  atmosphere entry”, Proceedings of the DSMC15 Conference, Kauai, Hawaii, U.S.A., September.
+
+
+EC
+

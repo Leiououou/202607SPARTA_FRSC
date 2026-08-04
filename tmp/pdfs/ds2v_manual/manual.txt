@@ -1,0 +1,1613 @@
+Visual DSMC Program for
+  Two-Dimensional and
+Axially Symmetric Flows
+
+
+
+The DS2V Program
+   User’s Guide
+
+               Version 3.8
+
+              October 2006
+
+
+
+              G.A.B. Consulting Pty Ltd
+  144/110 Sussex Street, Sydney NSW 2000, Australia
+    Phone: Country code 61 City code 2 9279 0073
+                FAX: 61 2 9279 0275
+              gabird@compuserve.com
+                  http://gab.com.au
+                                                              2
+
+
+
+Table of Contents
+
+  1    The DS2V Implementation of the DSMC Method   3
+
+  2    The Scope of the DS2V2 Program
+
+       2.1   Geometry and Boundary Conditions       7
+
+       2.2   Gas Specification and Model            8
+
+  3    Computer Requirements                        8
+
+  4    Program Installation and Operation           9
+
+  5    Data Input Dialogs                           18
+
+  6    The Interactive Flow Display Screen          43
+
+  7    Output Files                                 45
+
+      Reference                                          47
+
+      Appendix    Using TECPLOT output              47
+                                                                                                   3
+
+
+1 The DS2V Implementation of the DSMC Method
+The direct simulation Monte Carlo method is a technique for the computer modelling of a real gas
+by some thousands or millions of simulated molecules. The velocity components and position co-
+ordinates of these molecules are stored in the computer and are modified with time as the
+molecules are concurrently followed through representative collisions and boundary interactions
+in simulated physical space. This direct simulation of the physical processes is in contrast with
+conventional computational fluid dynamics which seeks to obtain solutions of the mathematical
+equations that model the processes. The computational task associated with the direct physical
+simulation becomes feasible when the gas density is sufficiently low. It also becomes necessary
+under these conditions because the Navier-Stokes equations do not provide a valid model for
+rarefied gases, and conventional CFD methods are unable to cope with the large number of
+independent variables that are involved in applications of the Boltzmann equation to realistic
+multi-dimensional problems.
+
+The degree of rarefaction of a gas flow is generally expressed through the overall Knudsen
+number, which is the ratio of the mean free path in the undisturbed stream to a typical dimension
+of the flowfield. It is desirable to also define the local Knudsen number as the ratio of the local
+Knudsen number to the scale length of the gradient of a specified macroscopic (or continuum)
+flow property. The Navier-Stokes equations are valid only when the local Knudsen numbers
+based on flow speed, density, temperature and pressure are small in comparison with unity. The
+limit as the Knudsen numbers tend to zero may be identified with the inviscid limit that is
+modelled by the Euler equations. The opposite limit as the Knudsen number tends to infinity is
+the collisionless or free-molecule flow limit in which intermolecular collisions may be neglected.
+The flow regime between free-molecule and the limit of validity of the Navier-Stokes equations is
+generally referred to as the transition flow regime. A Knudsen number of 0.1 has traditionally
+been quoted as the boundary between the continuum and transition regimes, but the characteristic
+dimension of complex flow fields may be specified in many different ways and the use of the
+overall Knudsen number may be misleading.
+
+The conservation equations of fluid mechanics are valid for all flow regimes, but the
+Navier-Stokes equations depend also on the Chapman-Enskog theory for the shear stresses, heat
+fluxes and diffusion velocities as linear functions of the velocity, temperature and concentration
+gradients. The Chapman-Enskog theory assumes that the velocity distribution is a small
+perturbation of the equilibrium or Maxwellian distribution. (In an isentropic flow for which the
+Euler equations are valid, the distribution function conforms everywhere to the Maxwellian). The
+formulation of the Chapman-Enskog distribution involves the local Knudsen numbers based on
+the velocity and temperature gradients. It has been found that errors become significant when
+these local Knudsen numbers exceed 0.1 and the continuum theory is hardly useable when they
+exceed 0.2. The transport property terms become zero in an isentropic flow and it might be
+thought that the Euler equation yield correct inviscid flow results at all Knudsen numbers.
+However, as the density decreases, the collision rate in the gas eventually becomes too low to
+maintain the isotropy of the pressure tensor. A breakdown parameter can then be defined as the
+ratio of the density scale time following the fluid element to the mean collision rate. For a steady
+flow, this parameter can be related to the local Knudsen number based on the density scale length.
+
+Although it was shown many years ago that the Chapman-Enskog expansion for the distribution
+function is not uniformly valid, attempts are still being made to extend the range of validity of the
+Navier-Stokes equations to lower densities. However, the low density effects such as the
+development of an anisotropic pressure tensor are of a very basic nature and it is unlikely that
+much progress will be made for other than one-dimensional steady flows. In addition, effects such
+                                                                                                   4
+
+as thermal and pressure diffusion become more prominent at low densities and these are not
+generally included in the Navier-Stokes formulations. It is certain that the necessary extensions
+(in the event that adequate ones can be developed) will add greatly to the difficulty of the
+continuum approach. On the other hand, once the density becomes sufficiently low for the DSMC
+solution to be computationally feasible, it is a much easier method to apply. The main reasons for
+this are:-
+          (i) The calculation is always unsteady with physical time as one of the principal variables
+in the simulation. If the flow becomes steady, it is obtained as the large time state of the unsteady
+flow. The method does not require an initial approximation to the flow field and there is no
+iterative procedure or convergence to the final solution. (In the case of a time averaged steady
+flow or an ensemble averaged unsteady flow, there will be a gradual decline in the statistical
+scatter as the sample increases, but "convergence" is not the appropriate description of this
+process.)
+          (ii) Additional effects, such as non-equilibrium chemistry, may be included simply by
+adding to the complexity of the molecular model and the fact that these may change the basic
+nature of the mathematical models is of no consequence.
+          (iii) Most importantly, there are no numerical instabilities!
+
+Personal computers now readily permit DSMC calculations of two-dimensional and axially
+symmetric flows at overall Knudsen numbers in the range 0.01 to 0.001. This is well into the
+continuum regime. Note that the Reynolds number (Re) is related to the Knudsen number (Kn),
+the Mach number M, and the specific heat ratio by
+                                                      1
+                                           16  2 M
+                                     (Re)              .
+                                            5 2 ( Kn )
+
+The total number of simulated molecules is limited and, in a three-dimensional
+calculation at normal and low densities, each simulated molecule must be regarded
+as representing an extremely large number of real molecules. The macroscopic or
+continuum flow properties are established through averages over the microscopic or
+molecular properties and are therefore subject to an unrealistic level of statistical
+scatter. However, the number of molecules in a cubic mean free path is inversely
+proportional to the square of the number density. The scatter in a typical DSMC
+calculation is, in fact, similar to the real scatter in a gas flow at a density of about
+five times normal or sea-level density. A flow with extremely small physical
+dimensions may therefore be calculated with a 1:1 correspondence between real and
+simulated molecules. The DSMC method may be modified to take account of the size
+of the molecules and the fluctuations in the simulation have then been shown to
+have the same physical characteristics as the real fluctuations. This has important
+philosophical consequences in that fluctuations are neglected in the formulation of
+the Boltzmann equation, so that the DSMC solution has a higher degree of physical
+realism than a (hypothetical) solution of the Boltzmann equation. Fluctuations are
+included in gas theory only at the level of the Fokker-Planck equations and are, of
+course, disregarded in the Navier-Stokes equations.
+
+The physical realism of the fluctuations has important consequences for DSMC
+calculations with two-dimensional or axial symmetry, as in the DS2V program. This
+is because the calculation can be regarded as a simulation within a slice of the flow
+that is sufficiently thin for the number of simulated molecules to be realistic. The
+statistical scatter generally decreases as the square root of the sample size and, in
+order to attain a sufficiently small standard deviation in the results, DSMC
+                                                                                                    5
+
+programs employ either time averaging for steady flows or ensemble averaging for
+unsteady flows. There is a serious statistical problem if a significant effect in the real
+gas is a consequence of the few molecules towards the extremities of the velocity
+distribution, but this is a very rare occurrence. The fluctuations are therefore a
+consequence (albeit an undesirable consequence) of the physical model rather than
+an unrealistic computational approximation.
+
+The uncoupling of the molecular motion and collisions over small time steps and the
+division of the flow field into small cells are the key computational assumptions
+associated with the DSMC method. The time step should be much less than the mean collision
+time and a typical cell dimension should be much less than the local mean free path. The cell
+dimension should also be small compared with the distance over which there is a significant
+change in the flow properties. The DSMC method uses the cell system only for the sampling of
+the macroscopic properties and for the selection of possible collision partners, although the
+sampled density is used in the procedures for establishing the collision rate. This means that the
+cell geometry should be chosen to minimise the changes in the macroscopic properties across an
+individual cell.
+
+A detailed exposition of the method is available in the reference that will be referred to as Bird
+(1994). However, the DS2V program takes advantage of several important developments in
+DSMC methodology that have occurred since that time.
+
+Simple implementations of the DSMC method choose the collision partners from any location in
+the same cell. Later implementations, including those in Bird(1994), employed fixed sub-cells to
+reduce the spacing of collision partners. The condition relating to the cell size relative to the mean
+free path then applies to the sub-cell size, rather than to the cell size. The most recent programs,
+including the later versions of the DS2V program, employ separate cell systems for the sampling
+of flow properties and collisions. The first molecule for a potential collision is chosen at random
+from a collision cell. If the number of molecules in the cell is less than 30, the nearest molecule is
+chosen as the potential collision partner. For larger numbers, a transient rectangular background
+grid is generated and the molecules are indexed to this transient grid. The size of the background
+grid is such there is approximately one simulated molecule within each grid element. The
+transient sub-cell in which it lies is determined from the indexing and, if there is more than one
+molecule in the sub-cell, the collision partner is chosen from these. The ratio of the mean
+separation between collision partners to the local mean free path is output by the program and
+should be small (say 0.2) compared with unity over the flowfield. The nearest-neighbor
+procedures ensure that the lowest possible values of this ratio are achieved. Further reductions can
+be obtained only by an increase in the total number of simulated molecules.
+
+A problem with nearest neighbour collisions is that, if the interval between collisions happens to
+be very small, a subsequent collision may involve the same collision pair. This is unphysical
+because molecules are always moving away from one-another after a collision. Version 2 of the
+program stores the code number of the immediately preceding collision partner for each molecule
+and this molecule is not allowed to be the next collision partner. It has been found that this avoids
+an error in the heat transfer and shear stress that can be as high as four or five percent.
+
+The only computational parameter that must be set by the user in Version 3 is the initial number of
+megabytes to be used for storage. All other computational variables are set automatically by the
+program. There is an opportunity for experienced users to increase or decrease the default values
+of cell size, time step etc.
+                                                                                                   6
+
+The traditional specification of a single value of this time step over the whole flowfield is
+computationally inefficient, particularly for supersonic and hypersonic flows. This is because a
+value that is small in comparison with the mean collision time in the stagnation region is
+extremely small in comparison with the collision time in the outer regions of the flow. This
+problem is avoided by new procedures that make the time step vary with every molecule as well
+as with every cell. To this end, separate time variables are associated with every molecule and
+every cell. The procedures keep all these variables concurrent with the overall time variable.
+
+The overall time variable is advanced in very small time steps, but only a small fraction of the
+molecules are moved and collisions are calculated in only a small fraction of the cells at any one
+time step. The mean collision time is kept for each cell and collisions in a cell appropriate to a
+time interval of one third the local mean collision time are calculated whenever the cell time
+variable falls one tenth the local mean collision time behind the overall flow time. Similarly, a
+molecule will generally be moved through a time interval of one fifth the mean collision time of
+its current cell when its time variable falls one tenth this local mean collision time behind the
+overall flow time. The time step of one fifth the local mean collision time is the default (and near
+optimum) value, but may be varied whenever a program is started or restarted. For near free-
+molecule flows that have a large collision time, there is also a molecule velocity dependent
+restriction that limits the distance that a molecule can move in a single step.
+
+Because of the very small overall time step and the small number of cells for which collisions are
+calculated at each step, the implementation of the traditional indexing routine at each step involves
+a computational time penalty. This can be avoided through the specification of “continuous”
+indexing. The traditional index array is comprised of the molecule numbers in order of the cells.
+If the address of the corresponding entry in this array is stored for each molecule, the indexing
+may be kept up to date continuously as molecules move from cell to cell. The index array must
+also be extended with sufficient free space between cells to cope with the fluctuations in the
+number of molecules in individual cells. Some general rearrangement takes place from time to
+time to allow for particularly large fluctuations or systematic changes in the distribution of
+molecules. Continuous indexing is the default but, if memory use is to be minimized, traditional
+or “normal” indexing may be specified in the data. In addition, normal indexing should be
+employed if chemical reactions are present and this is enforced in Version 2.1.
+
+
+2 The Scope of the DS2V Program
+2.1 Geometry and Boundary Conditions
+
+The flowfield limits are specified by the minimum and maximum values of the x and y co-
+ordinates. These four boundaries may be stream boundaries, planes of symmetry, vacuum
+boundaries or the axis of an axially symmetric flow, although the minimum y coordinate may be at
+any radius. This basically rectangular flowfield may be modified by the definition of one or more
+separate “surfaces”. Each of these must be either a closed surface or an open surface that starts
+and finishes on a boundary of the basic rectangle. Each surface is specified either by a
+combination of straight line and circular arc segments. Most importantly with regard to the
+flexibility of the program, each of the surfaces may be a combination of solid surface segments
+and specified flow input boundaries. The surfaces may be set to move in their plane or normal to
+it. The latter boundary in the axially symmetric case permits the study of rotating flows. Intervals
+for the sampling of properties along solid surfaces may be specified at any desired spacing.
+
+The flow input boundaries permit the study of a wide range of problems that involve jets and
+plumes. A secondary stream may be set to occupy part of the initial flowfield and this permits the
+                                                                                                  7
+
+study of unsteady shock tube type flows and shear flows. Alternatively, shock waves may be
+generated by a moving “piston” type boundary for diffraction studies. Special “constant pressure”
+boundaries are available for the generation of steady internal flows that are unaffected by the
+boundary conditions. Periodic boundary conditions are also available.
+
+There are a number of options for the generation of a file consisting of the molecules that leave a
+boundary, including notional boundaries normal to the plane of the flow, or cross a specified line
+in the flow. In addition to the position coordinates and velocity components, the file contains
+sufficient information on the flow that generates the file to allow the molecules to be “played
+back” into other flows. The most common application involves an interface between a two-
+dimensional or axially symmetric calculation and a three-dimensional calculation. For example,
+the molecules from a two-dimensional flow that contains a plane oblique shock wave may the
+input molecules over one face of a three dimensional calculation. Alternatively, there may be an
+interface between two two-dimensional calculations. This is particularly useful for plume
+calculations. A molecule file may be generated along a boundary at which the normal velocity
+component is everywhere supersonic. This may then be the input file for outer region flow
+calculations using either DS2V or DS3V. The molecule output file is always named
+DSMOF.DAT and the input file DSMIF.DAT.
+
+The flowfield grid consists of a background rectangular grid that is uniformly spaced in each
+direction. Every “division” of this grid is divided into a finer grid of “elements”, typically 100
+elements in each division. Solid surfaces must not be thinner than an element. The flowfield cells
+are defined by cell nodes that are initially set to the centers of the divisions and the points that
+define the surfaces. The cell associated with a given node is comprised of the elements that are
+closer to that node than to any other. At any stage of the calculation, a new set of nodes may be
+adaped to the flow density and density gradients in order to set new cells with a specified number
+of simulated molecules in each cell. Separate cell systems are employed for collisions and for the
+sampling of flow properties.
+
+2.2 Gas Specification and Model
+
+The gas may be chosen from a menu that includes ideal air, real air with vibration and chemical
+reactions, nitrogen, argon and a hard sphere gas. Alternatively, a custom non-reacting or reacting
+gas may be specified.
+
+The program employs the physical gas models that have been described and validated in Bird
+(1994). The gas is a mixture of the VHS or VSS models and the cross-sections, the viscosity-
+temperature index (which determines the way in which the cross-section changes with the relative
+velocity), are set separately for every molecular species. The VSS model permits the specification
+of the correct Schmidt number. This can be important for gas mixtures, but the VHS model is
+adequate for simple gases and for A classical Larsen-Borgnakke model is employed for the
+rotational degrees of freedom, while a quantum model is used for the vibrational modes. The
+chemical reaction model calculates reactive cross-sections that are consistent with the measured
+rate constants.
+
+The classical diffuse reflection model with complete accommodation of the gas to the surface
+temperature is appropriate to "engineering surfaces" that have not been exposed for a long period
+to ultra-high vacuum. The alternative CLL gas-surface interaction model is also included and
+provides a realistic model for partial accommodation on ultra-clean surfaces. The other "classical"
+model of specular reflection may be specified but it is recommended that this option be used only
+for planes of symmetry. A set temperature distribution may be specified for the surface, or it may
+be specified as an adiabatic surface with zero heat transfer. In the latter case, the temperature
+                                                                                          8
+
+distribution on the surface is one of the output quantities. The surface may be specified as
+insulated with zero thermal conductivity or isothermal with infinite conductivity. Thermal
+radiation from the surface is also taken into account.
+
+3      Computer Requirements
+(i)    The program requires Windows 98 or higher.
+
+(ii)   A 2 GHz Pentium™ processor or higher is recommended.
+
+(iii) 500+ MB RAM is required for the program to run efficiently.
+
+(iv) The program runs in an XGA (1024 x 768) window.
+Windows 98 required “small fonts” to be specified in order for the DS2V windows to
+                          With XP, it is essential that the “DPI
+be sized and positioned correctly.
+setting” be set to “Normal size (96 DPI)”. This is accessed through
+Control Panel -> Display -> Settings -> Advanced -> General.
+
+
+
+4      Program Installation and Operation
+The program is distributed as the compressed executable DS2VZ.EXE. This is run to
+produce the uncompressed executable DS2V.EXE. Many additional files will be
+generated when this file is run and it is best placed in a new directory.
+
+Running DS2V produces the Initial Options window that contains six push button
+style radio buttons and an OK button to move on when the desired button has been
+selected.
+
+
+
+
+Continue the Current Run
+This is the pre-selected button, but is valid only when a calculation has been stopped
+after it had reached the stage at which the flow and surface property displays are
+displayed.
+
+ Restart files are written every time the “print-out” stage is reached. The selection of
+this option causes the last set of restart files to be read and re-starts the run from
+that flow time.
+
+       The following dialog provides an opportunity to alter some of the program
+       settings when a run is restarted
+                                                                              9
+
+
+
+
+Continue the Current Sample
+This and the following option is applicable only when the flow is assumed to
+become steady at large times and the specified time at which time averaging is
+to commence had been reached in the earlier calculation. This option continues
+the existing time average.
+
+Commence a New Sample
+This option resets the sampling variables so that a new time-averaged sample
+commences from the restart. This option is useful when the specified time to
+steady flow proves to be inadequate. In addition, it should be applied when the
+flow has settled down after a change in gas density or a change in the number
+of simulated molecules. The program resets the sample automatically if the
+fluctuating number of simulated molecule changes by more than eight
+standard deviations.
+
+Commence building the molecule output file
+
+If the box is checked, a molecule output file DSMOF.DAT is created and its
+generation commences as soon as the calculation restarts. The first choice is
+whether the file is generated from molecules crossing a line in the flow of from
+                                                                            10
+
+molecules leaving the flow across a boundary or notionally leaving from the
+plane of the flow.
+
+
+
+
+ If a line within the flow is to be specified
+
+        The menu allows the crossing direction to be specified along with the
+        coordinates of the endpoints of the line.
+                                                                             11
+
+ If a boundary line or flow plane is to be specified
+
+
+
+
+Factor to Change the Density of the Flow
+Most calculations start from an initially uniform flow and, at low Knudsen
+numbers, the computational time to steady flow may be very large. It is
+generally more efficient to establish steady flow at a higher Knudsen number
+and then increase the density of the flow. This option can be useful when a
+number of cases are to be calculated at gradually decreasing Knudsen
+numbers, but the user must beware of the transient disturbances that can be
+generated when there is a large change in the flowfield.
+
+Factor to Change the Number of Molecules
+Another strategy to decrease the computational effort for eventually steady
+flows is to employ a relatively small number of simulated molecules at the start
+of the calculation and to increase the number when steady flow is nearly
+attained. This option changes the number of real molecules that are
+represented by each simulated molecule. The initial number should not be so
+low that the criteria for a good DSMC calculation are violated by such large
+margins that the initial flow is unrepresentative of the real flow. In general,
+the increase will not be greater than a factor of about three. The option may
+also be used to reduce the number of simulated molecules if it appears that the
+eventual number will be beyond the memory capacity of the computer. Again,
+the user must beware of the transient disturbances that can be generated
+when there is a large change in the flowfield.
+                                                                                12
+
+WARNING: If the above two options cause large changes in the flowfield,
+transient disturbances can be generated. The time that is required for these
+transients to die out may be comparable with the time that is required for the
+establishment of steady flow. The options are useful for exploratory runs, but
+their use is not recommended when the most accurate result is required.
+
+Time step adjustment
+
+The default at the center position of the slider control sets the time step to
+approximately one third the local mean collision time. The “Maximum
+Computational Accuracy” corresponds to a time step of one fifth the mean
+collision time and the “Maximum Computational Speed” corresponds to about
+one half the mean collision time.
+
+Set the Non-equilibrium Parameter as:-
+
+The “Non-equilibrium Parameter” is one of the options that may be chosen in
+for plotting in the interactive display screen. There are a number of options for
+the definition of this parameter.
+
+The default is the root mean square of the ratios of the three normal
+components of the pressure tensor to the scalar pressure. The next three are
+ratios of the translational temperatures in the x and y direction, the ratio of the
+rotational to the translational temperature and the ratio of the vibrational
+temperature to the translational temperature. The latter two are available
+only if one or more of the molecular species has the relevant internal degrees of
+freedom. The final option for the Chapman-Enskog term involves the
+evaluation of velocity and temperature gradients and should be chosen only
+when the sample is very large. The term is evaluated separately for the
+velocity and temperature gradients and the value of the larger term is shown
+
+Flow boundary adaption
+
+WARNING: This procedure is appropriate only for low Knudsen number flows
+and is still in an experimental stage.
+
+The setting of all flow boundaries as stream boundaries is exact for collisionless
+external flows, but becomes increasingly in error as the Knudsen number is
+reduced.
+
+The boundaries of the bounding rectangle are frequently set as stream
+boundaries in low Knudsen number flows even though there is strongly
+disturbed flow at the boundary. For external flow problems, this is an
+unavoidable source of error at all boundaries if the flow is subsonic. There is
+always some error in the surface properties and forces in subsonic flows. All
+that can be done is to study the error by running a number of cases with the
+boundaries at different distances from the body. Hopefully, it is possible to set
+boundaries sufficiently far from the body for the errors to be negligible. In the
+case of supersonic external flows, it is often possible to position the boundaries
+such that one can be confident that the surface properties and forces are not
+                                                                                   13
+
+     affected. However it is not always possible to do this and, in any case, there is
+     almost always some error in the flowfield near a boundary at which there is a
+     mismatch between leaving and entering molecules.
+
+     Flow boundary adaption sets the incoming molecules to be those appropriate to
+     an equilibrium gas with the sampled macroscopic properties at the boundary.
+     However, the properties at the boundary are unavoidably affected by the
+     mismatch between the leaving and entering molecules and the experience with
+     the procedure has been that it is stable but goes only half way to compensating
+     for the mismatch.
+
+     Sample the velocity distribution at a specified location
+
+     A file of a specified number of molecule velocity components and internal
+     energies may be generated a specified location in the flow. This is a formatted
+     file and may be used with a post-processing program to generate any desired
+     representation of the velocity distribution function at that point. A new
+     location may be chosen each time that the calculation is restarted. However,
+     the file name is always VELDIS.TXT and, if files are desired for multiple
+     locations, the earlier files must be saved under different names.
+
+
+
+
+Run a Demonstration Case
+
+This brings up a dialog for the choice of demonstration case. A fuller description is
+available via the About button for each example. If the Review the data input menus
+before running the example checkbox is selected, the menus that produced the data
+are reviewed before the run starts.
+                                                                                     14
+
+
+
+
+About the DSMC method
+
+This option brings up an information screen on the DSMC method and a “Frequently
+Asked Questions” screen on the method can be called from this. The program then
+returns to the Initial Options menu.
+
+Adapt the Cells and Continue
+
+Continues the current run with cells adapted to the density in the current flowfield
+sample. When selected, the user is asked to supply the desired number of simulated
+molecules in each of the new cells. Separate adaptions are made are made for the
+collision cells and sampling cells. The collision cells are adapted first and acceptance
+of the default eight molecules per collision cell is recommended.
+
+
+
+
+A plot of the new cells appears in a new window when the adaption is complete and
+the window should be closed for the computation to proceed. The sampling cell
+                                                                                    15
+
+dialog then appears with a recommended number that depends on the magnitude of
+the calculation.
+
+
+
+
+A plot again appears and this window should be closed for the calculation to proceed.
+An information dialog appears when the flow is ready to restart using the new cells.
+
+
+
+
+In the case of flows that become steady, the option will normally be chosen after a
+substantial sample has been built up. However it can be selected any number of
+times and can be used for flows that remain unsteady.
+
+IMPORTANT: IF THE PROGRAM STOPS WITH OR WITHOUT
+A DIAGNOSTIC WINDOW, EXAMINE THE FILE DIAG.TXT
+FOR MESSAGES AND EXPLANATION.
+
+A number of additional files are generated during the problem set-up phase. These
+are mainly for diagnostic purposes.
+
+Set New or Modified Data
+This option allows a new calculation to be specified. If there is no valid data file on
+the computer, it must be selected before a calculation, other than the demonstration
+examples, can be made. The following dialog with three choices then appears:
+                                                                                   16
+
+
+     Generate Completely New Data
+     Selection of this button asks for a choice of input units.
+
+
+
+
+     SI units are recommended. The program is rarely used with engineering units,
+     so please report any errors. The program then moves straight to the data input
+     dialogs of Section 5.
+
+     Modify the Existing Data Set
+     The user may choose to modify an existing DS2VD.DAT file. Should an “end of
+     file” be encountered when modifying an existing file, the program
+     automatically switches to the “new file” mode. The details of the input menu
+     windows are described in Section 5.
+
+
+
+     New Run with Existing Data
+     There must, of course, be an existing DS2VD.DAT file and this starts a new
+     run from zero time.
+
+About the DSMC method
+
+This option brings up an information screen on the DS2V program and a “Frequently
+Asked Questions” screen on the program can be called from this. The program then
+returns to the Initial Options menu.
+
+
+
+
+5 Data Input Dialogs
+The first dialog asks the user to set the initial number of Megabytes that are used by
+the program. One million simulated molecules requires about 80 Megabytes. This is
+the only computational parameter that the user must set. All other computational
+parameters are automatically set by the program to recommended or default values.
+There is an opportunity at the end of the data input process for experienced user to
+modify many of the default settings.
+                                                                                   17
+
+
+
+
+Two-Dimensional Plane Flow
+The flow is in the x-y plane with no flow gradients in the z direction, although there
+may be a velocity component in the z direction that varies with x and y. The width of
+the flow is set to unity.
+
+ Axially Symmetric Flow
+The flow is symmetric about the x (y=0) axis and the y coordinate is a radius. There
+are no flow gradients in the circumferential direction, but there may be a
+circumferential velocity component that varies over the flowfield. The program may
+therefore be applied to rotating flows.
+
+The following dialog appears if the flow is axially symmetric,
+                                                                                  18
+
+      No Radial Weighting Factors
+      All simulated molecules represent the same number of real molecules.
+      Therefore, with equally spaced cell layers in the radial direction, the number
+      of simulated molecules in a cell layer is proportional to the average radius of
+      that layer. There is then great difficulty with the small sample near the axis
+      and the option will generally be used only for flows like plume expansions in
+      which the gas density falls as the radius increases.
+
+      Employ Radial Weighting Factors
+      The number of real molecules represented by each simulated molecule is
+      proportional to the radius. This tends to equalize the number of simulated
+      molecules in each cell layer in a uniform flow. There must be fractional
+      molecule removal for molecules moving away from the axis and fractional
+      duplication for molecules moving towards the axis.
+
+      With radial weighting factors, energy and momentum are conserved only “on
+      the average” and random walks can occur. These can become apparent in low
+      speed flow regions with long molecule residence times, for example
+      hypersonic blunt body problems. The random walk fluctuations appear to
+      produce acoustic waves that are focused at the axis and spikes are sometimes
+      seen at the axis. These effects are minimized if the flow resolution is reduced
+      and, should they occur, the nearest-neighbor collision procedures can be
+      turned off in the Set Custom Options dialog that can be selected in the final
+      stages of the data input.
+
+
+
+
+Minimum x coordinate
+Maximum x coordinate
+Minimum y coordinate
+                                                                                    19
+
+Maximum y coordinate
+
+These input variables set the limits on the basic rectangular flowfield. An axially
+symmetric flow need not have its minimum y coordinate (i.e. minimum radius) on
+the axis, but it must not be negative. The effective shape of the flowfield may be
+changed through the definition of open surfaces and flow input lines that terminate
+on these boundaries.
+
+Approximate fraction of the bounding rectangle that is within the flow
+
+The surfaces may be such that only a small fraction if the bounding rectangle is
+within the flow. The setting of this item to the approximate fraction assists with the
+automatic setting of the computational variables.
+
+
+
+
+Retain Existing Composition
+This option is available only when data is being modified and it retains the existing
+number and definitions of the gas species.
+
+Custom Composition
+Allows the detailed specification of the gas species and chemical reactions. Modified
+data files revert to custom composition unless the preceding option is chosen. The
+following dialogs appear under this option.
+                                                                                     20
+
+     Number of molecular species in the flow
+     This is the total number that may appear in the stream, the secondary stream,
+     or in the gas that enters the specified flow entry lines.
+
+     Max. no. of vibrational modes of any species
+     Vibrational modes need not be set unless the temperatures in the flow are
+     sufficiently high for them to be activated to a significant extent.
+     The number of chemical reactions
+     This is the total number that will be specified.
+
+     Number of third-body tables for recombinations
+     These set the relative efficiencies of all the molecular species as third bodies in
+     recombination of atoms and molecules.
+
+     Number of surface reactions
+     Molecules may recombine or dissociate as a result of collisions with solid
+     surfaces.
+
+
+     The following dialog appears in a loop over the number of molecular species.
+
+
+
+
+     The physical properties of a number of common gases may be found in the
+Reference.
+
+     Diameter of the molecular model
+     The variable hard sphere and variable soft sphere molecular models employ
+     the hard sphere (VHS) or modified hard sphere (VSS) scattering model but
+                                                                               21
+
+have a diameter that varies with the collision energy. The energy for the
+specified diameter is characteristic of the temperature that is specified after:
+at a reference temperature of
+
+Inverse of the VSS scattering parameter.
+This is set to unity if the VHS model is to be used or, for VSS molecules, to the
+value appropriate to the Schmidt number of the gas.
+
+Viscosity-temperature power law
+The variation in the VHS diameter is such as to produce a coefficient of
+viscosity that varies with temperature raised to this power. 0.5 is a hard
+sphere gas and 1.0 is effectively a Maxwell gas. These should be regarded as
+limiting values.
+
+Molecular Mass
+This is the mass of an individual molecule.
+
+Number of rotational degrees of freedom
+A monatomic molecule has no rotational degrees of freedom and a diatomic
+molecule or a linear triatomic molecule has two. Non-linear and complex
+polyatomic molecules have three rotational degrees of freedom.
+
+Rotational relaxation collision number
+This sets the rotational relaxation rate. It may be made a constant (generally
+about five) or a second order polynomial in the temperature.
+
+Fixed collision number or the constant in the polynomial
+
+Coefficient of temperature in the polynomial
+Required only if the polynomial option has been chosen.
+
+Coefficient of temperature squared in the polynomial
+Required only if the polynomial option has been chosen.
+
+The number of vibrational modes
+These do not become significantly excited until the temperature reaches
+values of the order of the characteristic vibrational temperature. For most
+gases, vibration may be neglected if the temperature is less than about 1000K.
+
+
+The following dialog appears if there are vibrational modes in a loop over the
+number of modes.
+                                                                               22
+
+
+
+
+      Characteristic vibrational temperature
+      This is a basic physical property of the gas.
+
+      Vib. Collision number Zv, or constant C1 in eqn (6.53)
+      -1 for a constant Zv, or constant C2 in eqn (6.53)
+      If a constant vibrational collision number is to be used, the first value is
+      set to that number and the second value to –1. However, vibrational
+      relaxation is strongly temperature dependent and it is preferable to use
+      values correlated by the Millikan-White theory. The equation numbers
+      refer to the supplementary theory in Bird(1994).
+
+
+
+End of the loop over the number of molecular species.
+
+
+Note that the molecules will be referred to in later data input items by a code
+number based on the order in which they were specified in this loop.
+
+i.e. The first species to be input is regarded as species 1, the second as species
+2, and so on….
+
+
+The following dialog appears in a loop over the specified number of chemical
+reactions.
+                                                                               23
+
+
+
+
+Pre-collision species of the first molecule
+Pre-collision species of the second molecule
+The code numbers of the two pre-collision species. The identity of the third-
+body molecule in a recombination is specified later.
+
+Choose one of Dissociation, Recombination, and Exchange Reaction.
+
+If it is a dissociation.
+
+       Post-collision species code of the first molecule
+       Post-collision species code of the second molecule
+       Post-collision species code of the third molecule
+        A dissociation is a reactive collision that converts two molecules to
+       three molecules.
+
+
+If it is a recombination,
+
+       Post-collision species of the recombined molecule
+       A recombination leads to a single molecule and an unchanged third-body
+       molecule.
+
+       The code of the third-body molecule or, if negative, the code of the third-
+       body table
+                                                                                      24
+
+           The first option is allows a reaction to be specified for a particular species
+           as the third-body, while the second allows all species as third-bodies with
+           the relative efficiencies given by the table with code number equal to the
+           absolute value of the negative data variable.
+
+     If it is an exchange reaction
+
+     Post-collision species code of the first molecule
+     Post-collision species code of the second molecule
+     The number of molecules is unchanged in an exchange reaction.
+
+     The reaction model accepts data in the form of the continuum rate equations in
+     the conventional Arrhenius form. The rate equation data is converted within
+     the program to reactive cross-sections using the theory of Bird (1994). Note
+     that this is a quasi-equilibrium theory and, while it appears to work well for
+     the reactions in hypersonic flows in air, large correction factors may be need in
+     other reacting flows. For example, combustion reactions appear to be to slow
+     and significant non-equilibrium effects may be present.
+
+     No. of internal d. of. f. that contribute
+     The internal degrees of freedom of the reacting molecules may contribute to the
+     activation energy that is required for the reaction to occur. The value of this
+     data item will not affect the reaction rate but, if the temperature exponent in
+     the rate equation is negative, the curve of reactive cross-section against
+     collision energy may not have a physically reasonable shape unless the internal
+     degrees of freedom contribute energy. The temperature exponent cannot be
+     more negative than the negative of the sum of this number and 3/2.
+
+     Activation energy
+     The sum of relative translational energy and the contributing internal energy
+     must exceed this energy for a reaction to be possible.
+
+     1.e10 the pre-exponential factor
+     The reaction rate coefficient is assumed to be in the form
+                              k (T ) T  exp(E a / kT )
+     where Ea is the activation energy, is the pre-exponential factor, and is the
+     temperature exponent. The units are such that the rate coefficient k(T) is in
+     m3 molecule-1 sec-1 for a binary (dissociation or exchange) reaction and m6
+     molecule-1 sec-1 for a ternary (dissociation) reaction. The input quantity is
+     multiplied by ten orders of magnitude so that it does not become smaller than
+     the minimum number that can be represented by a single precision variable.
+
+     Temperature exp. in the rate equation
+     The quantity in the above equation.
+
+
+Reaction energy input to the gas
+     This is positive for an exothermic reaction and negative for an endothermic
+     reaction.
+                                                                                    25
+
+The following dialog appears in a double loop over the number of third-body
+tables and the number of molecular species.
+
+
+
+
+Relative probability
+If this is set to unity, the rate coefficient is as set for the reaction. Otherwise, it
+is the factor by which the rate coefficient is multiplied.
+
+The following dialog appears in a loop over the specified number of surface
+reactions.
+
+
+
+
+Species code of first incident molecule
+Species code of second incident molecule
+There is one incident molecule for a dissociation and two for recombination and
+exchange reactions
+
+Species code of first reflected molecule
+Species code of second reflected molecule
+Species code of third reflected molecule
+Species code of fourth reflected molecule
+Species code of fifth reflected molecule
+Species code of sixth reflected molecule
+                                                                                    26
+
+     There is one reflected molecule in a recombination reaction, two in an exchange
+     reaction, and at least two in a dissociation reaction.
+
+     Reaction energy input to the surface
+     This is the energy from a single event and will be negative when energy is
+     required for the reaction.
+
+     The probabilities of the various surface reactions are set when the surface
+     properties are specified.
+
+Ideal air
+This sets oxygen as species 1 and nitrogen as species 2. The vibrational modes are
+not active and there are no chemical reactions. It is useful for problems involving air
+at temperatures less than about a thousand degrees. The fractions of the two species
+are about 0.2 and 0.8 and are set in the stream property dialog.
+
+Argon
+Argon is set as a typical real monatomic gas.
+
+Hard sphere gas
+This employs a fixed molecular diameter of 410-10 m and a molecular mass 10-25 kg.
+
+Real air with reactions
+This is a five species model with;
+     oxygen as species 1,
+     nitrogen as species 2,
+     atomic oxygen as species 3,
+     atomic nitrogen as species 4, and
+     nitric oxide as species 5.
+The vibrational modes are active and the data is set for 23 chemical reactions. The
+model has been extensively employed for atmospheric re-entry studies.
+
+Martian atmosphere
+This employs nine molecular species. The first five are as outlined for real air and
+      atomic carbon is species 6,
+      carbon monoxide is species 7,
+      carbon dioxide is species 8, and
+      argon is species 9.
+The model is again intended for atmospheric entry problems and the vibrational
+modes are active. A typical Martian atmospheric composition is 95.6% carbon
+dioxide and 4.6% molecular nitrogen. Argon would have to be added as a trace
+species, but the other species are generated by the fifty nine chemical reactions that
+are included in the model.
+                                                                                    27
+
+
+
+
+x velocity components
+y velocity components
+Only for two-dimensional flows
+z velocity components
+Only for two-dimensional flows. There may be a velocity component in the z
+direction normal to the x-y calculation plane and this velocity component may vary
+over the flowfield. The “two-dimensional” restriction is that there must be no
+gradients in the z direction.
+Temperature
+Vibrational Temperature
+The separate specification of vibrational temperature is required only if some
+molecules have been specified to have vibrational modes. It will be equal to the
+overall stream temperature in equilibrium flows, but is sometimes different in
+hypersonic test facilities.
+Number Density
+Fraction of Species
+A maximum of twelve molecular species may have been defined.
+
+This sets the flow conditions for the gas that enters across the stream boundaries
+and which generally fills the flowfield at the start of the calculation. It is used for
+the normalization when the “non-dimensional” option is chosen during the run. It
+should therefore be set as a reference gas even when there are no stream boundaries
+and the flowfield is initially set as a vacuum.
+                                                                                   28
+
+
+
+
+Input the number of unconnected surfaces
+As noted in the dialog, “surfaces” must be either open or closed. However, in
+addition to sold surfaces, these surfaces may be lines across which a specified flow
+enters the flowfield. In fact, a single surface may consist of both solid elements and
+flow entry elements. Moreover, the entry flow conditions are unrelated to the stream
+conditions.
+
+The following dialogs are in a loop over the number of surfaces.
+
+If previous data is being modified and the number of surfaces is less than the
+previous number, the following dialog appears:
+
+
+
+
+The complete surface in the data that is being modified may be deleted completely or
+may be retained and/or modified.
+                                                                                       29
+
+
+
+
+Number of Segments
+This number relates to the segments that the surface in divided into in order to
+specify its geometry. It is not related to the surface sampling intervals that are set
+later or to the groups of these intervals that set the type and the properties of the
+surface.
+
+
+
+
+     Irrespective of the option that is chosen here, the dialog for the first point of the
+     first segment is:
+                                                                         30
+
+
+This sets the x and y coordinates of the first point on the line. The dialog
+for the end-points depends on the segment type.
+
+Straight Line
+
+The segment is a straight line and is set by the following dialog
+
+
+
+
+                                     .
+
+     In addition to the x and y coordinates this dialog sets the:
+
+     Number of sampling intervals along the segment
+     The size of the sampling interval along a solid surface sets the
+     resolution at which the surface properties will be plotted. It also
+     sets the resolution to which the temperature of solid surface
+     elements can be set and, in the case of specified flow input lines, the
+     resolution to which the flow properties are specified.
+
+Arc Clockwise from Initial Point
+Arc Anti-clockwise from Initial Point
+The initial point in the context of this dialog is either the first point on
+the surface or the end-point of the previous segment.
+                                                                               31
+
+
+
+
+     Final Point x and y coordinate
+     Sets the location of the final point of the segment.
+
+     With Center at x and y coordinate
+     Sets the location of the center of the circle on which the arc lies. An error
+     window appears if the initial and final points do not lie on the same
+     circle.
+
+     Number of sampling intervals along the segment
+     While this is generally similar to the corresponding data item for the
+     straight-line segment, it is essential that sufficient intervals be set to
+     properly define the circular arc. This means that there should a
+     reasonable limit on the angular change between the straight intervals.
+
+
+End of the loop over the segments .
+                                                                           32
+
+In a loop over the number of interval groups on this surface.
+
+
+
+
+     Solid surface intervals with species-independent properties
+     This choice brings up a menu to set the properties for this group.
+
+
+
+
+     Reflection at a Set Temperature
+     The molecules that are reflected according to the gas surface interaction
+     to be specified later at the temperature that is specied below.
+
+     Zero Heat Transfer (Adiabatic) Surface
+                                                                         33
+
+The incident heat transfer to the surface is calculated on a progressive
+basis and the surface temperature is adjusted such that there is zero net
+heat transfer to the surface. This is commonly referred to as an
+“adiabatic surface” and the adiabatic surface temperature appears as one
+of the options for the surface distribution output.
+
+Surface Temperature
+The surface temperature for molecular reflection or the minimum
+allowable surface temperature if the adiabatic option has been chosen
+and the surface is insulated (zero thermal conductivity). However, if this
+is set to zero, the surface is assumed to have infinite thermal conductivity
+such that the whole group comes to a uniform temperature with no net
+heat transsfer to the group as a whole.
+
+Emissivity
+This need be set only for adiabatic surfaces so that thermal radiation is
+taken into account in calculating the temperature for zero heat transfer.
+
+In-Plane Velocity
+The surface moves in its own plane in a direction within the plane of the
+flow. This has effect only on the molecules are reflected diffusely.
+
+Normal-to-Plane Velocity
+The surface moves in its own plane in the drection normal to the plane of
+the flow. This is the circumferential direction in the case of an axially
+symmetric flow and the option allows rotating flows to be studied.
+                                                                                  34
+
+Diffuse Reflection
+           The classical diffuse reflection model is employed with full
+           accommodation of the translational energy to the temperature that was
+           defined earlier.
+
+          CLL reflection model
+          This model (see Reference) can provide a realistic model of the reflection
+          processes that occur on extremely clean surfaces. It also employs the
+          temperature that was defined earlier and requires the definition of the
+          Normal energy accommodation coefficient
+          and the
+          Tangential momentum accommodation coefficient
+          A major problem is that very little information is available on when this
+          model should be used and the values of these coefficients that should be
+          employed if it is used.
+
+          Rotational accommodation coefficient
+          Irrespective of the model that is used for the gas-surface interaction of
+          the translational modes, the fraction accommodation of any rotational
+          modes may be set.
+
+          Vibrational accommodation coefficient
+          Similarly for any vibrational modes.
+
+          Fraction of specular reflection
+          A combination of specified fractions of specular and diffuse reflection has
+          often been used to provide an indication of non-diffuse effects. It is now
+          recommended that the CLL model be used for this purpose. Full specular
+          reflection can be used make a surface a plane of symmetry or to make an
+          “inviscid” flow calculation.
+
+          Fraction adsorbed at surface
+          The specified fraction of molecules that strike the surface are removed
+          from the calculation.
+
+          Outgas Mass Flux
+          This option should only be used when there is separate input for each
+          molecular species.
+
+          The following dialog appears if any surface reactions have been defined.
+                                                                                35
+
+
+
+
+     Probability of surface reaction number
+     Up to 18 surface reactions were defined earlier. This is the probability
+     when one of the incident molecules strikes the surface. If two are
+     required, the other is removed later.
+
+Solid surface intervals with species-dependent properties
+This choice brings up similar menus to the species-independent choice, except
+that the dialog Gas-surface interaction for this group is repeated for each
+molecular species. Also, it is possible to set the
+
+     Outgas mass flux
+     This is set separately for each species. The outgassed molecules are
+     generated as if they were effusing from the surface at its temperature.
+
+Specified flow entry intervals
+                                                                                 36
+
+
+
+
+          x, y and z velocity components
+          There are separate dialogs for two-dimensional and axially symmetric
+          flows. This is the axially symmetric version and, while the stream in an
+          axially-symmetric flow is not allowed to have a radial or circumferential
+          flow, calculations do not have to include the axis and these option allow
+          expanding and swirling flows to be set up.
+
+          Temperature and Number Density
+
+          Fraction of Species
+          A maximum of twelve molecular species may have been defined.
+
+     Stream entry intervals
+     The surface is a flow entry surface and is commonly used to cut off a region of
+     flow that is undisturbed freestream flow. This option does not require any
+     further information
+
+     End of the loop over the interval groups on the surface.
+
+
+End of the loop over the surfaces.
+
+The following screen appears in a loop over the four flow boundaries.
+                                                                           37
+
+
+
+
+Axis
+This choice is valid only for the “minimum y boundary” in an axially symmetric
+flow and when that boundary has been set to y=0.
+
+Plane of Symmetry
+All molecules striking the boundary are specularly reflected. For other than
+the minimum and maximum y boundaries in an axially symmetric flow, this is
+equivalent to setting the boundary as a plane of symmetry.
+
+Stream Boundary
+Molecules that are typical of the specified stream enter across the boundary.
+Molecules that strike stream boundaries are removed from the flow. This
+boundary conditions maintains a uniform flow in an empty flowfield, even for a
+subsonic or stationary stream.
+
+Vacuum Interface
+No molecules enter the flow and all molecules striking the boundary are
+removed from the flow.
+
+Periodic Boundaries
+This applies only to the minimum and maximum x boundaries and must be
+applied to both. Molecules that leave across the minimum x boundary enter
+across the maximum x boundary, and vice-versa.
+                                                                                  38
+
+     Constant Pressure Boundaries
+     These boundary conditions require the definition of a secondary stream and an
+     initial flow separation boundary at a specified x location. The minimum x
+     boundary is a stream boundary, but the number of molecules that enter is
+     made equal to the number that crosses the initial flow separation line in the
+     positive direction. The maximum x boundary is a similar boundary for the
+     secondary stream and the number of molecules that enter is equal to the
+     number that cross the flow separation line in the negative direction. This
+     boundary is intended for use in calculations involving steady subsonic flow
+     through channels and tubes.
+
+     Specular Surface Moving into the Flow
+     This boundary can be set only at the minimum x boundary and causes a
+     specular piston to move into the flow at a constant speed given by the specified
+     Surface Speed
+      This produces a shock wave ahead of the piston. Steady flow sampling should
+     not be employed with this option.
+
+     Not in Flow
+     Surfaces are often defined such that one or more of the sides are completely
+     outside the flow.
+
+End of the loop over the boundaries
+
+
+
+
+There are three options with regard to the separation boundary and secondary
+stream.
+                                                                                        39
+
+No Separation Boundary
+There is no separation boundary and no secondary stream.
+Boundary at line of constant x
+A secondary stream must be set and applies at x coordinates greater than this value.
+Boundary at line of constant y
+A secondary stream must be set and applies at y coordinates greater than this value.
+
+Coordinate of the Boundary
+The x or y coordinate of the separation boundary (if one is set).
+
+
+
+One of the following options must be chosen .
+
+Set Initial Flow to Stream or Ref. Gas
+The initial (zero time) state of the gas is set to the stream definition. If a separation
+boundary has been set the gas beyond this boundary is set to the secondary stream.
+
+Set Initial Flow to a Vacuum
+There are no molecules in the flow at zero time.
+
+
+
+
+If there is a secondary stream, it is set by the above dialog that is identical to that for
+the stream and for the specified stream elements.
+
+File Molecules Enter the Flow
+
+     For this to be a valid option, a previously generated DSMOF.DAT file must
+     have been renamed DSMIF.DAT and be present in the directory. The
+     molecular species in this file must exactly match those in the new calculation.
+     The following menu appears after the flowfield has been set up, just before the
+     run starts.
+                                                                                40
+
+
+
+
+Either steady or unsteady sampling must be chosen.
+
+Assumed Steady Flow at Large Times
+This is chosen when the boundary conditions are such the flow becomes steady at
+large times and a long time average will be required to produce a large sample. The
+sample is automatically reset whenever the total number of simulated molecules
+changes by seven or eight standard deviations.           For most problems, this
+automatically causes a time sample to be made over the eventual steady flow.
+However, in some cases , the unsteady phase of the flow does not involve much (or
+even any) change in the number of molecules. The user must then stop the program
+after the flow has become steady and select the Commence a New Sample option
+when re-starting it. A large time-averaged sample may then be accumulated.
+Continued Unsteady Flow
+The flow is not assumed to become steady at any time. This option requires a very
+large number of molecules. The flow is time-averaged over an interval at the end of
+each output interval.
+
+Employ Standard Options
+The computation is made with the standard or default options that are adequate for
+most problems.
+                                                                                   41
+
+Set Custom Options
+This brings up the following dialog that can be used to modify the standard options.
+
+
+
+
+The data file DS2VD has now been generated. The program may be run with this
+data or it can be recycled for corrections and/or alterations
+.
+
+
+
+
+6    The Interactive Flow Display Screen
+This screen is visible throughout the running of the calculation and contains three
+graphical display bitmaps, about thirty numeric output fields, scrolling menus, and
+                                                                                    42
+
+many push button or checkbox controls. In addition, the graphical flow display
+accepts left button mouse clicks to display the flow properties at a point, and right
+button clicks to generate flow streamlines through the point. The screen is largely
+self-explanatory but some comment and clarification is useful for some of the
+contents.
+
+(i) The Flow time is the time in seconds since the surfaces were instantaneously
+inserted into the uniform stream. The flow time advances in steps equal to the set
+fraction of the smallest value of the sampled mean collision time in any of the cells.
+The flow properties are sampled at set time intervals. With the eventual steady flow
+option, until the flow becomes steady the samples are reset each time the restart
+files are written. The flow and surface property displays are therefore time-averaged
+over time intervals that are small in comparison with the steady flow time and give a
+realistic picture of the unsteady flow development process. Steady flow time
+averaging builds up a large sample. The unsteady sampling option essentially
+continues the unsteady phase indefinitely. short time averaging may be confined to
+the specified fraction of the output interval.
+
+(ii) The Molecule Number History window plots the number of simulated molecules
+over a time interval immediately preceding the current flow time. There is usually
+an increase in the number of simulated molecules during the unsteady phase of a
+flow but, when a flow has become steady, the fluctuations should be characteristic of
+the statistical fluctuations. These have a standard deviation of approximately the
+inverse square root of the number of simulated molecules. The magnitude of the
+standard deviation is indicated by the length of the double-ended yellow arrow at the
+center of the window. The scatter in a steady two-dimensional flow shows the
+expected characteristics. Axially symmetric flows employ radial weighting factors
+that cause molecules to be discarded and duplicated as they move towards and away
+from the axis. This does not affect the magnitude of the average number, but it
+affects the nature of the fluctuations With an assumed steady flow, should the
+number of molecules depart by more than about seven standard deviations from the
+value at the start of the sampling interval, the sample is reset. Should a flow become
+periodic rather than steady, it should be clear from the behavior of the total molecule
+number in this screen.
+
+(iii) The log of the computation in the top left hand corner of the screen shows the
+number of molecule round-off substitutions that have been made during the
+calculation. A molecule is removed from the flow and is replaced by randomly
+selected molecule if the computer is unable to fix its position within the flow. This
+problem arises from the six or seven significant digit limitation of 32 bit arithmetic.
+These are minimized by an internal scaling factor that causes the distances and the
+time to be of order unity even if the actual flow has extremely small physical
+dimensions.
+
+(iv) The units are quoted for dimensioned output and the forces are based on a flow
+of unit width in two dimensional flow or the full 360azimuth in an axially
+symmetric flow. The non-dimensional output option requires specific definitions for
+some of the output quantities.
+                                                                                      43
+
+The flow quantities are expressed as their ratios to selected undisturbed stream
+quantities. The non-dimensional positions are the x and y co-ordinates divided,
+respectively, by either the length or height of the working section. The speeds and
+velocity components are normalized by the speed U of the undisturbed flow. The
+overall temperatures and the separate components of the temperatures are
+normalized by the overall temperature of the stream. The pressure is normalized by
+the pressure p in the stream. The densities and number densities are normalized
+by the stream density  and number density n .
+
+A number flux coefficient is N/( nU  ).
+
+A surface pressure coefficient is ( p p ) /( 12 U 
+                                                      2 ).
+
+
+
+A shear stress coefficient is /( 12 U 
+                                         2
+                                           ).
+
+
+A heat flux coefficient is h /( 12 U 
+                                       3
+                                         ).
+
+
+A characteristic length or area is required for the normalization of the surface forces
+and moments. The input of this parameter is through a pop-up menu that appears
+the first time that non-dimensional output option is selected. The force coefficients
+are the force divided by the product of 12 U 
+                                               2
+                                                 and a characteristic area. For two-
+dimensional cases, the force is that applying to a surface of unit width and the
+characteristic area is the characteristic length times unity. For symmetric two-
+dimensional bodies, the force is that applying to only one side of the body. The force
+and the characteristic length are doubled if the option to display both sides of the
+flow is chosen. For axially symmetric flows the force is for a surface that extends
+over the full 360azimuth and the characteristic area must be consistent with this.
+The moment coefficient appears only for two-dimensional cases without symmetry
+and the denominator includes the square of the characteristic length.
+
+
+(v) The ratio of the local mean separation of the collision partners to the local mean
+free path is the key verification parameter for the calculation. The largest, and
+therefore the worst, value in any cell is output in the flow log. This is actually the
+average of the lower five in the top ten. There could be some error in the calculation
+unless this is small compared with unity. On the other hand, higher values might be
+tolerated in a small region of the flowfield.. If the largest value is undesirably large,
+refer to the Coll. Sep. / m.f.p option for the property in the flow display. The
+distribution of the ratio over the flowfield can then be studied and a judgement made
+about the quality of the calculation. The ratio can be reduced only by the use of a
+larger number of simulated molecules in the calculation.
+                                                                                      44
+
+7    Output Files
+The output file control for eventually steady flow sampling is
+
+
+
+
+and that for continuing unsteady flow is
+
+
+
+
+Steady and Unsteady Flows
+In both cases, there is a push-button control to generate bitmap files of the flow and
+surface displays at the time that the button is pressed. These are WFnnnn .BMP for
+the flowfield and WS nnnn.BMP for the surface distribution. nnnn is a four digit
+number equal to that in the integer field at the time that the button is pressed. In
+addition to these files, the log file WLnnnn.TXT and the screen copy file Snnnn.BMP
+are generated each time that the button is pressed.
+
+Steady Flows
+ASCII files DS2FF.DAT and DS2FFmm, where mm is the two digit species number,
+for the flowfield details and DS2SU.DAT for the surface properties may be generated
+at the end of each output interval. Because, the flow is assumed to be steady, a new
+file overwrites the previous file of the same name. This output is disabled by default
+and is toggled on and off by the radio buttons.
+
+Unsteady Flows
+For unsteady flows, there is a set of radio buttons that select the files that are
+automatically generated at the end of each output interval. The default is no output
+at all and the other options should be used sparingly because the numbered file
+output can occupy a large amount of disc space. The bitmap files are AFnnn.BMP
+for the flowfield image and ASnnnn.BMP for the surface properties. nnnn is now
+the number of the output interval. These numbered bitmap files are readily made
+into a movie with programs such as the well-known freeware ANIMATE-9. Note
+that the limits of the property bar may be adjusted and then locked so that all
+frames may employ the same values.
+
+The ASCII files are AFnnnn.DAT for the mixture properties, AnnnnFmm .DAT for
+the separate species and ASnnnn.DAT for the surface propertiesIn addition, the log
+file WLnnnn. TXT is generated
+
+The .DAT files are in TECPLOT format, but are readily edited and adapted to other
+post-processing programs.
+
+The descriptive column headings for the surface properties are:
+
+S the distance along a surface from the initial point to the center of the interval
+X the x coordinate of the center of the interval
+                                                                                     45
+
+Y the y coordinate of the center of the interval
+NF the number flux to the surface
+PR the pressure
+SSP the shear stress in the plane of the flow
+SSC the shear stress normal to the plane of the flow
+EI incident energy flux
+ER reflected energy flux
+ET net energy flux
+TS surface temperature
+VG the velocity slip
+TG the translational temperature slip
+TRG the rotational temperature slip
+N1 the sample of species 1
+N2 the sample of species 2
+etc….
+
+The descriptive column headings for the flow mixture (or single species) flowfield
+properties are:
+
+X the x coordinate
+Y the y coordinate
+ND number density
+D density
+U u velocity component
+V v velocity component
+W z velocity component
+TTR translational temperature
+TRT rotational temperature
+TVB vibrational temperature
+TOV temperature
+MA Mach number
+MC molecules per cell
+MCT mean collision time
+MFP mean free path
+SOF ratio (mean collisional separation) / (mean free path)
+FSP the (in-plane) speed of the flow (any z component is not included)
+ANG the (in-plane) flow angle in degrees
+P the scalar pressure (nkT)
+
+The descriptive column headings for the flow mixture (or single species) flowfield
+properties are (in a separate file for each species) :
+
+X the x coordinate
+Y the y coordinate
+SAMP sample size
+FRA number fraction
+TTX the temperature based on the velocity components in the x direction
+TTY the temperature based on the velocity components in the y direction
+TTZ the temperature based on the velocity components in the z direction
+TTR translational temperature
+                                                                                     46
+
+TRT rotational temperature
+TVB vibrational temperature
+TOV overall temperature for the species
+UDIF the x component of the diffusion velocity
+VDIF the y component of the diffusion velocity
+WDIF the z component of the diffusion velocity
+
+The surface file is quite straightforward with a separate zone for each surface, and a
+line for each surface sampling interval. No additional instructions are needed for
+the surface file. However, because TECLOT is unable to deal directly with
+unstructured two-dimensional data, a complex triangulation procedure must be
+followed and this is described in the appendix.
+
+
+
+
+Reference
+Bird, G.A. Molecular Gas Dynamics and the Direct Simulation of Gas Flows, Oxford
+University Press, 1994.
+
+
+
+
+Appendix         Using TECPLOT output
+
+The built-in flow displays should be sufficient for most applications and either the
+whole screen or the separate flow and surface property windows can be output as
+bitmap files. Should post-processing be desired for higher quality output, additional
+output files may be generated. These are in the form specified by the TECPLOT
+program, but are text files and may be studied directly or adapted for other post-
+processing programs if TECPLOT is not available.
+
+Zone 1 of the flowfield file is for the values in the interior of the flow. These are at
+the center of the cells with one line for each cell. Because TECPLOT assumes that
+flow values are at grid points rather than at the cell centers, additional zones have
+been added for extrapolated values along the flow boundaries. There is one zone for
+each closed line that defines a flow boundary. For example, if there is one isolated
+body in the working section, there will be one zone for the values on the body and one
+zone for the boundaries of the working section. Because of the unstructured grid,
+TECPLOT must triangulate the flowfield. To do this in Version 9:-
+
+Load the file DS2FF.DAT.
+
+In the Tecplot window,
+
+(i) Select 2D
+                                                                           47
+
+(ii) Select Data / Triangulate
+
+       In the Triangulate window:
+
+       (1) Select ZONE 001 as the Source Zone
+       (2) Check Use Boundary Zone(s)
+       (3) Select ZONE 002 and higher numbered zones as Boundary Zone(s)
+       (4) Press the Compute button
+
+               In the Information window:
+
+               Press the OK button.
+
+       (5) Press the Close button.
+
+(iii) Select Data / Delete Zone
+
+       In the Delete Zone window:
+
+       (1) Select all zones other than the Triangulation zone.
+       (2) Press the Delete button.
+
+       In the Information window:           Press the OK button.
+
+       (3) Press the Close button
+
+TECPLOT may now be used to draw contours, show streamlines etc.
+

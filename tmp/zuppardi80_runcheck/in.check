@@ -1,0 +1,42 @@
+clear
+seed 12345
+dimension 2
+global gridcut -1.0 comm/sort yes
+units si
+global surfmax 5000
+
+boundary o ao p
+create_box -3 4 0 3.5 -0.5 0.5
+create_grid 700 350 1
+balance_grid rcb cell
+
+global nrho 1.94e+19 fnum 6.4667e+13 vstream 7269 0 0 temp 135
+global weight cell radius/only
+
+species air.species N2 O2 NO N O CO2 CO C Ar vibfile co2.species.vib
+mixture air N2 frac 0.04173
+mixture air O2 frac 0.00176
+mixture air NO frac 0.00014
+mixture air N frac 0.0
+mixture air O frac 0.0
+mixture air CO2 frac 0.93399
+mixture air CO frac 0.00108
+mixture air C frac 0.00396
+mixture air Ar frac 0.01734
+
+read_surf data.orion2d clip
+surf_collide 1 diffuse 300 1
+surf_modify all collide 1
+surf_react gamma gamma gamma.surf surf 300 6.022e18 O 1 C 1 N 1
+surf_modify all react gamma
+
+react tce air.tce
+react_modify recomb no partial_energy no
+fix in emit/face air xlo xhi yhi
+collide vss air air.vss
+collide_modify vibrate discrete rotate smooth
+fix vib vibmode
+
+stats 1
+stats_style step cpu np nreact nscoll nscheck nsreact
+run 0

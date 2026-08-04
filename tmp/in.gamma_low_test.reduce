@@ -1,0 +1,64 @@
+# Quick test for the five-case nsite sensitivity loop
+# Each case runs only 100 timesteps. No grid/surface dump files are written.
+
+variable nsite index 6.022e16
+variable caseid index diagnostic_nsite_6.022e16
+
+clear
+
+shell mkdir ${caseid}
+log ${caseid}/log.sparta
+
+print "============================================================"
+print "Quick test: nsite = ${nsite}, 100 timesteps"
+print "Output directory: ${caseid}"
+print "============================================================"
+
+seed                 123456
+dimension            2
+global               gridcut 0.0 comm/sort yes surf/comm reduce
+boundary             o o p
+
+create_box           -2 2 -2 2 -0.5 0.5
+create_grid          223 223 1
+balance_grid         rcb cell
+
+global               nrho 3.63e18 fnum 3.8931e13 vstream 4811 0 0 temp 144.74
+species              air.species N2 O2 NO N O CO2 CO C vibfile co2.species.vib
+
+mixture              air N2 frac 0.05
+mixture              air O2 frac 0.05
+mixture              air NO frac 0.0
+mixture              air N frac 0.3
+mixture              air O frac 0.2
+mixture              air CO2 frac 0.1
+mixture              air CO frac 0.0
+mixture              air C frac 0.3
+
+read_surf            circle_R0.5_P10000.surf
+
+surf_collide         1 diffuse 560 1
+surf_modify          all collide 1
+
+surf_react           gamma gamma gamma.surf surf 560 ${nsite} O 1 C 1 N 1
+surf_modify          all react gamma
+
+react                tce air.tce
+react_modify         recomb no partial_energy no
+
+fix                  in emit/face air xlo xhi ylo yhi
+collide              vss air air.vss
+collide_modify       vibrate discrete rotate smooth
+fix                  vib vibmode
+
+create_particles     air n 0
+
+timestep             2e-6
+stats                10
+stats_style          step cpu np nattempt ncoll nscoll nscheck nsreact
+
+run                  100
+
+print "Quick test completed: nsite = ${nsite}"
+
+print "Single low-nsite diagnostic completed."

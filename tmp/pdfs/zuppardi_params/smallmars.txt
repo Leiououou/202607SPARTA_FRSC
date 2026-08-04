@@ -1,0 +1,808 @@
+Publication Year   2016
+
+
+Acceptance in OA   2020-06-03T14:13:16Z
+
+
+Title              Small Mars satellite: a low-cost system for Mars exploration
+
+
+Authors            Pasolini, Pietro, Aurigemma, Renato, Causa, Flavia, Dell'Aversana, Pasquale, de la Torre Sangrà,
+                   David, ESPOSITO, Francesca, Fantino, Elena, Gramiccia, Luciano, Grassi, Michele, Lanzante,
+                   Giovanni, MOLFESE, CESARE, Punzo, Francesco, Roma, Ilaria, Savino, Raffaele, Zuppardi,
+                   Gennaro, Cimminiello, Nicola
+
+
+Handle             http://hdl.handle.net/20.500.12386/25908
+                      67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                        Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+                                                           IAC-16-A3.3A.6
+
+              SMALL MARS SATELLITE: A LOW-COST SYSTEM FOR MARS EXPLORATION
+
+       Pasolini P.*a, Aurigemma R.b, Causa F.a, Cimminiello N.b, de la Torre Sangrà D.c, Dell’Aversana P.d,
+      Esposito F.e, Fantino E.c, Gramiccia L.f, Grassi M.a, Lanzante G.a, Molfese C.e, Punzo F.d, Roma I.g,
+                                             Savino R.a, Zuppardi G.a
+                                      a
+                                       University of Naples “Federico II”, Naples (Italy)
+                                                  b
+                                                    Eurosoft srl, Naples (Italy)
+                               c
+                                 Space Studies Institute of Catalonia (IEEC), Barcelona (Spain)
+                                                 d
+                                                   ALI S.c.a.r.l., Naples (Italy)
+                             e
+                               INAF - Astronomical Observatory of Capodimonte, Naples (Italy)
+                                                    f
+                                                      SRS E.D., Naples (Italy)
+                                  g
+                                    ESA European Space Agency, Nordwijk (The Netherlands)
+* Corresponding Author
+
+                                                            Abstract
+    The Small Mars Satellite (SMS) is a low-cost mission to Mars, currently under feasibility study funded by the
+European Space Agency (ESA). The mission, whose estimated cost is within 120 MEuro, aims at delivering a small
+Lander to Mars using an innovative deployable (umbrella-like) heat shield concept, known as IRENE (Italian ReEntry
+NacellE), developed and patented by ALI S.c.a.r.l., which is also the project's prime contractor. The Lander includes
+two small payloads, i.e., a dust particle analyzer and an aerial drone. The former is based on an instrument, developed
+by the Astronomical Observatory of Capodimonte (INAF-OAC), performing in-situ measurements of the size
+distribution and abundance of dust particles suspended in the Martian atmosphere. The drone is being designed by the
+University of Naples and aims at demonstrating the feasibility of low-altitude flight in the Martian atmosphere. The
+project also involves the Space Studies Institute of Catalonia (IEEC), responsible for launch and trajectory design. In
+the paper, we illustrate the results of the feasibility study of SMS, including a description of the mission profile, launch
+and escape phases, interplanetary trajectory, Mars approach, entry, descent and landing (EDL), and payload
+deployment and operations. The current baseline envisages launching to LEO with VEGA. Then, a dedicated
+propulsion module will provide a series of apogee raising maneuvers to place the vehicle on the hyperbolic trajectory
+to Mars. A targeting maneuver, provided by a cruise stage, will direct the spacecraft to the atmospheric entry point
+providing initial conditions suitable for the deployment of the heat shield. This will provide a ballistic coefficient much
+lower than in previous Mars missions, thus allowing to reach subsonic conditions without the use of a supersonic
+parachute. To demonstrate this, EDL and aero-thermo-dynamic analyses are performed with a 3-DoF model of the
+entry trajectory and high fidelity CFD and DSMC analysis tools. Finally, particular attention is devoted to the
+description of the deployable shield technology and verification.
+
+Keywords: Mars Exploration, HDAD, Aerial Drone, DPA
+
+Acronyms/Abbreviations                                                  MEMS             Micro Electro-Mechanical Systems
+AD         Aerial Drone                                                 OBDH             On-Board Data Handling
+CCD        Charge Coupled Device                                        PCP              Porkchop Plot
+COTS       Commercial Off The Shelf                                     PM               Propulsion Module
+CS         Cruise Stage                                                 SMS              Small Mars Satellite
+DHS        Deployable Heat Shield                                       SOI              Sphere Of Influence
+DPA        Dust Particle Analyzer                                       TPS              Thermal Protection System
+EDL        Entry, Descent and Landing                                   TRL              Technology Readiness Level
+ESA        European Space Agency                                        UAV              Unmanned Aerial Vehicle
+FS         Flexible Shield                                              GCS              Ground Control Station
+HDAD       Hypersonic Deployable Aerodynamic
+           Decelerator
+HIAD       Hypersonic Inflatable Aerodynamic                            1. Introduction
+           Decelerator                                                      Over the past 20 years, great effort has been put on
+IRENE      Italian REentry NacellE                                      Mars exploration, with a primary aim at understanding
+LEO        Low Earth Orbit                                              its surface composition and habitability potential.
+
+
+
+          IAC-16- A3.3A.6                                                                                      Page 1 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+Since 1976, several missions have successfully landed                  providing thermal protection and aerobraking
+on Mars: Viking 1 and 2 [1], Mars Pathfinder [2], the                  functions during Mars entry. The shield is retracted at
+two Mars Exploration Rovers [3], Phoenix [4] and                       launch and during the interplanetary cruise. This
+Mars Science Laboratory [5]. All Mars landers,                         feature allows to adopt a small launcher, gives higher
+including those of the on-going ESA’s ExoMars                          flexibility in the shield design and sizing, and brings
+programme [6], are based on similar entry, descent and                 advantages in the achievable ballistic coefficient at
+landing (EDL) strategies, which employ a fixed                         planetary entry. Indeed, the ballistic coefficient can be
+forebody for the lander. Only recent studies have                      made sufficiently small for the deceleration through
+focused on deployable and inflatable landing systems.                  the atmosphere to subsonic Mach numbers to be
+Hypersonic Inflatable Aerodynamic Decelerator                          achieved without a supersonic parachute, and at
+(HIAD) [7-9] and Hypersonic Deployable                                 altitudes higher than those of previous Mars missions.
+Aerodynamic        Decelerator      (HDAD)       [10-13]               This is discussed in detail in Section 4 which describes
+technologies represent the new challenge in planetary                  the EDL phase results and the deployable shield
+exploration.                                                           technology. Here, we wish to mention that a lower
+    The aim of this contribution is to present the Small               ballistic coefficient allows to deliver payloads at
+Mars Satellite (SMS) mission, whose primary goal is                    higher elevations on Mars surface, with the possibility
+to test a deployable shield for Mars atmospheric entry.                of reaching unexplored sites, of high interest for life
+The shield shall provide both thermal protection and                   search [14].
+deceleration through the thin Martian atmosphere.                          As outlined in the previous section, SMS will carry
+SMS will also carry a technology payload, i.e., an                     on board a DPA and an AD. These are designed so to
+aerial drone (AD) for planetary surface exploration,                   fit the limited power, mass and volume resources
+and a science payload, i.e., a dust particle analyzer                  available on board SMS (see sections 5 and 6).
+(DPA).                                                                 Nevertheless, they can potentially improve Mars
+    Accommodating the shield in folded configuration                   atmosphere knowledge and modeling, as well as
+at launch and deploying it at Mars entry, offers the                   demonstrate the viability of atmospheric flight on
+advantage of increasing the mass/volume ratio at                       Mars, issues of high interest to future Mars exploration
+launch, thus widening the choice of the possible                       missions.
+launchers. Moreover, the shield deployment reduces
+the ballistic coefficient to much lower values than
+previous missions of the same category, thus allowing
+a significantly higher deceleration in the upper and
+more rarefied region of the atmosphere. This brings
+lower thermal and dynamic loads, and the possibility
+of reaching subsonic conditions without the use of a
+supersonic parachute. These are the core
+characteristics of SMS. The present work illustrates in
+detail the choices and the methods that led to the
+current system’s design.
+    In particular, Section 2 illustrates the mission and
+the system outline, focusing on the system
+configuration and the mission profile. Section 3 is
+devoted to the description of launch, interplanetary
+transfer and Mars approach. Section 4 describes the
+EDL phase, followed by the illustration of the design
+of the deployable shield. Sections 5 and 6 describe the
+two payloads. Conclusions are drawn in Section 7.                        Fig. 1. Overall system configuration at launch (top)
+                                                                              and SMS with the shield opened (bottom).
+2.   Mission and system outline
+    Core characteristics of SMS are the deployable                         SMS will be launched to Mars by a Vega rocket on
+shield, the low cost and the small size, features which                a direct hyperbolic transfer. To this end, an additional
+stand out with respect to previous Mars Landers. The                   propulsion module (PM), acting as a fifth stage, shall
+overall mission cost, estimated with state-of-the-art                  be introduced because Vega does not perform to Earth
+CER models for small missions, is within 120 M€,                       escape. The propulsion module will separate soon after
+including launch and operations. Concerning the                        executing the injection into interplanetary trajectory.
+deployable shield technology, an umbrella-like                         Fig. 1 illustrates the launch setup in the payload fairing
+mechanism will be tested to open a flexible shield                     of Vega: SMS (with the shield in retracted
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 2 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+configuration) is integrated with the Cruise Stage (CS),
+and the ensemble is installed on top of the fifth stage.
+The CS provides electric power, telecommunications,
+thermal control, and attitude determination and control
+during the interplanetary transfer, and is jettisoned
+shortly before Mars entry. On approaching Mars, the
+CS applies a targeting maneuver to achieve the
+required kinematics conditions at atmospheric entry
+(i.e., a flight path angle between -14º and -12º).
+    To host the payloads and carry out the mission,
+SMS exploits a modular architecture, which consists of                               Figure 3. EDL operation sequence.
+two main elements: the Lander, including the payload
+and the avionics modules (see Fig. 2), and the                         Table 1. Overall system mass budget.
+deployable shield (see Fig. 1). The payload module                      Unit                          Mass(kg)
+(drone bay in the figure) hosts the AD in folded                        Cruise Stage                  74.3
+configuration, preserving its integrity during all the                  Lander                        110
+mission and allowing its release after landing. The                     Deployable Heat Shield        57.1
+avionics module contains the DPA and all the                            System margin (20%)           48.3
+subsystems and components required to carry out the                     Total dry mass                289.7
+mission and perform the payload operations on Mars.                     Total wet mass                304.5
+A vented airbag is stowed in the hollow nose and in the
+upper side of the avionics bay.                                        3.   Launch, interplanetary transfer and Mars
+                                                                            approach
+                                                                           SMS will follow a direct trajectory from Earth to
+                                                                       Mars and shall enter the atmosphere of Mars from a
+                                                                       hyperbolic orbit relative to the planet. Environmental
+                                                                       considerations put restrictions on the choice of the
+                                                                       landing site and on the selection of the arrival date.
+                                                                       According to the temperature maps of Fig. 4, the
+                                                                       southern hemisphere is characterized by the warmest
+                                                                       temperatures, and this occurs in winter. However, the
+                                                                       Martian atmospheric conditions are severe at this
+                                                                       epoch because the heat transport causes strong air
+                                                                       currents and winds which raise the dust. The dust
+                                                                       circulation causes devils and may even result in global
+          Fig. 2. SMS capsule configuration.                           storms. Therefore, landing close to the equator (the
+                                                                       mildest region on a yearly basis) before autumn is to
+    As outlined in Fig. 3, at Mars entry the umbrella-                 be preferred.
+like mechanism unfolds the shield. Then, a subsonic                        Following the algorithm proposed by [15], the
+parachute is opened to further reduce the ground                       Earth-to-Mars trajectories have been computed by
+impact speed to values compatible with a passive soft                  solving the two-body Sun-spacecraft Lambert’s
+landing system (i.e., the vented airbag). The                          problem between positions obtained by assuming that
+deployable shield is jettisoned soon after parachute                   the planets are massless bodies revolving on secularly-
+deployment. Once on ground, the cover of the Lander                    precessing Keplerian ellipses.
+unfolds (see section 6) exposing the AD. Operations on                     The transfer opportunities have been determined
+the surface of Mars should last from a few days to a                   with a time resolution of one day at departure and at
+few weeks.                                                             arrival. These opportunities are represented in the form
+    As shown in Table 1, the wet mass is of 304.5 kg.                  of porkchop plots (PCPs), and their overall cost (sum
+Upon separation of the CS, the mass of the system                      of departure and arrival ΔV’s) exhibits a typical pattern
+decreases to about 200 kg. After parachute and shield                  with a periodicity of two years approximately,
+ejection, the mass further decreases to 132 kg. This                   resembling the synodical period of the two planets
+value is the mass at landing. About 15 kg of propellant                (2.14 years). Hence, three PCPs are available for the
+are needed for maneuvers during cruise.                                interval 2020-2024, centered in 2020, 2022 and 2024,
+                                                                       respectively. The opportunities with the minimum cost
+                                                                       at departure are those of the year 2024, in particular
+                                                                       those corresponding to type II trajectories (i.e.,
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 3 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+trajectories with transfer angles larger than 180º) (see
+Fig. 5).
+
+
+
+
+                                                                        Fig. 6. Heliocentric plot of the baseline Earth-to-Mars
+                                                                        trajectory (details in the text). The positions of Earth
+                                                                          at arrival and Mars at departure are also indicated.
+
+                                                                           The lowest cost at departure corresponds to a 334-
+                                                                       days trajectory leaving the Earth on 2 October 2024
+                                                                       and reaching Mars on 1 September 2025 (see Fig. 6).
+                                                                       This solution has an Earth C3 (the square of the
+                                                                       hyperbolic excess speed v∞) of 11.3 km2/s2 and a Mars
+                                                                       v∞ of 2.5 km/s. The arrival date is compliant with the
+                                                                       requirement of landing before the local autumnal
+Fig. 4 - Daily average maximum (top) and minimum
+                                                                       equinox.
+   (bottom) atmospheric temperatures close to the
+                                                                           The C3 level of the trajectory sets the requirements
+  ground over one Martian year and with respect to
+                                                                       on the wet mass of the spacecraft, in a way which
+geographical latitude. The lowest minima are close to
+                                                                       depends on the performance of the launcher. Among
+ -130ºC, whereas the highest maxima are at the level
+                                                                       the three European vehicles, i.e., Ariane 5, Soyuz and
+                       of 20ºC.
+                                                                       Vega, Vega is the cheapest and the smallest, in other
+                                                                       words the most suitable for a small-class mission.
+                                                                           Unfortunately, Vega by itself launches to
+                                                                       geocentric orbit (C3 < 0) only. The performance of
+                                                                       Vega can be enhanced to positive values of C3 by an
+                                                                       additional ad hoc stage assembled with the spacecraft
+                                                                       and stowed in the payload fairing. In particular,
+                                                                       according to a recent study [16], a particular bi-
+                                                                       propellant engine (i.e., the PM) provides the
+                                                                       performance shown in Fig. 7.
+                                                                           Following insertion into a 300-km LEO low-
+                                                                       inclination orbit and separation from the launcher, the
+                                                                       PM can inject a spacecraft of the mass indicated in the
+                                                                       y-axis, given the C3 (x-coordinate) and one of two
+                                                                       options for the size of the PM’s propellant tank, i.e.,
+                                                                       the short (yellow line) or the long (red line). The Lisa
+                                                                       Pathfinder spacecraft [17] was launched to the L1 point
+                                                                       of the Sun-Earth system with a version of the PM: upon
+                                                                       separation from the fourth stage of the rocket, the PM
+                                                                       executed a series of apogee raising maneuvers until
+                                                                       escape was achieved. The baseline launch profile that
+                                                                       has been conceived for SMS is very similar to this.
+                                                                       Adoption of the long propellant tank allows to launch
+                                                                       320 kg of wet mass, margins included. The apogee
+                                                                       raising sequence shown in Fig. 8 is just an exercise
+    Fig. 5. Porkchop plots for the 2024 launch                         based on the example of Lisa Pathfinder.
+ opportunities: colour maps of departure C3 (km2/s2                    Modifications shall be made based on communications
+        top) and arrival v∞ (km/s, bottom).                            and power requirements. However, although in a
+                                                                       preliminary and simplified way, this apogee raising
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 4 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+sequence demonstrates that SMS can be injected into                    4.   The EDL phase and the deployable thermal
+the right hyperbolic trajectory by means of six perigee                     protection system (TPS) concept layout
+burns of 0.4249 km/s, followed by a final burn of                          Here we define the SMS capsule’s entry trajectory
+0.8297 km/s of 22 minutes duration. The maneuvers                      and we make a preliminary assessment of the shield
+performed by Lisa Pathfinder had similar magnitudes                    design. Velocity, Mach number and pressure profiles
+and duration.                                                          have been computed over the entry trajectory using 3-
+                                                                       DOF models and hypersonic Newton theory for entry
+                                                                       trajectories evaluation.
+                                                                       
+                                                                        dV      V 2
+                                                                                        g sin  
+                                                                        dt        2
+                                                                            M r cos   sin  cos   cos  sin sin  
+                                                                                 2
+                                                                       
+                                                                        d  V 2          
+                                                                       V             g  cos   2M cos  cos 
+                                                                        dt  r            
+                                                                       
+                                                                              2
+                                                                                 M
+                                                                                   r   cos   cos  cos   sin  sin sin  
+                                                                       
+                                                                        d
+                                                                                     2
+
+                                                                            
+                                                                                 V
+                                                                                        cos  cos tan  
+                                                                                                                                              (1)
+                                                                       V
+ Fig. 7. Performance of Vega (launch mass, kg) with                     dt        r
+                                                                                                                          cos sin  cos 
+ the PM endowed with either of two versions of the                          2M  sin   tan  sin cos    M2 r
+    propellant tank (long in red, short in yellow).                                                                            cos 
+                                                                        dH
+                                                                            V sin 
+                                                                        dt
+                                                                        d V
+                                                                            cos  sin
+                                                                        dt    r
+                                                                        d  V cos  cos
+                                                                        dt  r         cos 
+                                                                       
+                                                                                                                                             (2)
+                                                                                             q0  1.83  104 V 3
+                                                                                                                    Rc
+                                                                                             p0  V 2                                        (3)
+
+                                                                           In Equation 1 t is the time, V the velocity, H the
+                                                                       altitude, γ the flight path angle, β the ballistic
+                                                                       coefficient, g the gravitational acceleration, r the
+  Fig. 8. A possible Earth escape sequence through                     radius of curvature of the trajectory, ψ the azimuth
+seven consecutive perigee burns executed by the PM.                    angle, λ the latitude, Λ the longitude and ωM Mars
+                                                                       angular rotation speed. Heat fluxes (𝑞̇ 0 ) have been
+    The selected interplanetary trajectory targets the                 estimated along the trajectories using engineering
+center of Mars in a two-body Sun-spacecraft model.                     formulations (eqn. 2) as a function of the speed V, the
+The gravitational influence of the planet gradually                    Mars atmospheric density ρ and the capsule nose
+takes over as SMS approaches its destination, and,                     radius R0 [13]. Equation 3 describes the hypersonic
+according to the patched conics model, dominates the                   Newton theory where p0 is the stagnation point
+dynamics of the spacecraft once an ideal border, i.e.,                 pressure, V the velocity and ρ the Mars atmospheric
+the surface of the sphere of influence (SOI, 580000 km                 density.
+radius) has been crossed. The resulting Mars-centered                      Due to the low atmospheric density of Mars, all
+hyperbola must be appropriately corrected in order to                  past Mars landers have employed complicated and
+satisfy the aerodynamic requirement that the flight                    expensive EDL strategies in order to safely touch down
+path angle be in the range [-14º, -12º] at an altitude of              on the surface [14]. In these designs, the entry capsule
+125 km, representing the upper limit of the Martian                    is characterized by a fixed forebody heat shield which
+atmosphere. The correction maneuver has been                           protects the lander in the high aerodynamic heating
+modelled as a small impulse (33 m/s) applied by the                    portion of the atmospheric entry. Then, when the
+onboard propulsion system when crossing the surface                    capsule reaches supersonic speeds, a parachute system
+of the SOI. Such impulse makes SMS enter the                           is deployed to reduce the speed. Once the lander has
+atmosphere at a speed of 5.5 km/s and land close to the                slowed down to subsonic speeds, the heat shield is
+equator, as desired.                                                   jettisoned and a subsonic parachute is deployed.
+                                                                       Different touch down methods, active and passive,
+                                                                       using thrusters and airbags respectively, are employed.
+
+
+
+          IAC-16- A3.3A.6                                                                                            Page 5 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+    The advantage of using a deployable umbrella-like                  landing at high altitudes (i.e., sites with elevation
+configuration is the small attainable ballistic                        higher than MOLA 0).
+coefficient, which can be made lower than 20 kg/m2,
+less than one third the ballistic coefficient of any
+previous Mars lander [18]. Compared with the EDL
+methods adopted by past missions, several advantages
+are brought by the decrease in the ballistic coefficient.
+First of all, the aerodynamic and aero-thermo-dynamic
+loads along the hypersonic entry flight path are much
+reduced. Besides, a single subsonic parachute may be
+sufficient since the capsule decelerates to subsonic
+speeds at higher altitudes. Finally, passive landing
+systems, such as airbags or crushing systems, can be
+used to absorb the impact energy.
+    A parametric analysis based on varying the ballistic
+coefficient and the flight path angle has been carried
+out in order to assess the maximum design parameters
+(Fig. 9). The simulations have been performed with
+actual values for the entry mass (200 kg) and the shield                 Fig. 10. Speed, Mach number, stagnation point heat
+diameter (3.11 m), and assuming a drag coefficient Cd                   flux and pressure profiles for SMS and three previous
+equal to 1. Special relevance has been given to the                        Mars landers, i.e., Mars Viking, Mars Pathfinder,
+results corresponding to β = 21 kg/m2 and FPA = -13°.                                           Phoenix.
+The relative initial entry velocity and initial entry
+altitude have been set to 5.5 km/s and 125 km,                             A parachute analysis has been carried out to assess
+respectively (see Section 3).                                          the performance of SMS in terms of landing capability
+                                                                       using a single subsonic parachute. In order to simulate
+                                                                       the shield ejection in the entry trajectory after the
+                                                                       parachute deployment, an analysis of the variation of
+                                                                       the landing speed as a function of the Lander mass has
+                                                                       been performed. For this analysis, four alternative
+                                                                       values for the diameter have been considered (Fig. 11).
+
+
+
+
+Fig. 9. Landing speed (top-left), stagnation point heat
+flux (top-right) and pressure (bottom) as functions of                   Fig. 11. Landing speed as a function of capsule mass and
+                                                                                           parachute diameter.
+ ballistic coefficient (x-axis) and entry FPA (y-axis).
+                                                                           Finally, in order to evaluate the aerodynamic and
+                                                                       thermal field around the entry capsule and particularly
+    Figure 10 shows a comparison between the velocity
+                                                                       on the flexible and rigid elements of the thermal
+profiles of previous Mars entry trajectories [19] and the
+                                                                       protection system, an aero-thermo-dynamic analysis
+nominal SMS entry path. The lower ballistic
+                                                                       on the selected capsule configuration has been
+coefficient achieved by SMS causes lower stress in
+                                                                       executed. Depending on the flow regime, different
+terms of aerodynamic and aero-thermo-dynamic loads.
+                                                                       numerical state-of-the-art codes have been applied. In
+    As shown in Fig. 10, one of the most important
+                                                                       continuous regime, the solution of the classical Navier-
+results achieved with the deployable shield technology
+                                                                       Stokes and energy equations has been obtained with
+is the possibility of reaching the subsonic regime at
+                                                                       the commercial code STAR-CCM+ [20]. The flow
+altitudes of approximately 15 km without sophisticated
+                                                                       field around the capsule has been assumed laminar.
+deceleration systems (such as supersonic parachutes or
+                                                                       Due to its chemical composition (95% carbon dioxide),
+thrusters). Hence, the SMS technology is extremely
+                                                                       the Mars atmosphere has been treated as a single-
+flexible and the only low-cost system capable of
+                                                                       component ideal gas. The numerical simulations have
+
+
+          IAC-16- A3.3A.6                                                                                     Page 6 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+been performed with a density-based, time implicit                     made up of a sliding structure, tensioning poles and
+numerical solution scheme through a control volume-                    threads. Figure 14 shows the shield in retracted (top)
+based technique. The AUSM (Advanced Upstream                           and deployed (bottom) configuration. A rigid nose
+Splitting Method) scheme has been employed for                         cone and the associated support structure are also part
+convective numerical fluxes [21, 22]. In a rarefied                    of the TPS.
+regime, the study of the aerodynamic characteristics
+has required Direct Simulation Monte Carlo (DSMC)
+methods [23]. In particular, two-dimensional
+axisymmetric analyses have allowed to estimate the
+distribution of the thermal and mechanical loads on the
+surface of the capsule, and to compare the results
+obtained in the EDL phase. Three-dimensional
+analyses have allowed to calculate the values of
+temperature and pressure distributions on the three-                    Fig. 13. Pressure distribution at maximum stagnation point
+dimensional geometry of the capsule at the most severe                    pressure at 40 km (left) and temperature distribution at
+                                                                         maximum stagnation point heat flux condition at 50 km
+conditions along the entry trajectory.
+                                                                                                   (right).
+
+
+
+
+  Fig. 12. CFD, DSMC and hypersonic Newtonian theory
+          (top) and Tauber/Sutton theory (bottom).
+
+    Fig. 12 shows good agreement in terms of                                Figure 14. Shield layout in retracted (top) and
+stagnation point pressure prediction, meaning that the                           deployed (bottom) configurations.
+Newtonian theory is a valuable tool to predict the
+stagnation point pressure for a blunt body in a                            The shield is made of woven ceramic fabrics,
+hypersonic flow field. It is known that the correct                    which retain strength and flexibility with little
+evaluation of the stagnation point heat flux over the                  shrinkage at temperatures lower than 1100 °C. The
+planetary entry trajectory is a very difficult task to                 shield consists of two 0.38-mm layers, each composed
+accomplish. According to Fig. 12, the more rarefied                    by twelve trapezoidal patches reinforced at the edges
+the flow regime, the closer the DSMC results are to the                (Fig. 15). When deployed, the shield approximates a
+curve predicted by the theory. On the other hand, as the               45° conic surface, with a maximum diameter of 3.11 m
+altitude decreases, the CFD code results get closer to                 and a maximum working temperature of 1300 °C. The
+the Tauber/Sutton equation results.                                    fabric layers are put in tension by 12 poles and are
+    Fig. 13 illustrates the pressure distribution at                   clamped at the nose cone support structure.
+maximum stagnation point conditions and the
+temperature distribution at maximum stagnation point
+heat flux conditions through the capsule entry
+trajectory.
+    The main component of the TPS is a flexible shield
+(FS) whose deployment mechanism is essentially
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 7 of 11
+                      67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                        Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+
+
+                                                                             Fig. 16. Stress map on the Nextel Fabric during entry.
+          Fig. 15. Layout of the flexible shield.
+                                                                        5.   The DPA
+                                                                            The monitoring of airborne dust is of great interest
+    In order to reduce the overall system’s mass, a
+                                                                        in the study of Martian climatology because dust
+hollow configuration has been used for the nose cone,
+                                                                        affects the atmospheric thermal structure, balance and
+which offers also the possibility of accommodating the
+                                                                        dynamics by absorbing and re-emitting solar and
+airbag. To increase the nose cone strength, a double-
+                                                                        thermal radiation.
+layer solution has been adopted in which the external
+                                                                            The influence of dust is relevant, even with
+layer is made of RESCOR 310M (a silica foam) with a
+                                                                        moderate presence of dust in the atmosphere, but
+thickness of 4 mm and a maximum working
+                                                                        during regional or global dust storms more than 80%
+temperature of 1650 °C, and the inner layer is made of
+                                                                        of the incoming sunlight is absorbed by the dust
+a FW12 Oxide/Oxide ceramic matrix composite with a
+                                                                        causing intense atmospheric heating. Airborne dust is
+thickness of 2 mm and a maximum working
+                                                                        therefore a crucial climate component on Mars. The
+temperature of 1300 °C. Although the temperature
+                                                                        main dust parameters are the size distribution and
+reached at the nose during entry is equal to the
+                                                                        abundance. Moreover, wind and windblown dust
+maximum working temperature of FW12, the
+                                                                        represent nowadays the most active processes having
+temperature at the inner layer is lower due to the 4 mm
+                                                                        long-term effects on the Martian geology and on the
+RESCOR layer. The deployment mechanism, made of
+                                                                        morphological evolution, such as aeolian erosion, dust
+titanium alloy Ti6Al-4V, is composed by a sliding
+                                                                        redistribution on the surface and weathering.
+structure consisting of two rings, connected by four
+                                                                            The size distribution is so far measured indirectly
+rods, sliding along the Lander. The twelve tensioning
+                                                                        through remote sensing data, but these measurements
+poles (50 mm diameter, 1 mm thickness) are connected
+                                                                        exhibit poor vertical resolution, since they are related
+to the upper ring by means of cylindrical hinges, while
+                                                                        to the entire atmospheric column, and give little insight
+the lower ring supports one end of the twelve lower
+                                                                        into the properties of the atmospheric layer close to the
+threads (1.5 mm diameter). The lower and upper
+                                                                        surface, where phenomena of dust lifting are present.
+threads (4 mm diameter) ensure fabric stabilization in
+                                                                        The DPA selected for SMS will be able to perform,
+the tensioning phase before the atmospheric entry.
+                                                                        actually for the first time, measurements of dust
+Indeed, under pressure loads the lower threads lose
+                                                                        concentration directly on the Martian soil. The DPA is
+tension, while the upper threads support the fabric in
+                                                                        based on an optical particle counter which processes
+sustaining the loads. Two electric actuators complete
+                                                                        the light scattered from the single dust particle. In this
+the deployment system, which allow the displacement
+                                                                        way, the instrument measures the size and estimates
+of the sliding structure during the opening phase. The
+                                                                        the abundance of each grain. As a matter of fact,
+shield design has been verified by using a nonlinear FE
+                                                                        according to Mie theory, the intensity of the scattered
+model of the flexible shield and of the main structural
+                                                                        light is directly related to the grain size. The DPA is
+parts of the deployment mechanism, considering load
+                                                                        endowed with a pump to obtain a flow of gas with
+conditions deriving from the tensioning phase and
+                                                                        embedded dust flowing into the instrument, down to an
+entry phase (pressure loads). A pressure value of 4.4
+                                                                        area where a laser light is focused and the scattered
+kPa on the nose and 3.2 kPa on the fabric have been
+                                                                        light is collected by a mirror and finally sent to a
+used, as predicted by the aero-thermodynamic analysis.
+                                                                        detector. Eventually, the flow of air and dust is ejected
+For the flexible shield and the deployment mechanism,
+                                                                        back into the atmosphere. The light which is not
+both the pressure and the tensioning loads have been
+                                                                        scattered is captured by a light trap to avoid stray light
+simulated to test the design. Fig. 16 shows the stress
+                                                                        inside the instrument. The grain radii which can be
+distribution of the Nextel fabric during entry: the stress
+                                                                        measured range from 0.2 to 10 µm, with a factor of
+level is lower than the allowable limit (40 MPa) except
+                                                                        coincidence lower than 4%. Once the particle counting
+in very small areas (i.e., black areas in Fig. 16).
+                                                                        and size measurements have been performed, the dust
+
+
+
+
+          IAC-16- A3.3A.6                                                                                      Page 8 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+number density can be estimated since the volume                       each measurement run. Scientific data can either be in
+sampled by the instrument is known.                                    the form of raw data, i.e., the complete waveform
+    The current design of the DPA is derived from the                  corresponding to the single event (dust grain), or can
+MEDUSA instrument, selected for the ExoMars                            be transmitted in the form of histograms, an option
+Humboldt payload which reached a TRL of 5.2 in 2009                    which reduces the data volume.
+[24]. Since the mass and power budgets are very
+different from those of the ExoMars mission, an                        6.   The AD
+optimized DPA design was needed to fulfill the more                        Most of Mars surface exploration has been
+demanding requirements. The DPA has now a total                        performed by means of surface rovers [25]. Rovers are
+mass of 600 g (including a margin of 20%) and                          able to collect data near the surface, but their
+requires about 3 W of power, instead of the 3 kg and                   exploration capability is limited by the obstacles of the
+21 W of the MEDUSA instrument.                                         terrain. To overcome these limitations, SMS carries an
+    A DPA laboratory breadboard (Fig. 17) was                          aerial drone.
+developed with funds of the Italian Space Agency in                        The first idea of sending an Unmanned Aerial
+2011 and thanks to INAF financial resources                            Vehicle (UAV) to Mars dates back to 1978 with the
+afterwards. The breadboard was successfully tested                     Mini-sniffer [27-29]. Since then, many UAV proposals
+demonstrating the expected performances. The                           have been developed including airship/balloons [30],
+estimated TRL is between 4 and 5.                                      aircraft [25, 32-34] and rotorcraft [35-38].
+                                                                           Among the several concepts, a two-blade coaxial
+                                                                       rotorcraft appears the best solution in terms of
+                                                                       deployment complexity and ability to perform multiple
+                                                                       controlled flights while acquiring high-resolution
+                                                                       images. In addition, this solution is compliant with the
+                                                                       strict mass and volume requirements of the SMS
+                                                                       mission.
+                                                                           The atmospheric density on Mars is about 100
+                                                                       times lower than on Earth, thus making the design of a
+                                                                       Mars rotorcraft very challenging. This type of vehicle
+                                                                       needs high blade velocity and/or radius to generate
+                                                                       sufficient lift [25]. Furthermore, the blade design must
+                                                                       avoid transonic regimes and Reynold numbers lower
+          Fig. 17. DPA laboratory breadboard.                          than 5104 [35].
+                                                                           With this in mind, the preliminary sizing of the
+    The DPA will be accommodated preferably in a                       drone has been carried out so as to fit the space and
+fixed position on the lander. The possibility of                       mass available in the payload module. This has
+embarking the DPA on the drone was discarded                           resulted in a 7-kg rotorcraft, with a rotor radius of 1.25
+because this solution is more complex and demanding,                   m. The main characteristic of the drone are
+and does not ensure a significant increase in the                      summarized in Table 2.
+scientific return. According to the current baseline                       The drone is folded inside the Lander’s payload
+design, the DPA will be activated after landing and                    bay during launch, interplanetary flight and EDL, and
+shall execute at least four runs per Sol. Further                      is exposed by the Lander cover opening after landing.
+activations are desired, but they depend on the                            To fulfill the high-resolution imaging goal, the
+availability of energy and data link resources. Longer                 drone is equipped with a COTS CCD camera, that can
+and continuous acquisitions from the DPA can allow                     provide centimeter-level resolution images of the
+the detection of dust devils. Also the possibility to                  Martian surface [39]. The camera is used also as aiding
+trigger the DPA acquisition by means of other sensors                  sensor for navigation purposes, providing optical flow.
+(e.g., pressure sensors) can highlight this kind of                    Low-weight MEMS devices compose the drone
+phenomena. The possibility to perform measurements                     avionics. They shall guarantee autonomous navigation
+with the DPA during the descent phase of SMS is also                   and control on Mars. The drone is assumed to fly a
+of great interest and will be studied in the next stages               loiter path (320 m radius, 100 m altitude, 2 km ground
+of the project. The DPA interfaces directly with the                   track) around the Lander that acts as GCS and drone
+On-Board Data Handling (OBDH) by means of power                        landing site for battery recharging. Thus, during the
+supply and serial data interfaces.                                     flight the drone always keeps the GCS in line of sight.
+    The OBDH will activate the DPA according to a                      The multi-mission capability is ensured by four LiPo
+predefined mission timeline resident in the OBDH                       rechargeable batteries [25], which allow 7-min drone
+memory, and will acquire the data from the DPA after                   autonomous flight. The batteries are recharged in 1
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 9 of 11
+                     67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                       Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+SOL with the drone standing on a charging pad [40]                        The study has been carried out under ESA Contract
+embedded in the Lander cover (see Fig. 18).                            No. 4000115306/15/NL/LF/as (11/12/2015).
+Table 2. AD Characteristic
+                                                                       References
+ Parameter                              Value                           [1] Corliss, W.R., The Viking mission to Mars,
+ N. of rotors and blades (per           2                                   Scientific and Technical Information Office,
+ rotor)                                                                     National Aeronautics and Space Administration,
+ Cruise altitude (m)                    100                                 Washington, 1974.
+ Forward velocity (m/s)                 11.5                            [2] Golombek, M.P., The Mars Path Finder mission,
+ Blade radius (m)                       1.25                                Journal of Geophysical Research 102, 3953-3966,
+ Main body volume (m3)                  0.15×0.15×0.15                      2006.
+ Total power/Energy (W/Wh)              410/60                          [3] Crisp, J.A., Adler, M., Matijevic, J.R., et al., Mars
+                                                                            Exploration Rover mission, Journal of
+                                                                            Geophysical Research 108, 8061, 2001.
+                                                                        [4] Smith, P.H., and the Phoenix Science Team, The
+                                                                            Phoenix Mission to Mars, Lunar and Planetary
+                                                                            Science Conference 35, MackWell, S. and
+                                                                            Stansbery, E. (Eds.), 2004.
+                                                                        [5] Grotzinger, J.P. Crisp, J., Vasavada, et al., Mars
+                                                                            Science Laboratory Mission and Science
+                                                                            Investigation, Space Science Reviews 170, 5-56,
+                                                                            2012.
+                                                                        [6] Banerdt, W.B., Smrekar, S., Lognonne, P., et al.,
+                                                                            InSight, A Discovery Mission to Explore the
+ Fig. 18. Drone lading site on the unfolded lander. A
+                                                                            Interior of Mars, Lunar and Planetary Science
+   charging pad is embedded in the Lander cover.
+                                                                            Conference 44, 2013.
+                                                                        [7] Beck, R.A.S., Arnold, J.O., White, S., Fan, W.,
+7.   Conclusions
+                                                                            Stackpoole, M., Agrawal, P., Coughlin, S.,
+    The main results of the phase 0 study of a small,
+                                                                            Overview of initial development of flexible
+low-cost system for Mars exploration have been
+                                                                            ablators for hypersonic inflatable aerodynamic
+presented. The core features of the proposed system
+                                                                            decelerators,     21st    AIAA       Aerodynamic
+are a flexible shield that can be deployed at Mars
+                                                                            Decelerator Systems Technology Conference and
+arrival using an umbrella-like mechanism (providing
+                                                                            Seminar, 2011.
+thermal protection and aerobraking functions), a small
+                                                                        [8] Sheta, E.F., Venugopalan, V., Tan, X.G., Liever,
+scientific payload, for atmospheric dust analysis, and a
+                                                                            P.A., Habchi, S.D., Aero-structural assessment of
+small aerial drone aiming at demonstrating
+                                                                            an     inflatable    aerodynamic        decelerator.
+atmospheric flight on Mars.
+                                                                            NASA/CR-2010-216731, CFDRC Rept-8927/6,
+    Our preliminary analyses have proven the
+                                                                            NF1676L-10953, 2010.
+capability of the innovative shield concept to limit
+                                                                        [9] Goldman, B.D., Dowell, E.H., Scott, R.C.,
+thermal and pressure loads during re-entry, and to
+                                                                            Aeroelastic stability of a thermal protection
+reduce the ballistic coefficient to much lower values
+                                                                            system for inflatable aerodynamic decelerator.
+than all previous Mars missions. In this way, the
+                                                                            Journal of Spacecraft and Rockets, 52(1), 144-
+capsule decelerates to subsonic speeds in the higher
+                                                                            156, 2015.
+atmosphere, without the aid of a supersonic parachute.
+                                                                       [10] Bassano, E., Savino, R., Lo Forti, R., Ferrarotti,
+In the paper, the overall system configuration and
+                                                                            A., Richiello, C., Russo, G., Aurigemma, R.,
+mission profile have been presented. A peculiar feature
+                                                                            Punzo, F., Dell’Aversana, P., IRENE – Italian
+of the system is the possibility of using a small
+                                                                            Re-Entry NacellE for Microgravity Experiments,
+launcher, such as Vega, provided its performance is
+                                                                            in Proceedings of the 62nd International
+extended to Earth escape by the addition of an ad hoc
+                                                                            Astronautical Congress, CapeTown, October 3–7,
+fifth stage.
+                                                                            IAC-11.A2.7.7, 2011.
+    Finally, the preliminary design of the two payloads
+                                                                       [11] Carandente, V., Savino, R., D’Oriano, V.,
+have demonstrated their compliance with such a small
+                                                                            Fortezza, R., Deployable aerobraking earth entry
+system, opening the way to achieving scientific and
+                                                                            systems       for    recoverable      microgravity
+technological results of great value for future Mars
+                                                                            experiments, in Proceedings of the 65th
+exploration missions.
+                                                                            International Astronautical Congress, Toronto,
+                                                                            Canada, IAC-14.A2.3.8, September 2014.
+Acknowledgements
+
+
+         IAC-16- A3.3A.6                                                                                     Page 10 of 11
+                      67th International Astronautical Congress (IAC), Guadalajara, Mexico, 26-30 September 2016.
+                        Copyright ©2016 by the International Astronautical Federation (IAF). All rights reserved.
+
+
+[12] Carandente, V., Zuppardi, G., Savino, R.,                          [28] Colozza, A.J., Preliminary design of a Long-
+     Aerothermodynamic and stability analyses of a                           Endurance Mars Aircraft, NASA Contractor
+     deployable re-entry capsule. Acta Astronautica,                         Report 185243, 1990.
+     93, 291–303, 2014.                                                 [29] Minear, J., Davies, D., Malin, M., Gaffey, M.,
+[13] Carandente, V., Aerthermodynamic and mission                            Buck, S., Strangway, D., Prinn, R., Final Report
+     analyses of deployable aerobraking Earth re-                            of the Ad Hoc Mars Airplane Science Working
+     entry systems, PhD thesis, 2014.                                        Group, Pasadena, 1978.
+[14] Braun, R.D., Manning, R.M. Mars Exploration                        [30] Elfes, A., Bueno, S.S., Bergerman, M., De Paivs,
+     Entry, Descent and Landing Challenges,                                  E.C., Ramos, J.G., Azinheira, J.R., Robotic
+     IEEEAC Paper, 2006.                                                     Airships for Exploration of Planetary Bodies with
+[15] Standish, E.M., Keplerian elements for the                              an     Atmosphere:      Autonomy Challenges,
+     approximate positions of the major planets, Solar                       Autonomous Robots 14, 147-164, 2003.
+     System            Dynamics,          JPL/Caltech,                  [31] Gired, A.R., The Case For A Robotic Martian
+     http://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf                        Airship,    12th    Lighter-Than-Air     Systems
+     (last viewed 19/06/2016).                                               Technology Conference, San Francisco, 1997.
+[16] Vega User's Manual Issue 4, Revision 0,                            [32] Braun, R.D., Spencer, D.A., Design of the ARES
+     Arianespace (Ed.), April 2014.                                          Mars Airplane and Mission Architecture, Journal
+[17] CAS-ESA Call for Mission Proposals, Technical                           of Spacecraft and Rockets 43(5), 1026-1034,
+     Annex, Chinese Academy of Science & ESA                                 2006.
+     (Eds.), 2014.                                                      [33] Noth, A., Engel, W., Siegwart, R., Recent
+[18] McNamara, P., The LISA Pathfinder Mission,                              Progress on the Martian Solar Airplane Project
+     40th COSPAR Scientific Assembly 40, 2014.                               Sky-Saylor, 9th ESA Workshop on Advanced
+[19] Edquist, K.T., Desai, P.N., Schoenenberger, M.                          Space Technologies for Robotic and Automation
+     Aerodynamics for the Mars Phoenix Entry                                 "ASTRA", Noordwijk, 2006.
+     Capsule, AIAA paper 2008-7219, 2008.                               [34] Hall, D.W., Parks, R.W., On the Development of
+[20] Cd-Adapco STAR-CCM+ v10.04 User’s Guide,                                Airborne Science Platforms for Martian
+     2015.                                                                   Exploration, Founding Convention of the Mars
+[21] Paterna, D., Monti, R., Savino, R., Esposito, A.,                       Society, Boulder, 1998.
+     Experimental and numerical investigation of                        [35] Datta, A., Roget, B., Griffiths, D., Pugliese, G.,
+     Martian atmosphere entry, AIAA J. Space                                 Sitaraman, J., Bao, J., Liu, L., Gamard, O.,
+     Rockets 39 2 227–236, 2001.                                             Design of a Martian Autonomous Rotary-Wing
+[22] Zuppardi, G., Savino, R., DSMC Aero-Thermo-                             Vehicle, Journal of Aircraft 40(3), 461-472. 2006.
+     Dynamic Analysis of a Deployable Capsule for                       [36] Young, L.A., Vertical Lift – Not Just For
+     Mars Entry, 2015.                                                       Terrestrial Flight, in AHS/AIAA/RaeS/SAE
+[23] Bird, G.A., Molecular Gas Dynamics and Direct                           International Powered Lift Conference, Arlington,
+     Simulation Monte Carlo, Clarendon Press,                                VA, 2000.
+     Oxford, 1998.                                                      [37] Landau, E., Helicopter Could Be 'Scout' for Mars
+[24] Esposito, F., Colangeli, L., Della Corte, V., et al.,                   Rovers,          January          22        2015.
+     MEDUSA: Observation of atmospheric dust and                             http://www.jpl.nasa.gov/news/news.php?feature
+     water vapor close to the surface of Mars,                               =4457 (last viewed 19.07.2016).
+     International Journal of Mars Science and                          [38] Volpe, R., 2014 Robotic Activities at JPL, Jet
+     Exploration 6, 1-12, 2011.                                              Propulsion Laboratory, California Institute of
+[25] Song, H., Underwood, C., A Mars VTOL                                    Technology, Pasadena, CA, 2014.
+     Aerobot – Preliminary Design, Dynamics and                         [39] Point Gray – Innovation in Imaging website,
+     Control, 2007 IEEE Aerospace Conference, Big                            https://www.ptgrey.com/         (last     viewed
+     Sky, MT, 3-10 March 2007.                                               19.07.2016).
+[26] Englar, R.J., Michelson, R.C. , Navqi, M.A.,                       [40] New Skysense charging pad enables drones to
+     Colozza, A., Planetary Exloration Using                                 dock recharge and fly again, 4 November 2014,
+     Biomimetics, An Entomopter for Flight on Mars,                          http://www.skysense.co/blog/2014/11/charging-
+     NIAC Fellow Conference, Lunar and Planetary                             pad-drones-dock (last viewed, 19.07.2016).
+     Institute, Houston, Texas, 11-12 June 2002.
+[27] Ulivi, P., Harland, D.M., Robotic Exploration of
+     the Solar System, Part I: The Golden Age 1957-
+     1982, Springer Science and Business Media,
+     2007.
+
+
+
+
+          IAC-16- A3.3A.6                                                                                     Page 11 of 11
+
