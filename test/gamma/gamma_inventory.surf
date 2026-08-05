@@ -1,0 +1,10 @@
+# Four storable reactants for gank inventory-output testing
+
+C + O --> CO
+5.0e-19
+
+N + N --> N2
+4.0e-19
+
+CO + O --> CO2
+6.0e-19

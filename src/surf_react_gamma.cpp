@@ -55,8 +55,15 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   //   ID gamma file mode Tw nsite ...
   //   ID gamma only_one no  file mode Tw nsite ...
   //   ID gamma only_one yes file mode Tw ...
+  //   ID gamma [site mode] noleave file mode Tw [nsite] ...
+  //   ID gamma gank no file mode Tw nsite ...
+  //   ID gamma gank yes every_n N allow|noallow file mode Tw ...
 
   only_one_flag = 0;
+  noleave_flag = 0;
+  gank_flag = 0;
+  gank_allow_flag = 0;
+  every_n = 0;
   int ibase = 2;
   if (strcmp(arg[ibase],"only_one") == 0) {
     if (narg < ibase+2)
@@ -65,9 +72,32 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
     else if (strcmp(arg[ibase+1],"no") == 0) only_one_flag = 0;
     else error->all(FLERR,"Illegal surf_react gamma only_one option");
     ibase += 2;
+  } else if (strcmp(arg[ibase],"gank") == 0) {
+    if (narg < ibase+2)
+      error->all(FLERR,"Illegal surf_react gamma command");
+    if (strcmp(arg[ibase+1],"yes") == 0) {
+      gank_flag = 1;
+      if (narg < ibase+5 || strcmp(arg[ibase+2],"every_n") != 0)
+        error->all(FLERR,"Illegal surf_react gamma gank command");
+      every_n = input->inumeric(FLERR,arg[ibase+3]);
+      if (every_n <= 0)
+        error->all(FLERR,"Illegal surf_react gamma gank every_n value");
+      if (strcmp(arg[ibase+4],"allow") == 0) gank_allow_flag = 1;
+      else if (strcmp(arg[ibase+4],"noallow") == 0) gank_allow_flag = 0;
+      else error->all(FLERR,"Illegal surf_react gamma gank capacity option");
+      ibase += 5;
+    } else if (strcmp(arg[ibase+1],"no") == 0) {
+      gank_flag = 0;
+      ibase += 2;
+    } else error->all(FLERR,"Illegal surf_react gamma gank option");
   }
 
-  int nrequired = only_one_flag ? 3 : 4;
+  if (ibase < narg && strcmp(arg[ibase],"noleave") == 0) {
+    noleave_flag = 1;
+    ibase++;
+  }
+
+  int nrequired = (only_one_flag || gank_flag) ? 3 : 4;
   if (narg < ibase+nrequired)
     error->all(FLERR,"Illegal surf_react gamma command");
 
@@ -85,8 +115,9 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
 
   twall = input->numeric(FLERR,arg[twall_index]);
   nsite = 0.0;
-  if (!only_one_flag) nsite = input->numeric(FLERR,arg[iarg++]);
-  if (twall <= 0.0 || (!only_one_flag && nsite <= 0.0))
+  if (!only_one_flag && !gank_flag)
+    nsite = input->numeric(FLERR,arg[iarg++]);
+  if (twall <= 0.0 || (!only_one_flag && !gank_flag && nsite <= 0.0))
     error->all(FLERR,"Illegal surf_react gamma command");
 
   int nspecies = particle->nspecies;
@@ -107,9 +138,9 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
 
   while (iarg < narg) {
     if (strcmp(arg[iarg],"init_cover") == 0) {
-      if (only_one_flag)
+      if (only_one_flag || gank_flag)
         error->all(FLERR,
-                   "Cannot use surf_react gamma init_cover with only_one yes");
+                   "Cannot use surf_react gamma init_cover with this site mode");
       if (iarg+2 >= narg)
         error->all(FLERR,"Illegal surf_react gamma command");
 
@@ -175,6 +206,7 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
 
   build_surface_species();
   build_reaction_map();
+  if (gank_flag) validate_gank_reactions();
 
   nsingle = ntotal = 0;
   tally_single = new int[nlist];
@@ -223,6 +255,10 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   one_state_win = MPI_WIN_NULL;
   one_state_owned = NULL;
   one_state_nown = 0;
+  gank_state_win = MPI_WIN_NULL;
+  gank_state_owned = NULL;
+  gank_state_buffer = NULL;
+  gank_state_nown = 0;
 
   if (mode == FACE) create_per_face_state();
   else create_per_surf_state();
@@ -238,6 +274,9 @@ SurfReactGamma::~SurfReactGamma()
 
   if (one_state_win != MPI_WIN_NULL) MPI_Win_free(&one_state_win);
   one_state_owned = NULL;
+  if (gank_state_win != MPI_WIN_NULL) MPI_Win_free(&gank_state_win);
+  gank_state_owned = NULL;
+  delete [] gank_state_buffer;
 
   delete random;
   delete diffuse;
@@ -304,6 +343,7 @@ void SurfReactGamma::init()
   else initialize_per_surf_state();
 
   if (only_one_flag) create_one_state_window();
+  else if (gank_flag) create_gank_state_window();
 
   if (me == 0) {
     if (screen)
@@ -312,13 +352,39 @@ void SurfReactGamma::init()
       fprintf(logfile,"  Wall chemistry model: constant-gamma\n");
     if (screen) {
       if (only_one_flag)
-        fprintf(screen,"  Site mode: one site per surface\n");
-      else fprintf(screen,"  Site mode: nsite-based, nsite = %.8g\n",nsite);
+        fprintf(screen,"  Site mode: one site per surface%s\n",
+                noleave_flag ? ", noleave" : "");
+      else if (gank_flag)
+        fprintf(screen,"  Site mode: gank, every_n = %d, %s%s\n",every_n,
+                gank_allow_flag ? "allow" : "noallow",
+                noleave_flag ? ", noleave" : "");
+      else fprintf(screen,"  Site mode: nsite-based, nsite = %.8g%s\n",nsite,
+                   noleave_flag ? ", noleave" : "");
     }
     if (logfile) {
       if (only_one_flag)
-        fprintf(logfile,"  Site mode: one site per surface\n");
-      else fprintf(logfile,"  Site mode: nsite-based, nsite = %.8g\n",nsite);
+        fprintf(logfile,"  Site mode: one site per surface%s\n",
+                noleave_flag ? ", noleave" : "");
+      else if (gank_flag)
+        fprintf(logfile,"  Site mode: gank, every_n = %d, %s%s\n",every_n,
+                gank_allow_flag ? "allow" : "noallow",
+                noleave_flag ? ", noleave" : "");
+      else fprintf(logfile,"  Site mode: nsite-based, nsite = %.8g%s\n",nsite,
+                   noleave_flag ? ", noleave" : "");
+    }
+    if (gank_flag && mode == SURF) {
+      if (screen) {
+        fprintf(screen,"  Gank inventory dump fields:\n");
+        for (int i = 0; i < nspecies_surf; i++)
+          fprintf(screen,"    s_%s[%d] = %s\n",species_state_name,i+1,
+                  particle->species[species_surf[i]].id);
+      }
+      if (logfile) {
+        fprintf(logfile,"  Gank inventory dump fields:\n");
+        for (int i = 0; i < nspecies_surf; i++)
+          fprintf(logfile,"    s_%s[%d] = %s\n",species_state_name,i+1,
+                  particle->species[species_surf[i]].id);
+      }
     }
     if (tally_only_flag) {
       if (screen) fprintf(screen,"  *** TALLY-ONLY mode: "
@@ -356,9 +422,108 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
   double gamma = gamma_coeff[incident];
   if (gamma <= 0.0 || random->uniform() >= gamma) return 0;
 
-  int jsurf;
+  int jsurf = -1;
+  int ireaction = -1;
   int one_owner = -1;
   MPI_Aint one_disp = 0;
+  int gank_owner = -1;
+  MPI_Aint gank_disp = 0;
+
+  // gank is a well-mixed, per-species inventory.  The complete inventory
+  // vector is read and modified under one exclusive owner lock so partner
+  // selection and count changes are atomic across MPI ranks.
+
+  if (gank_flag) {
+    lock_gank_state(isurf,gank_owner,gank_disp);
+
+    bigint compatible_total = 0;
+    for (int j = 0; j < nspecies_surf; j++) {
+      int stored = species_surf[j];
+      if (gank_state_buffer[j] > 0 &&
+          reaction_map[incident][stored] >= 0) {
+        if (compatible_total > MAXBIGINT-gank_state_buffer[j]) {
+          MPI_Win_unlock(gank_owner,gank_state_win);
+          error->one(FLERR,"Surf_react gamma gank inventory overflow");
+        }
+        compatible_total += gank_state_buffer[j];
+      }
+    }
+
+    if (compatible_total > 0) {
+      bigint selected = (bigint) (random->uniform()*compatible_total);
+      bigint cumulative = 0;
+      for (int j = 0; j < nspecies_surf; j++) {
+        int stored = species_surf[j];
+        if (gank_state_buffer[j] <= 0 ||
+            reaction_map[incident][stored] < 0) continue;
+        cumulative += gank_state_buffer[j];
+        if (selected < cumulative) {
+          jsurf = j;
+          ireaction = reaction_map[incident][stored];
+          break;
+        }
+      }
+      if (jsurf < 0) {
+        MPI_Win_unlock(gank_owner,gank_state_win);
+        error->one(FLERR,"Invalid surf_react gamma gank partner selection");
+      }
+    }
+
+    // No compatible inventory: adsorb into the incident species inventory.
+    // In allow mode the capacity grows logically in every_n chunks.  The
+    // fixed RMA vector stores only the 64-bit count, so no window rebuild is
+    // needed.  In noallow mode a full inventory emits one stored particle
+    // together with the incident particle and decreases by one.
+
+    if (ireaction < 0) {
+      if (tally_only_flag) {
+        MPI_Win_unlock(gank_owner,gank_state_win);
+        return 0;
+      }
+
+      int iad = species2surf[incident];
+      if (iad < 0) {
+        MPI_Win_unlock(gank_owner,gank_state_win);
+        error->one(FLERR,"Surf_react gamma incident species cannot adsorb");
+      }
+
+      if (gank_allow_flag || gank_state_buffer[iad] < every_n) {
+        if (gank_state_buffer[iad] == MAXBIGINT) {
+          MPI_Win_unlock(gank_owner,gank_state_win);
+          error->one(FLERR,"Surf_react gamma gank inventory overflow");
+        }
+        gank_state_buffer[iad]++;
+        put_gank_state(gank_owner,gank_disp);
+        MPI_Win_unlock(gank_owner,gank_state_win);
+        ip = NULL;
+        return 0;
+      }
+
+      if (noleave_flag) {
+        MPI_Win_unlock(gank_owner,gank_state_win);
+        return 0;
+      }
+
+      gank_state_buffer[iad]--;
+      put_gank_state(gank_owner,gank_disp);
+      MPI_Win_unlock(gank_owner,gank_state_win);
+
+      double x[3],v[3];
+      int pid = MAXSMALLINT*random->uniform();
+      memcpy(x,ip->x,3*sizeof(double));
+      memcpy(v,ip->v,3*sizeof(double));
+      Particle::OnePart *particles = particle->particles;
+      int reallocflag =
+        particle->add_particle(pid,incident,ip->icell,x,v,0.0,0.0);
+      if (reallocflag) ip = particle->particles + (ip - particles);
+      jp = &particle->particles[particle->nlocal-1];
+
+      diffuse->wrapper(ip,norm,NULL,diffuse_coeffs);
+      diffuse->wrapper(jp,norm,NULL,diffuse_coeffs);
+      velreset = 1;
+      return 0;
+    }
+  }
 
   // A one-site surface is a global state, not a per-rank cached count.
   // Hold an exclusive passive-target lock while reading and changing it so
@@ -375,11 +540,11 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
       MPI_Win_unlock(one_owner,one_state_win);
       error->one(FLERR,"Invalid surf_react gamma one-site species");
     }
-  } else jsurf = select_surface_species(isurf);
+  } else if (!gank_flag) jsurf = select_surface_species(isurf);
 
   // vacant site: adsorption is a state transition, not a file reaction
 
-  if (jsurf < 0) {
+  if (!gank_flag && jsurf < 0) {
     if (tally_only_flag) {
       if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
       return 0;
@@ -406,9 +571,14 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
   // both the incident and adsorbed particles leave the surface separately
 
   int adsorbed = species_surf[jsurf];
-  int ireaction = reaction_map[incident][adsorbed];
-  if (ireaction < 0) {
+  if (!gank_flag) ireaction = reaction_map[incident][adsorbed];
+  if (!gank_flag && ireaction < 0) {
     if (tally_only_flag) {
+      if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
+      return 0;
+    }
+
+    if (noleave_flag) {
       if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
       return 0;
     }
@@ -448,12 +618,17 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
 
   if (tally_only_flag) {
     if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
+    if (gank_flag) MPI_Win_unlock(gank_owner,gank_state_win);
     return 0;
   }
 
   if (only_one_flag) {
     put_one_state(one_owner,one_disp,0);
     MPI_Win_unlock(one_owner,one_state_win);
+  } else if (gank_flag) {
+    gank_state_buffer[jsurf]--;
+    put_gank_state(gank_owner,gank_disp);
+    MPI_Win_unlock(gank_owner,gank_state_win);
   } else {
     mark_surface(isurf);
     species_delta[isurf][jsurf]--;
@@ -513,6 +688,7 @@ void SurfReactGamma::tally_update()
   // No PS clock is used.  Commit gas/surface state changes every timestep.
 
   if (only_one_flag) sync_one_state();
+  else if (gank_flag) sync_gank_state();
   else if (mode == FACE) update_state_face();
   else update_state_surf();
 }
@@ -707,6 +883,138 @@ void SurfReactGamma::sync_one_state()
         error->all(FLERR,"Invalid surf_react gamma one-site species");
       owned_species[i][jsurf] = 1.0;
     }
+  }
+
+  surf->spread_custom(total_state_index);
+  surf->spread_custom(species_state_index);
+
+  total_state = surf->edvec_local[surf->ewhich[total_state_index]];
+  species_state = surf->edarray_local[surf->ewhich[species_state_index]];
+  delete [] snapshot;
+}
+
+/* ----------------------------------------------------------------------
+   create a globally unique per-species inventory for every surface
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::create_gank_state_window()
+{
+  if (mode == FACE) {
+    gank_state_nown = nface/nprocs;
+    if (me < nface % nprocs) gank_state_nown++;
+  } else gank_state_nown = surf->nown;
+
+  if (gank_state_nown && nspecies_surf > MAXSMALLINT/gank_state_nown)
+    error->all(FLERR,"Surf_react gamma gank state is too large");
+  int nvalue = gank_state_nown * nspecies_surf;
+  MPI_Aint nbytes = (MPI_Aint) nvalue * sizeof(bigint);
+  MPI_Win_allocate(nbytes,sizeof(bigint),MPI_INFO_NULL,world,
+                   &gank_state_owned,&gank_state_win);
+
+  if (nvalue) {
+    bigint *zero = new bigint[nvalue];
+    memset(zero,0,nvalue*sizeof(bigint));
+    MPI_Win_lock(MPI_LOCK_EXCLUSIVE,me,0,gank_state_win);
+    MPI_Put(zero,nvalue,MPI_SPARTA_BIGINT,
+            me,0,nvalue,MPI_SPARTA_BIGINT,gank_state_win);
+    MPI_Win_unlock(me,gank_state_win);
+    delete [] zero;
+  }
+  MPI_Barrier(world);
+
+  gank_state_buffer = new bigint[nspecies_surf];
+}
+
+/* ----------------------------------------------------------------------
+   lock and fetch the complete inventory vector for one surface
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::lock_gank_state(int isurf, int &owner, MPI_Aint &disp)
+{
+  one_state_location(isurf,owner,disp);
+  disp *= nspecies_surf;
+
+  MPI_Win_lock(MPI_LOCK_EXCLUSIVE,owner,0,gank_state_win);
+  MPI_Get(gank_state_buffer,nspecies_surf,MPI_SPARTA_BIGINT,
+          owner,disp,nspecies_surf,MPI_SPARTA_BIGINT,gank_state_win);
+  MPI_Win_flush(owner,gank_state_win);
+}
+
+/* ---------------------------------------------------------------------- */
+
+void SurfReactGamma::put_gank_state(int owner, MPI_Aint disp)
+{
+  MPI_Put(gank_state_buffer,nspecies_surf,MPI_SPARTA_BIGINT,
+          owner,disp,nspecies_surf,MPI_SPARTA_BIGINT,gank_state_win);
+  MPI_Win_flush(owner,gank_state_win);
+}
+
+/* ----------------------------------------------------------------------
+   mirror authoritative RMA inventories into existing output state arrays
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::sync_gank_state()
+{
+  MPI_Barrier(world);
+
+  int nvalue = gank_state_nown * nspecies_surf;
+  bigint *snapshot = NULL;
+  if (nvalue) {
+    snapshot = new bigint[nvalue];
+    MPI_Win_lock(MPI_LOCK_SHARED,me,0,gank_state_win);
+    MPI_Get(snapshot,nvalue,MPI_SPARTA_BIGINT,
+            me,0,nvalue,MPI_SPARTA_BIGINT,gank_state_win);
+    MPI_Win_unlock(me,gank_state_win);
+  }
+
+  if (mode == FACE) {
+    int nall = nface*nspecies_surf;
+    bigint *one = new bigint[nall];
+    bigint *all = new bigint[nall];
+    memset(one,0,nall*sizeof(bigint));
+
+    for (int iface = me, i = 0; iface < nface; iface += nprocs, i++)
+      for (int j = 0; j < nspecies_surf; j++)
+        one[iface*nspecies_surf+j] = snapshot[i*nspecies_surf+j];
+
+    MPI_Allreduce(one,all,nall,MPI_SPARTA_BIGINT,MPI_SUM,world);
+
+    for (int iface = 0; iface < nface; iface++) {
+      bigint total = 0;
+      for (int j = 0; j < nspecies_surf; j++) {
+        bigint value = all[iface*nspecies_surf+j];
+        if (value < 0)
+          error->all(FLERR,"Surf_react gamma gank inventory became negative");
+        face_species_state[iface][j] = (double) value;
+        if (total > MAXBIGINT-value)
+          error->all(FLERR,"Surf_react gamma gank inventory overflow");
+        total += value;
+      }
+      face_total_state[iface] = (double) total;
+    }
+
+    delete [] one;
+    delete [] all;
+    delete [] snapshot;
+    return;
+  }
+
+  double *owned_total = surf->edvec[surf->ewhich[total_state_index]];
+  double **owned_species =
+    surf->edarray[surf->ewhich[species_state_index]];
+
+  for (int i = 0; i < surf->nown; i++) {
+    bigint total = 0;
+    for (int j = 0; j < nspecies_surf; j++) {
+      bigint value = snapshot[i*nspecies_surf+j];
+      if (value < 0)
+        error->all(FLERR,"Surf_react gamma gank inventory became negative");
+      owned_species[i][j] = (double) value;
+      if (total > MAXBIGINT-value)
+        error->all(FLERR,"Surf_react gamma gank inventory overflow");
+      total += value;
+    }
+    owned_total[i] = (double) total;
   }
 
   surf->spread_custom(total_state_index);
@@ -920,6 +1228,27 @@ void SurfReactGamma::build_reaction_map()
     int a = rlist[i].reactants[0];
     int b = rlist[i].reactants[1];
     reaction_map[a][b] = reaction_map[b][a] = i;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+
+void SurfReactGamma::validate_gank_reactions()
+{
+  int nspecies = particle->nspecies;
+  for (int i = 0; i < nspecies; i++) {
+    if (gamma_coeff[i] <= 0.0) continue;
+
+    int compatible = 0;
+    for (int j = 0; j < nspecies; j++)
+      if (gamma_coeff[j] > 0.0 && reaction_map[i][j] >= 0) {
+        compatible = 1;
+        break;
+      }
+
+    if (!compatible)
+      error->all(FLERR,
+                 "Surf_react gamma gank species has no active reaction partner");
   }
 }
 

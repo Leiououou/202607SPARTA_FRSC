@@ -1,0 +1,320 @@
+\documentclass[aspectratio=169,11pt]{ctexbeamer}
+\usepackage{fontspec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{positioning}
+
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setCJKmainfont{Microsoft YaHei}
+\setCJKsansfont{Microsoft YaHei}
+
+\definecolor{navy}{HTML}{17324D}
+\definecolor{blue}{HTML}{2878B5}
+\definecolor{teal}{HTML}{2A9D8F}
+\definecolor{orange}{HTML}{F4A261}
+\definecolor{red}{HTML}{D1495B}
+\definecolor{light}{HTML}{F4F7FA}
+\definecolor{gray}{HTML}{5E6B75}
+
+\setbeamercolor{normal text}{fg=navy,bg=white}
+\setbeamercolor{frametitle}{fg=white,bg=navy}
+\setbeamercolor{structure}{fg=blue}
+\setbeamercolor{block title}{fg=white,bg=blue}
+\setbeamercolor{block body}{fg=navy,bg=light}
+\setbeamercolor{alerted text}{fg=red}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{teal}\large\textbullet}
+\setbeamertemplate{itemize subitem}{\color{orange}\textbullet}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=0.78cm,dp=0.22cm,leftskip=0.55cm]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}}
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox{%
+    \begin{beamercolorbox}[wd=.84\paperwidth,ht=0.32cm,dp=0.13cm,leftskip=.45cm]{author in head/foot}
+      \color{gray}\scriptsize 常gamma表面复合模型 - 近期尝试总结
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.16\paperwidth,ht=0.32cm,dp=0.13cm,rightskip=.45cm plus1fil]{date in head/foot}
+      \color{gray}\scriptsize \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}}}
+
+\newcommand{\tagbox}[2]{%
+  \tikz[baseline=(X.base)]\node[rounded corners=2pt,fill=#1,inner xsep=6pt,inner ysep=3pt,text=white,font=\bfseries\small](X){#2};}
+\newcommand{\keynum}[1]{\textcolor{red}{\bfseries #1}}
+
+\title{常gamma表面复合模型：近期尝试与阶段结论}
+\subtitle{Zuppardi Orion 火星进入算例复现}
+\author{SPARTA 表面催化模型工作记录}
+\date{2026-08-05}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[navy] (current page.south west) rectangle (current page.north east);
+    \fill[blue] (current page.south west) rectangle ([xshift=0.23\paperwidth]current page.north west);
+    \fill[teal] ([yshift=0.55cm]current page.south west) rectangle ([yshift=0.72cm]current page.south east);
+  \end{tikzpicture}
+  \vspace{1.05cm}
+  \hspace{0.4cm}\begin{minipage}{0.86\textwidth}
+    {\color{white}\fontsize{25}{31}\selectfont\bfseries 常gamma表面复合模型：\par}
+    \vspace{0.12cm}
+    {\color{white}\fontsize{23}{29}\selectfont\bfseries 近期尝试与阶段结论\par}
+    \vspace{0.5cm}
+    {\color{white!85}\Large Zuppardi Orion 火星进入算例复现\par}
+    \vspace{0.85cm}
+    {\color{orange}\large\bfseries 核心问题：为什么SPARTA的FC热流比论文低约20\%？\par}
+    \vspace{1.05cm}
+    {\color{white!75}\small 2026-08-05}\hfill
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{1. 为什么开始修改常 $\gamma$ 模型？}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.55\textwidth}
+    \begin{block}{计算现象}
+      \begin{itemize}
+        \item NC热流与论文基本接近：偏差约 \keynum{0.3\%-5.5\%}
+        \item FC热流系统性偏低：约 \keynum{16\%-20\%}
+        \item 当前FC-NC催化增量只有论文的 \keynum{53\%-58\%}
+      \end{itemize}
+    \end{block}
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item 说明整体来流、几何与对流热流不是首要矛盾
+      \item 偏差主要集中在\textbf{表面复合次数和化学热贡献}
+    \end{itemize}
+    \column{0.41\textwidth}
+    \begin{block}{判断路径}
+      \centering
+      \tagbox{blue}{NC基本对齐}\quad$\rightarrow$\quad
+      \tagbox{orange}{FC偏低}\quad$\rightarrow$\quad
+      \tagbox{red}{审查表面状态机}
+    \end{block}
+    \vspace{0.28cm}
+    \begin{block}{初始假设}
+      共享驻留槽可能降低有效复合概率，导致催化增量不足。
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{2. 模型迭代路线}
+  \centering
+  \begin{tikzpicture}[node distance=0.33cm and 0.32cm,
+    box/.style={rounded corners=4pt,minimum width=2.55cm,minimum height=1.45cm,align=center,text=white,font=\small\bfseries},
+    arrow/.style={->,very thick,gray}]
+    \node[box,fill=gray] (a) {原始 nsite\\有限物理位点};
+    \node[box,fill=blue,right=of a] (b) {only\_one\\共享驻留槽};
+    \node[box,fill=teal,right=of b] (c) {gank allow\\分物种库存};
+    \node[box,fill=orange,right=of c,text=navy] (d) {gank 1 noallow\\每物种容量1};
+    \node[box,fill=red,right=of d] (e) {prob\\激进热流上包络};
+    \draw[arrow] (a)--(b); \draw[arrow] (b)--(c); \draw[arrow] (c)--(d); \draw[arrow] (d)--(e);
+  \end{tikzpicture}
+  \vspace{0.65cm}
+  \small
+  \begin{tabularx}{0.96\textwidth}{>{\bfseries}p{2.35cm}X X}
+    \toprule
+    模型 & 主要目的 & 暴露的问题 \\
+    \midrule
+    nsite & 保留原有覆盖/位点模型 & 位点密度是额外假设，并非论文参数 \\
+    only\_one & 模拟每个surf一个等待粒子 & MPI下需全局唯一状态；结果仍低于论文 \\
+    gank allow & 避免单槽阻塞，兼容物种优先配对 & CO、C长期积累；O$_2$通道被抑制 \\
+    gank 1 & 限制库存，避免无限积累 & 每surf最多仍可保存4种物种，不等于单槽 \\
+    prob & 检验热流可达到的激进上包络 & 不保证元素守恒，不能作为物理FC模型 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{3. only\_one：最接近论文文字描述的状态机}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.54\textwidth}
+    \begin{block}{状态转移}
+      \begin{enumerate}
+        \item 空槽：入射粒子驻留
+        \item 已占据且反应匹配：生成产物并清空
+        \item 已占据但不匹配：驻留粒子与入射粒子同时散射
+      \end{enumerate}
+    \end{block}
+    \begin{itemize}
+      \item 新增命令：\texttt{only\_one yes|no}
+      \item 省略关键词或\texttt{no}时回退原nsite模式
+      \item 串行、2/4进程共享face与跨分区surf测试通过
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{block}{实现难点}
+      \begin{itemize}
+        \item 同一surf可能同时被多个MPI进程撞击
+        \item 使用唯一属主MPI RMA窗口
+        \item 排他锁保证“读取-判断-更新”原子性
+      \end{itemize}
+    \end{block}
+    \begin{alertblock}{超算问题与修复}
+      256核出现\texttt{MPI\_ERR\_RMA\_SYNC}；根因是初始化阶段在合法epoch外调用\texttt{MPI\_Win\_sync}。改用lock/put/unlock清零后通过多进程回归。
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{4. gank：兼容物种优先配对与库存输出}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{核心规则}
+      每个surf分别保存 $n_N,n_O,n_{CO},n_C$；入射物种先搜索兼容库存，多伙伴按
+      \[
+        P(B\mid A)=\frac{n_B}{\sum_{j\in\mathcal C_A}n_j}
+      \]
+      加权选择。无伙伴时才吸附。
+    \end{block}
+    \begin{itemize}
+      \item \texttt{allow}：库存可按\texttt{every\_n}逻辑扩容
+      \item \texttt{noallow}：满容量时同种驻留粒子与入射粒子双散射
+      \item 独立dump输出每个surf的分物种DSMC库存
+    \end{itemize}
+    \column{0.44\textwidth}
+    \begin{block}{库存输出示例}
+      \small\texttt{dump inventory surf all 10000}\par
+      \small\texttt{data/adsorbed\_species.*.dat}\par
+      \small\texttt{id s\_gamma\_gamma\_species[*]}
+    \end{block}
+    \begin{itemize}
+      \item 列顺序由启动日志明确打印
+      \item MPI输出行序不固定，后处理必须按surf ID匹配
+      \item 每步库存镜像与全局Barrier可能限制256核效率
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{5. gank allow暴露的关键问题：CO库存线性增长}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.47\textwidth}
+    \begin{tabular}{lrr}
+      \toprule
+      指标 & 50000步 & 150000步 \\
+      \midrule
+      CO总库存 & 123693 & 372074 \\
+      单surf平均CO & 493 & 1482 \\
+      单surf最大CO & 1639 & 4565 \\
+      C总库存 & 16895 & 50853 \\
+      O总库存 & 0 & 0 \\
+      \bottomrule
+    \end{tabular}
+    \vspace{0.45cm}
+    \begin{alertblock}{直接观察}
+      时间扩大3倍，CO与C库存也约扩大3倍：库存未达到稳态。
+    \end{alertblock}
+    \column{0.49\textwidth}
+    \begin{itemize}
+      \item 入射O一到达就能找到大量CO/C/N，因此几乎不形成O库存
+      \item 估算 $P(CO\mid O)\approx88\%$，\texttt{CO+O}垄断入射O
+      \item \texttt{O+O$\rightarrow$O$_2$}通道被强烈抑制
+      \item 库存绝对量增长，但CO:C比例稳定，故事件率与热流可进入\textbf{准稳态}
+    \end{itemize}
+    \begin{block}{重要区分}
+      热流是单位时间事件率；库存是积分状态量。\par
+      \textbf{热流可稳定，不代表表面库存达到稳态。}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{6. 容量敏感性与时间平均检查}
+  \small
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{100 km，250000步，同步数对比}
+      \begin{tabular}{lcc}
+        \toprule
+        模式 & 峰值热流 & 相对差异 \\
+        \midrule
+        gank 1 noallow & 9.1307 kW/m$^2$ & -- \\
+        gank 1024 allow & 9.1403 kW/m$^2$ & -- \\
+        \midrule
+        全曲线RMS差异 & \multicolumn{2}{c}{\keynum{0.1971\%}} \\
+        最大差异/allow峰值 & \multicolumn{2}{c}{\keynum{0.4836\%}} \\
+        \bottomrule
+      \end{tabular}
+    \end{block}
+    \begin{itemize}
+      \item 100 km总热流对库存容量变化不敏感
+      \item 反应分支与元素库存仍可能不同
+    \end{itemize}
+    \column{0.44\textwidth}
+    \begin{block}{ave running不是ave one}
+      \texttt{fix ave/surf ... ave running}输出累计平均：
+      \[
+        A_k=\frac{B_1+\cdots+B_k}{k}
+      \]
+      已用相邻累计结果反演独立窗口：
+      \[
+        \bar B_{i\rightarrow j}=\frac{n_jA_j-n_iA_i}{n_j-n_i}
+      \]
+    \end{block}
+    \begin{itemize}
+      \item 90 km：独立10000步窗口；100 km：独立50000步窗口
+      \item 独立窗口基本重合，支持热流准稳态
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{7. 与Zuppardi/DS2V描述的对照}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.49\textwidth}
+    \begin{block}{论文明确描述}
+      \begin{itemize}
+        \item 第一个粒子撞击后驻留
+        \item 第二个粒子撞击同一表面微元
+        \item 可复合则反应，产物返回流场
+        \item 不匹配则两个粒子分别离开
+        \item FC/NC通过复合概率1/0控制
+      \end{itemize}
+    \end{block}
+    \column{0.47\textwidth}
+    \begin{alertblock}{论文关键结果}
+      \texttt{O+O$\rightarrow$O$_2$}和\texttt{CO+O$\rightarrow$CO$_2$}是各高度催化热流的两个主要贡献反应。
+    \end{alertblock}
+    \begin{itemize}
+      \item \tagbox{blue}{only\_one} 最接近论文文字机制
+      \item \tagbox{teal}{gank allow} 是库存敏感性模型，不是严格DS2V复刻
+      \item \tagbox{orange}{gank 1 noallow} 是实用有限库存折中
+      \item \tagbox{red}{prob} 是非守恒激进热流上包络
+    \end{itemize}
+  \end{columns}
+  \vspace{0.18cm}
+  {\scriptsize 来源：Zuppardi \& Mongelluzzo, Advances in Space Research 69 (2022), pp. 2830-2831。}
+\end{frame}
+
+\begin{frame}{8. 当前阶段结论与PPT建议主线}
+  \small
+  \begin{columns}[T,totalwidth=\textwidth]
+    \column{0.52\textwidth}
+    \begin{block}{阶段结论}
+      \begin{enumerate}
+        \item FC偏低主要表现为催化增量不足
+        \item 单纯增强库存并未显著提高100 km总热流
+        \item 无限库存会改变反应竞争并抑制O$_2$生成
+        \item 论文机制证据更支持临时单槽，而非兼容库存搜索
+        \item 约20\%偏差不能只归因于“单槽阻塞”
+      \end{enumerate}
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{block}{下一步最有判别力的比较}
+      \begin{itemize}
+        \item 分反应统计\texttt{O+O}与\texttt{CO+O}计数/化学热
+        \item 对比only\_one、gank 1、prob上包络
+        \item 分离\texttt{etot}与\texttt{echem}
+        \item 检查轴对称面积、粒子权重和反应热归一化
+        \item 追踪入口/出口/表面库存的元素平衡
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{0.08cm}
+  \centering
+  \colorbox{navy}{\parbox{0.91\textwidth}{\centering\color{white}\normalsize\bfseries
+    推荐汇报逻辑：发现偏差 $\rightarrow$ 修改状态机 $\rightarrow$ 库存诊断 $\rightarrow$ 论文回查 $\rightarrow$ 收敛为可检验的后续假设}}
+\end{frame}
+
+\end{document}

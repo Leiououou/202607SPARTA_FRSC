@@ -5,7 +5,18 @@
       "Bash(git *)",
       "Bash(env)",
       "Bash(ssh -T git@github.com)",
-      "Bash(start \"\" \"d:/博一/气固相互作用/202607_src/docs/GS_chemistry_analysis.html\")"
+      "Bash(start \"\" \"d:/博一/气固相互作用/202607_src/docs/GS_chemistry_analysis.html\")",
+      "Bash(ls -la \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\")",
+      "Read(//d/博一/catalytic/z_prob_max/80/**)",
+      "Bash(awk 'NR>9 {xmid=\\($2+$4\\)/2; print NR-9, xmid, $9}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\")",
+      "Bash(awk 'NR>9 {xmid=\\($2+$4\\)/2; print xmid}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\" | sort -u | head -20)",
+      "Read(//d/博一/catalytic/z_prob_max/80/data/**)",
+      "Bash(awk 'NR>9 {xmid=\\($2+$4\\)/2; print xmid}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\" | sort -n | head -5 && echo \"---\" && awk 'NR>9 {xmid=\\($2+$4\\)/2; print xmid}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\" | sort -n | tail -5)",
+      "Bash(echo \"=== FC data ===\" && awk -F',' 'NR>1 {print $1}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\80kmFC热流.csv\" | sort -n | head -3 && echo \"...\" && awk -F',' 'NR>1 {print $1}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\80kmFC热流.csv\" | sort -n | tail -3 && echo \"=== NC data ===\" && awk -F',' 'NR>1 {print $1}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\80kmNC热流.csv\" | sort -n | head -3 && echo \"...\" && awk -F',' 'NR>1 {print $1}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\80kmNC热流.csv\" | sort -n | tail -3)",
+      "Bash(awk 'NR>9 {etot=$9; ke=$10; erot=$11; evib=$12; echem=$13; sum=ke+erot+evib+echem; diff=etot-sum; printf \"Row %d: etot=%.2f, sum_comp=%.2f, diff=%.4f\\\\n\", NR-9, etot, sum, diff}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\" | head -10)",
+      "Bash(awk 'NR>9 {etot=$15; ke=$16; erot=$17; evib=$18; echem=$19; sum=ke+erot+evib+echem; diff=etot-sum; printf \"Row %d: etot=%.2f, sum_comp=%.2f, diff=%.2f\\\\n\", NR-9, etot, sum, diff}' \"D:\\\\博一\\\\catalytic\\\\z_prob_max\\\\80\\\\data\\\\80surf.20000.dat\" | head -10)",
+      "Bash(ls -la \"D:\\\\博一\\\\catalytic\\\\z_prob_max_yuan\")",
+      "Read(//d/博一/catalytic/z_prob_max_yuan/**)"
     ]
   }
 }

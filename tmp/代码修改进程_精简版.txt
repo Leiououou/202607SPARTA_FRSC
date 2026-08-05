@@ -1,0 +1,251 @@
+SPARTA 代码修改进程｜命令速查与计算路径
+最后更新：2026-08-05
+
+用途：只保留新增命令、可复制示例、代码归档和实际计算目录。
+详细算法、MPI 实现及内部验证过程见：代码修改进程.txt
+
+======================================================================
+01｜版本索引
+======================================================================
+
+20260714  adsorb：新增 schu、init_cover、tally_only、反应热
+20260722  compute boundary/surf：新增 echem
+20260727  schu：扩展至 PS 和 GS/PS（合并归档于 20260729）
+20260728  新增 surf_react gamma 常复合系数风格
+20260729  gamma：不匹配时两粒子同时释放（无新增命令）
+20260804  gamma：新增 only_one 单驻留槽模式
+20260805  gamma：新增 gank 分物种库存与库存独立输出
+20260805  gamma：新增 noleave 驻留保持选项
+
+======================================================================
+02｜新增命令速查
+======================================================================
+
+2.1 adsorb 风格（20260714 / 20260727）
+----------------------------------------------------------------------
+
+schu yes|no
+  yes：使用新增的舒马科娃/文献形式；PS 与 GS/PS 模式同样适用。
+
+init_cover species fraction
+  设置指定表面物种的初始覆盖度，可重复输入。
+
+tally_only yes|no
+  yes：只统计候选反应，不改变粒子和表面状态；默认 no。
+
+反应热写在反应文件对应行末尾，例如：
+  AA A 1.0 0 0 1 -1.6E-20
+  能量写 0 时保持原无化学热行为。
+
+GS 示例：
+  surf_react adsorb_test_gs2 adsorb gs schu_gs_1.surf nsync 1 surf 1000 6.022e18 schu yes init_cover O 1.0 tally_only yes O CO N N2 O2 NO
+
+PS 示例：
+  surf_react psrxn adsorb ps ps_lh2.surf nsync 1 face 300 100 schu yes init_cover O 0.5 tally_only no O
+
+GS/PS 示例：
+  surf_react both adsorb gs/ps gs_adsorb.surf ps_lh2.surf nsync 1 face 300 100 schu yes init_cover O 0.5 tally_only no O
+
+
+2.2 化学反应能量通量 echem（20260722）
+----------------------------------------------------------------------
+
+箱体边界：
+  compute 1 boundary all n nflux ke erot evib etot echem
+
+显式表面：
+  compute 1 surf all all n nflux ke erot evib etot echem
+
+
+2.3 gamma 基础模式（20260728）
+----------------------------------------------------------------------
+
+通用语法：
+  surf_react ID gamma file_name surf|face Tw n_site [init_cover species fraction]... [tally_only yes|no] [species gamma]...
+
+示例：
+  surf_react gamma gamma gamma.surf surf 300 6.022e18 O 1 C 1 N 1 CO 1
+  surf_modify all react gamma
+
+反应文件每个反应写两行：
+  O + O --> O2
+  8.197e-19
+
+说明：
+  - species 后的 gamma 为 0～1 的常复合系数。
+  - 未列出的气相物种 gamma 默认为 0。
+  - gamma 风格不使用 nsync 和 schu。
+  - 自 20260729 起，未启用 noleave 时，不匹配的入射粒子与驻留粒子均释放。
+
+
+2.4 only_one 单驻留槽（20260804）
+----------------------------------------------------------------------
+
+启用：
+  surf_react gamma gamma only_one yes gamma.surf surf 300 O 1 C 1 N 1 CO 1
+  surf_modify all react gamma
+
+退回 n_site：
+  不写 only_one，或写 only_one no，并按基础模式输入 n_site。
+
+说明：
+  - 每个全局 surf/face 只有一个共享驻留槽。
+  - only_one yes 时不输入 n_site，也不允许 init_cover。
+
+
+2.5 gank 分物种库存（20260805）
+----------------------------------------------------------------------
+
+软容量/继续扩容：
+  surf_react gamma gamma gank yes every_n 1024 allow gamma.surf surf 300 O 1 C 1 N 1 CO 1
+  surf_modify all react gamma
+
+硬容量：
+  surf_react gamma gamma gank yes every_n 1 noallow gamma.surf surf 300 O 1 C 1 N 1 CO 1
+  surf_modify all react gamma
+
+显式退回 n_site：
+  surf_react gamma gamma gank no gamma.surf surf 300 6.022e18 O 1 C 1 N 1 CO 1
+  surf_modify all react gamma
+
+说明：
+  - every_n N：每个 surf 上、每种物种的 DSMC 库存容量参数，N 为正整数。
+  - allow：达到 N 后按 N 继续扩容，用于观察近似无上限吸附。
+  - noallow：库存满且无兼容反应时，按当前释放规则处理。
+  - 存在多个兼容伙伴时，按其库存数量加权随机选择。
+  - gank yes 不输入 n_site，不允许 init_cover，且不能与 only_one 同时启用。
+
+
+2.6 noleave 驻留保持（20260805）
+----------------------------------------------------------------------
+
+n_site：
+  surf_react gamma gamma noleave gamma.surf surf 300 6.022e18 O 1 C 1 N 1 CO 1
+
+only_one：
+  surf_react gamma gamma only_one yes noleave gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+gank + noallow：
+  surf_react gamma gamma gank yes every_n 1 noallow noleave gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+作用：未发生匹配反应时，只让本次气相入射粒子继续散射，已有驻留
+粒子/库存保持不变。省略 noleave 时保持原来的双释放行为。
+
+
+2.7 gank 库存独立输出（20260805）
+----------------------------------------------------------------------
+
+示例（surf_react ID 为 gamma）：
+  dump inventory surf all 10000 data_80/adsorbed_species.*.dat id s_gamma_gamma_species[*]
+
+字段规则：
+  - 第一列为全局 surf ID。
+  - 后续各列为每种吸附物种的 DSMC 模拟粒子数。
+  - 不按面积或时间归一化，不乘 fnum 或粒子权重。
+  - 物种—列号映射在 log.sparta 初始化阶段打印一次。
+  - MPI 输出行序可能变化，后处理必须按 surf ID 匹配。
+  - s_gamma_ID_species 中的 ID 必须与 surf_react ID 一致。
+
+======================================================================
+03｜常用 gamma 配置对照
+======================================================================
+
+[A] 原 n_site 模式
+  surf_react gamma gamma gamma.surf surf 300 6.022e18 O 1 C 1 N 1 CO 1
+
+[B] 单驻留槽
+  surf_react gamma gamma only_one yes gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+[C] 分物种库存、允许继续扩容
+  surf_react gamma gamma gank yes every_n 1024 allow gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+[D] 分物种库存、每种容量 1
+  surf_react gamma gamma gank yes every_n 1 noallow gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+[E] 容量 1，并保持未反应驻留粒子
+  surf_react gamma gamma gank yes every_n 1 noallow noleave gamma.surf surf 300 O 1 C 1 N 1 CO 1
+
+以上配置后均需绑定反应模型：
+  surf_modify all react gamma
+
+======================================================================
+04｜用户计算目录
+======================================================================
+
+4.1 早期圆柱 gamma / n_site 对照
+----------------------------------------------------------------------
+  D:\博一\sparta代码修改流程\test\cylinder_gamma
+  D:\博一\sparta代码修改流程\test\cylinder_gamma\nsite_6.022e17
+  D:\博一\sparta代码修改流程\test\cylinder_gamma\nsite_6.022e18
+  D:\博一\sparta代码修改流程\test\cylinder_gamma\nsite_6.022e19
+  D:\博一\sparta代码修改流程\test\cylinder_gamma\nsite_6.022e20
+
+4.2 Zuppardi 原始与对照算例
+----------------------------------------------------------------------
+  总目录：D:\博一\catalytic\zupparid
+
+  80 km：
+    D:\博一\catalytic\zupparid\80
+    D:\博一\catalytic\zupparid\80_gamma_0
+    D:\博一\catalytic\zupparid\80_nogamma
+    D:\博一\catalytic\zupparid\80_gCO
+
+  90 km：
+    D:\博一\catalytic\zupparid\90
+    D:\博一\catalytic\zupparid\90_gamma_0
+    D:\博一\catalytic\zupparid\90_gCO
+
+  100 km：
+    D:\博一\catalytic\zupparid\100
+    D:\博一\catalytic\zupparid\100_gamma_0
+    D:\博一\catalytic\zupparid\100_gCO
+
+4.3 20260804 only_one / 常 gamma 算例
+----------------------------------------------------------------------
+  D:\博一\catalytic\z_0804\80_gCO
+  D:\博一\catalytic\z_0804\90_gCO
+  D:\博一\catalytic\z_0804\100_gCO
+
+4.4 20260805 gank 算例
+----------------------------------------------------------------------
+  D:\博一\catalytic\z_0805\80_gCO
+  D:\博一\catalytic\z_0805\90_gCO
+  D:\博一\catalytic\z_0805\100_gCO
+  D:\博一\catalytic\z_0805\80_gCO_g1
+  D:\博一\catalytic\z_0805\100_gCO_g1
+
+4.5 prob 上界算例
+----------------------------------------------------------------------
+  D:\博一\catalytic\z_prob\80
+
+======================================================================
+05｜代码归档与程序路径
+======================================================================
+
+本地代码归档：
+  20260714  D:\博一\sparta代码修改流程\sparta_20260714
+  20260722  D:\博一\sparta代码修改流程\sparta_20260722
+  20260727  功能合并到 sparta-20260729
+  20260728  D:\博一\sparta代码修改流程\sparta_20260728
+  20260729  D:\博一\sparta代码修改流程\sparta-20260729
+  20260804  D:\博一\sparta代码修改流程\sparta_20260804
+  20260805  D:\博一\sparta代码修改流程\sparta_20260805
+
+当前开发程序：
+  D:\博一\气固相互作用\202607_src\src\spa_mpi
+  文件大小：2595896 字节
+  SHA256：1E3DB09A9E806484899F79D64604CE230C0B366180CBDFA4F0BB66725E9A8C49
+
+超算程序：
+  20260804  /data/user/shengpengju/sparta_20260804/build/src/spa_0804
+  20260805  /data/user/shengpengju/sparta_20260805/build/src/spa_0805
+
+重要提醒：现有超算 spa_0805 是加入 noleave 之前编译的版本。
+如需使用 noleave，必须重新上传最新源码并重新编译。
+
+20260805 超算编译命令：
+  cd /data/user/shengpengju/sparta_20260805
+  mkdir build && cd build
+  module load openmpi/5.0.5
+  cmake ../cmake -DSPARTA_MACHINE=0805 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+  make -j16

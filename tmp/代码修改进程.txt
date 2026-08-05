@@ -1,0 +1,294 @@
+在surf_react   命令的adsorb style中增加了schu 关键词，参数yes 或者 no。yes则壁面反应概率依据舒马科娃文献确定
+                                                                                                             ——————————————————————————————————该关键词使用与否，并不影响PS反应在surf_react adsorb风格中的使用
+在surf_react   命令的adsorb style中增加了init_cover 关键词，参数一个物种名 + 初始覆盖度。如 init_cover O2 0.5
+在surf_react   命令的adsorb style中增加了tally_only 关键词，参数一个yes 或者 no。yes则只统计而不实际发生反应。
+增加了壁面反应文件读取反应热的功能，吸热为正。放置位置： 原：O(g) --> O(s)
+                                                                                                             AA  A  1.0 0 0 1 
+                                                                                                      现：O(g) --> O(s)
+                                                                                                            AA  A  1.0 0 0 1 -1.6E-20
+                                                                                                      注意：目前只能读取GS反应文件的反应热———————————————————能量项输入为0即恢复到PSARTA原有代码
+
+在compute boundary中增加关键词echem,统计的是adsorb反应壁面热流。——————————————————————————————经过了20260722_1算例验证
+                                                                                                                           ——————————————————————————————经过了20260722_2算例验证
+
+——————————————————————————————————————————————————————————————————————————————————————————————                                                                    
+【待修正问题：PS/LH反应频率nu中的max_cover（2026-07-27）】
+根据Molchanova等2018年论文（Phys. Fluids 30, 107105）以及SPARTA开发者2025年论文，在以表面数密度为基准定义PS/LH反应速率常数k时，一个表面单元上的LH模型反应频率应为：
+                                                                                                       不同物种 A(s)+B(s)：nu_LH = k_LH * N_A * N_B * (fnum*weight/area)
+                                                                                                       相同物种 A(s)+A(s)：nu_LH = k_LH * [N_A*(N_A-1)/2] * (fnum*weight/area)
+SPARTA原码中，多除以了n_site。
+
+20260727修改：在PS反应模式下也加入schu关键词。yes则意味着按照Molchanova 2018 & S.G 2025 文献中PS反应的特征频率公式计算。即在SPARTA原码的基础上多乘上n_site的对应次幂。
+                                                                                      ————————————————————————————————————————init_cover ,schu, tally_only关键词均已引入ps和gs/ps模式
+通过20260727_1算例，验证了脱附反应频率，相对偏差0.8% 
+通过20260727_2算例，验证了LH2反应频率，相对偏差1.58% 
+通过20260727_3算例，验证了LH4反应频率，相对偏差1.19% 
+——————————————————————————————————————————————————————————————————————————————————————————————
+目前问题：PS反应没有echem接口，暂时无法统计PS反应产生的热流。
+——————————————————————————————————————————————————————————————————————————————————————————————
+【20260728修改：新增独立的surf_react gamma常复合系数风格】即文件夹中sparta_20260728
+
+一、修改摘要
+1. 新增独立文件surf_react_gamma.cpp和surf_react_gamma.h，没有为本功能修改surf_react_adsorb.cpp和surf_react_adsorb.h。
+2. gamma风格只处理气体粒子与表面吸附物之间的GS常复合系数反应，不包含PS反应，因此命令中不需要、也不接受nsync关键词。
+3. 每个入射气相物种可以设置一个0～1之间的常复合系数gamma。命令中没有列出的物种，其gamma默认为0。
+4. 每条反应固定为两个无序反应物生成一个气相产物，即A+B-->C。A入射、B吸附和B入射、A吸附均可匹配同一条反应，不受反应物书写顺序影响。
+5. 复合产物复用入射粒子的粒子记录并改为气相产物C，随后按照壁温Tw进行完全漫反射。不会额外产生第二个气相粒子。
+6. 支持face边界和显式surf表面；支持串行、MPI replicated surf以及global surfs explicit/distributed模式。
+
+二、in文件命令格式
+surf_react                  ID                gamma             file_name          surf|face     Tw      n_site     [init_cover species fraction]... [tally_only yes|no] [species gamma]...
+
+参数说明：
+ID：人为定义的反应模型ID。
+gamma：新风格关键词。
+file_name：反应文件名，例如gamma.surf。
+surf或face：与adsorb风格含义相同。
+Tw：壁面温度，单位K，必须大于0。
+n_site：位点数密度，必须大于0。
+init_cover species fraction：可重复使用，为不同物种设置初始覆盖度；各覆盖度均在0～1之间，总和不能超过1。
+tally_only yes|no：可选，默认为no。
+species gamma：物种名与其复合系数成对给出；未给出的物种gamma=0。
+
+示例：
+surf_react recomb gamma gamma.surf face 1000 6.022e18 init_cover O 0.25 init_cover N 0.10 tally_only no O 0.5 N 0.2
+bound_modify zlo react recomb
+
+注意：gamma风格没有nsync和schu关键词。
+
+三、gamma反应文件格式
+有效信息严格两行一组：
+O + O --> O2
+8.19e-19
+
+或：
+N + O --> NO
+5.20e-19
+
+第一行为A + B --> C，只允许两个反应物和一个气相产物。
+第二行为反应热h，表示真实物理世界中每一次反应的热量，单位J。
+h>0表示向壁面放热；h<0表示从壁面吸热；h=0表示无化学热。
+
+
+四、事件处理规则
+1. 入射物种A首先以gamma_A的概率进入表面化学分支；未通过则执行外部surf_collide所设置的普通壁面散射。
+2. 通过gamma判断后，在当前表面的全部位点中均匀抽取一个位点。
+3. 抽到空位：A吸附到壁面，气相粒子被删除，表面增加一个A(s)。该吸附过程不属于反应文件中的反应，因此不增加反应计数。
+4. 抽到B(s)且文件中存在A+B-->C：消耗一个B(s)，将出射气相粒子改为C，并在Tw下进行完全漫反射。
+5. 抽到已占据位点但没有对应反应：不发生化学反应，执行普通壁面散射。
+
+五、能量与热流统计
+吸附到空位：
+echem = 0
+etot = E入射
+即入射粒子被壁面吸收，其平动、转动和振动能全部计入壁面能量；对于单原子O，转动和振动能为0，因此只贡献平动能。
+
+发生复合反应：
+echem = h
+etot = E入射 - E出射产物 + h
+其中正值表示加热壁面，负值表示冷却壁面。出射产物的平动能按照Tw采样；转动和振动能使用SPARTA原有的能量采样接口，在相应碰撞能量模式开启时按照Tw采样。
+compute boundary和compute surf输出时仍会按照SPARTA原有规则进行fnum、weight、面积和时间步归一化；反应文件中的h本身始终是J/真实反应。
+
+六、tally_only说明
+tally_only yes时，只统计已经通过gamma判断、抽到占据位点且能够匹配反应文件的候选复合反应。
+不消耗表面覆盖物，不改变气相物种，不执行化学热echem，也不吸附空位粒子。
+候选反应记录在sr_ID统计量中，但nsreact不增加。
+之后粒子仍执行普通surf_collide散射，所以普通非反应壁面碰撞造成的粒子能量交换仍可出现在etot中，echem保持0。
+
+七、MPI处理
+face模式下，各进程保存局部覆盖度增量，并在每个时间步通过MPI_Allreduce同步。
+显式surf模式下，按照surface ID归并增量，再将所有者状态spread到本地及ghost表面。
+支持普通显式表面和global surfs explicit/distributed表面。
+每个gamma反应ID使用独立的gamma_ID_*表面自定义属性，避免多个gamma模型互相覆盖状态。
+同步后检查表面粒子数，若出现负数或超过位点容量则直接报错，不静默破坏守恒。
+
+八、验证结果
+1. 空表面、满覆盖复合、tally_only、未指定gamma默认0均通过确定性测试。
+2. N+O-->NO在N入射/O(s)和O入射/N(s)两个方向均通过，产物均为唯一气相NO。
+3. gamma=0.5串行统计：1557次候选/3174次撞壁=0.4905，与0.5一致。
+4. 正、零、负反应热的echem和etot符号与公式一致。
+5. 两进程face实际反应测试：3120次反应准确生成3120个O2，总气相粒子数守恒。
+6. 两进程distributed explicit surf测试：991次反应准确生成991个O2。
+7. Windows串行程序spa_serial.exe和WSL MPI程序spa_mpi均已编译；spa_mpi位于：
+D:\博一\气固相互作用\202607_src\src\spa_mpi
+8. 当前实现为标准CPU/MPI路径，尚未新增专用Kokkos反应内核。
+
+原有GS/PS能量热流处理保持现状，本次gamma功能没有修改surf_react_adsorb.cpp和surf_react_adsorb.h。
+—————————————————————————————————————————————————————————————————————————————————————————————
+20260729版本修改：
+若粒子抽中了未定义的反应，则两粒子同时散射而非撞击粒子散射吸附粒子保持不动
+
+—————————————————————————————————————————————————————————————————————————————————————————————
+20260804版本修改：为surf_react gamma增加only_one关键词
+
+一、命令格式
+only_one必须紧邻gamma风格书写，可取yes或no；省略时默认no。
+
+原有格式（保持兼容）：
+surf_react ID gamma file_name surf|face Tw n_site ...
+
+显式关闭单个位点：
+surf_react ID gamma only_one no file_name surf|face Tw n_site ...
+
+启用单个位点：
+surf_react ID gamma only_one yes file_name surf|face Tw ...
+
+only_one yes时不再输入n_site，每个显式surf单元或箱体边界面只有一个全局位点。当前不允许同时使用init_cover，位点从空状态开始。
+
+二、事件处理规则
+1. 入射粒子先以gamma判断是否进入表面化学分支；以1-gamma概率执行普通壁面散射。
+2. 通过gamma判断且位点为空：入射粒子直接吸附并占据该位点。
+3. 位点已占据且反应文件定义了入射物种与吸附物种的无序反应对：执行反应、生成气相产物并清空位点。
+4. 位点已占据但没有定义对应反应：释放原吸附粒子，入射粒子和吸附粒子均在Tw下进行完全漫反射，位点变为空。
+
+三、MPI唯一属主处理
+only_one yes不再使用各进程局部累计、每步合并species_delta的方式，因为同一个surf可能在一个时间步内被多个进程同时判为空。
+每个全局surf或box face的单个位点状态只保存在一个唯一属主进程上。通过gamma判断的撞壁事件使用MPI单边通信（RMA）和排他锁，对位点状态执行不可分割的读取、判断和更新。
+粒子仍由其当前网格单元所属进程推进，不需要修改粒子迁移、surf_collide或update主框架。一个surf即使横跨多个MPI网格分区，仍然只有一个全局位点，而不是每个进程各有一个位点。
+only_one no和省略关键词时仍使用原来的n_site、局部增量及每步collate/spread路径。
+
+四、修改的源代码
+1. src/surf_react_gamma.cpp
+2. src/surf_react_gamma.h
+
+没有修改surf_react_adsorb.cpp、surf_react_adsorb.h、surf_collide.cpp、update.cpp和particle.cpp。
+
+五、验证结果
+1. 完整clean MPI编译通过。
+2. 串行空位吸附、吸附后复合、未定义反应双粒子散射、only_one no兼容性以及显式surf测试通过。
+3. 共享box face、distributed explicit surf和跨网格分区粗surf在2进程、4进程下均通过。
+4. 四个跨分区粗surf的2进程压力测试完成57092次表面碰撞和9892次反应，没有负占位、容量溢出或卡死。
+
+六、效率影响
+only_one no相对原实现基本没有额外开销。
+only_one yes的新增开销主要来自每次通过gamma判断后的MPI RMA读取/写回、排他锁竞争以及每时间步状态同步。
+在本机WSL的gamma=1极端压力基准中，粒子轨迹和1262万次表面碰撞保持一致：
+2进程：only_one no为0.965 s，only_one yes为2.680 s，约慢2.78倍。
+4进程：only_one no为0.988 s，only_one yes为2.923 s，约慢2.96倍。
+该基准仅使用4个粗surf，所有撞壁都触发位点访问，属于高竞争近最坏情况。实际大量细分surf算例的开销取决于gamma、撞壁比例、同一surf的并发竞争以及是否跨计算节点。
+
+七、版本替换
+已使用D:\博一\气固相互作用\202607_src\src完整替换D:\博一\sparta代码修改流程\sparta-20260804\src。
+
+八、20260804超算编译与运行脚本进展
+1. 已将sparta_20260804版本上传至超算平台并完成编译，命令行显示“[100%] Built target spa_0804”。
+2. 新程序已生成并具有可执行权限：
+   /data/user/shengpengju/sparta_20260804/build/src/spa_0804
+   最新编译记录显示文件大小为2339312字节，生成时间为8月4日17:10。
+3. 已更新D:\博一\catalytic\z_0804下全部6个test.sh，将SPARTA_EXE统一设置为上述spa_0804绝对路径。
+4. test.sh仍申请2个节点、每节点128个MPI任务，共256个任务；继续加载openmpi/5.0.5并读取in.orion。
+5. 脚本保留可执行文件和输入文件存在性检查，实际运行命令为：
+   mpirun -np "$NP" "$SPARTA_EXE" < "$INPUT_FILE"
+6. 当前状态：代码修改、目录归档、超算编译和提交脚本更新均已完成，下一步可提交80/90/100 km新gammaCO算例并检查日志与热流结果。
+
+九、20260804多节点MPI_ERR_RMA_SYNC修复
+1. 256核、2节点运行only_one yes时，管理员日志确认rank 118在MPI_Win_sync处触发MPI_ERR_RMA_SYNC并导致全任务abort。
+2. 根因是单个位点窗口初始化在MPI_Win_allocate之后直接调用MPI_Win_sync，但当时没有通过MPI_Win_lock或MPI_Win_lock_all建立passive-target epoch。该调用不符合MPI标准；本地MPI后端宽松接受，多节点UCX后端严格检查后报错。
+3. only_one窗口不保存245000个网格单元或surface2grid映射，只保存每个全局surf的一个整数状态。831个surf全局约3.3 KB，256进程时每个进程通常只有3～4个整数。
+4. 已删除初始化阶段的非法MPI_Win_sync，改为：
+   MPI_Win_lock(MPI_LOCK_EXCLUSIVE,me,...)
+   MPI_Put(零值到本进程拥有的窗口槽)
+   MPI_Win_unlock(me,...)
+   从而保证窗口清零发生在合法的passive-target RMA epoch内。
+5. 已审查后续MPI_Get、MPI_Put和MPI_Win_flush，均位于MPI_Win_lock/MPI_Win_unlock之间。
+6. 修复后完成完整clean MPI编译；4项串行功能/兼容性测试，以及2/4进程共享box face、distributed surf和跨分区粗surf共5项压力测试全部通过。
+7. UCX“required >= 1.17, actual 1.16.0”仍属于平台运行库版本告警，但不是本次MPI_ERR_RMA_SYNC的直接代码原因。
+8. 已再次使用修复后的D:\博一\气固相互作用\202607_src\src完整替换D:\博一\sparta代码修改流程\sparta-20260804\src。超算端需要重新上传、clean编译并生成新的spa_0804后再测试多节点任务。
+
+十、20260805新增gank有限库存、兼容物种优先配对模式
+1. 为surf_react gamma新增gank关键词，命令格式为：
+   surf_react ID gamma gank yes every_n N allow|noallow file_name surf|face Tw [tally_only yes|no] [species gamma]...
+   其中N为每个surf上每种物种的初始/分段库存容量，必须为正整数。
+2. 兼容性规则：省略gank和only_one时继续使用原有n_site模式；gank no也退回原有n_site模式；only_one yes/no的既有行为保持不变。gank yes与only_one模式不能在同一条命令中同时启用。gank yes不使用n_site，当前也不允许init_cover。
+3. gank yes时，每个全局surf或box face分别保存各表面物种的独立库存数量，不再使用“一个共享驻留槽”。入射物种先通过其gamma概率判断；未通过时执行普通壁面散射。
+4. 通过gamma判断后，程序先在当前表面库存中查找与入射物种存在已定义反应的兼容物种。若有多个兼容物种，按各物种当前库存数量加权随机选择：P(B|A)=n_B/sum(n_j)。找到后立即消耗一个被选库存粒子并执行反应，不受库存容量是否已满影响。
+5. 若没有兼容库存且当前入射物种库存未满，则吸附入射粒子并将该物种库存加1。
+6. allow模式下不设置硬上限；当某物种数量超过N、2N、3N等边界时，其逻辑容量按N逐段追加。实现中使用64位整数直接记录库存数量，不反复重新分配MPI窗口，仅保留整数上溢保护。因此该模式可用于观察不加硬限制时各物种的实际吸附量。
+7. noallow模式下，每种物种的硬上限均为N。若没有兼容反应且入射同种物种的库存已满，则释放一个已吸附的同种粒子；释放粒子和本次入射粒子都在Tw下完全漫反射，库存由N减为N-1，不产生化学反应热，也不增加反应计数。
+8. 为避免gamma>0但永远找不到反应伙伴的物种无限积累，gank初始化时会检查：每个gamma>0的物种必须在反应文件中至少有一个gamma同样大于0的反应伙伴，否则直接报错。每种库存及兼容库存求和均增加64位整数溢出检查。
+9. MPI实现沿用唯一属主RMA思路，但窗口中保存的是“每个表面×每个表面物种”的64位库存向量。每次通过gamma判断的碰撞，在唯一属主进程上使用排他锁原子地读取、选择、修改和写回整个表面库存向量。每个时间步再把权威库存同步到gamma_ID_total和gamma_ID_species表面自定义数组，供现有统计与输出使用。支持face、replicated surf和global surfs explicit/distributed模式。
+10. 修改文件：
+    src/surf_react_gamma.cpp
+    src/surf_react_gamma.h
+    docs/surf_react_gamma.md
+    change_logs/2026-07-28_surf_react_gamma.txt
+    test/gamma/README.md及新增gank串行/MPI测试输入文件。
+11. 验证结果：
+    （1）allow、noallow、gank no、省略模式和原only_one模式的串行测试均通过。
+    （2）every_n=0会按预期报错；gamma>0但有效伙伴gamma=0会按预期报错。
+    （3）共享box face压力测试在2进程和4进程下均得到1547次O+O反应。
+    （4）跨分区explicit surf测试在2进程和4进程下均正常完成，无卡死、负库存或整数溢出。
+    （5）完成make clean-mpi后重新执行make mpi -j4，干净编译通过；随后串行和MPI冒烟测试再次通过。
+12. 当前本机MPI可执行文件：
+    D:\博一\气固相互作用\202607_src\src\spa_mpi
+    文件大小：2591800字节
+    SHA256：ACDD322E6EBC8EBC272AFCE0C3C9412CE2B4ED6484423DE5CAC6B3A8FBEC5007
+13. 本次只完成代码修改、测试与编译，没有启动80 km计算；80 km算例由用户后续自行运行。
+
+十一、20260805新增gank分物种库存独立文件输出
+1. 本功能不修改compute surf。原因是n、nwt、press、etot等属于表面碰撞事件统计量，而吸附库存属于当前表面状态量；把两者放入同一个compute会混淆累计和归一化语义，并改变现有热流文件列号。
+2. gank的权威64位MPI RMA库存原本已在每个时间步镜像到显式表面的自定义数组：
+   gamma_<surf_react-ID>_species
+   当surf_react ID为gamma时，数组名为gamma_gamma_species。
+3. 可在surf_react和surf_modify命令之后增加独立dump，例如：
+   dump inventory surf all 10000 data/adsorbed_species.*.dat id s_gamma_gamma_species[*]
+   该文件第一列为surf ID，后续每列为一种吸附物种的瞬时DSMC模拟粒子库存数。数值不除以面积或时间，也不乘fnum或粒子权重。
+4. 程序初始化时新增明确的列—物种日志，例如：
+   Gank inventory dump fields:
+     s_gamma_gamma_species[1] = C
+     s_gamma_gamma_species[2] = O
+     s_gamma_gamma_species[3] = N
+     s_gamma_gamma_species[4] = CO
+   列顺序按species命令建立的全局物种顺序筛选，不按gamma系数参数顺序或反应文件书写顺序推断。
+5. MPI输出中的surf行顺序可能随属主分配变化，因此独立文件必须保留id列，后处理应按surf ID匹配，不能直接依赖行号。
+6. 该输出仅适用于显式surf模式；face模式没有可由dump surf读取的per-surf custom数组。
+7. 新增test/gamma/gamma_inventory.surf和in.surf_gank_inventory_dump。确定性测试依次向同一surf注入互不兼容的C、N、CO，最终该surf库存为C=1、O=0、N=1、CO=1，其余三个surf均为0。
+8. 单进程、2进程和4进程测试均得到相同的按ID库存结果；2进程输出行顺序发生变化但数值与全局surf ID对应关系保持正确。
+9. 本次仍未启动80 km正式计算；用户可在正式in文件中自行加入上述dump命令并运行。
+10. 最终执行make clean-mpi和make mpi -j4，从零编译通过；随后重新完成新库存输出1/2/4进程测试、gank allow/noallow、gank no、only_one以及原2/4进程gank压力回归。最终本机程序为：
+    D:\博一\气固相互作用\202607_src\src\spa_mpi
+    文件大小：2591800字节
+    SHA256：642FE926A049B58037CF29C81DBB84E43D8BD9836F83919486ED60A43137A7C6
+11. SPARTA输入脚本不能用shell风格的反斜杠`\`续写dump命令，否则反斜杠会被解析为dump属性并报`Invalid attribute in dump surf command`。80_gCO/in.orion已改为单行dump命令，删除前处理阶段的重复定义，并将输出目录修正为算例约定的data_80（运行前需建立）。
+
+十二、20260805超算编译与运行脚本更新
+1. 已在超算目录/data/user/shengpengju/sparta_20260805/build中使用openmpi/5.0.5完成Release静态构建，命令行显示“[100%] Built target spa_0805”。
+2. 新程序已生成并具有可执行权限：
+   /data/user/shengpengju/sparta_20260805/build/src/spa_0805
+   编译记录显示文件大小为2348064字节，生成时间为8月5日15:14。
+3. 已更新D:\博一\catalytic\z_0805下全部4个test.sh：
+   D:\博一\catalytic\z_0805\test.sh
+   D:\博一\catalytic\z_0805\80_gCO\test.sh
+   D:\博一\catalytic\z_0805\90_gCO\test.sh
+   D:\博一\catalytic\z_0805\100_gCO\test.sh
+   四个脚本的SPARTA_EXE均已统一设为上述spa_0805绝对路径。
+4. 各脚本原有节点数、MPI任务数、openmpi/5.0.5模块、输入文件检查和mpirun命令均保持不变。
+
+十三、20260805新增gamma通用noleave驻留保持模式
+1. 为surf_react gamma新增可选裸关键词noleave，适用于原n_site、only_one和gank三种状态机；关键词位于所选site模式参数之后、反应文件名之前。省略noleave时完全保留原行为。
+2. 命令示例：
+   n_site：
+   surf_react gamma gamma noleave gamma.surf surf 300 6.022e18 O 1 C 1 N 1 CO 1
+   only_one：
+   surf_react gamma gamma only_one yes noleave gamma.surf surf 300 O 1 C 1 N 1 CO 1
+   gank：
+   surf_react gamma gamma gank yes every_n 1 noallow noleave gamma.surf surf 300 O 1 C 1 N 1 CO 1
+3. n_site与only_one模式中，入射粒子通过gamma门槛但与驻留粒子无已定义反应时，不再释放或清空驻留粒子；驻留状态保持，只有气相入射粒子交由原surf_collide/boundary collide模型正常散射。
+4. gank模式继续优先搜索全部兼容库存；无兼容伙伴且本物种库存低于容量时仍正常吸附。仅在noallow模式库存已满时，noleave阻止原来的“库存减一并双散射”，库存保持N，只有入射粒子散射。allow模式可接受noleave，但没有满容量释放分支。
+5. gamma概率判定失败时，原代码本来就不修改库存；成功反应、反应热、产物散射、空位吸附和兼容伙伴加权选择均未改变。
+6. 修改文件：
+   src/surf_react_gamma.cpp
+   src/surf_react_gamma.h
+   docs/surf_react_gamma.md
+   test/gamma/README.md
+   change_logs/2026-07-28_surf_react_gamma.txt
+7. 新增确定性测试：
+   test/gamma/in.face_nsite_noleave
+   test/gamma/in.face_only_one_noleave
+   test/gamma/in.face_gank_noallow_noleave
+8. 三项noleave串行测试、三项省略关键词旧行为回归、2/4进程noleave测试及既有only_one/gank RMA压力测试均通过；旧共享box face压力测试仍为1547次反应。
+9. 最终执行make clean-mpi和make mpi -j4，从零完整编译通过。最终本机程序：
+   D:\博一\气固相互作用\202607_src\src\spa_mpi
+   文件大小：2595896字节
+   SHA256：1E3DB09A9E806484899F79D64604CE230C0B366180CBDFA4F0BB66725E9A8C49
+10. 本次未启动80 km正式计算；超算使用前需将更新源码重新上传编译，不能继续使用旧spa_0805二进制测试noleave。

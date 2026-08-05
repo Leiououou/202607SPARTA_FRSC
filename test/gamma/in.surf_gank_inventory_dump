@@ -1,0 +1,34 @@
+seed 123456
+dimension 2
+boundary r r p
+
+create_box -1 1 -1 1 -0.5 0.5
+create_grid 10 10 1
+
+global nrho 1.0 fnum 1.0 temp 300.0 surfmax 100
+species ../20260714/air.species C O N CO CO2 N2
+mixture air C O N CO CO2 N2
+
+read_surf data.square
+
+surf_collide wall diffuse 300.0 1.0
+surf_react gamma gamma gank yes every_n 8 allow gamma_inventory.surf surf 300.0 C 1.0 O 1.0 N 1.0 CO 1.0
+surf_modify all collide wall react gamma
+
+# The gamma startup log must report:
+# s_gamma_gamma_species[1]=C, [2]=O, [3]=N, [4]=CO.
+# Keep inventories separate from collision/heat-flux compute columns.
+dump inventory surf all 1 ${OUTFILE} id s_gamma_gamma_species[*]
+
+timestep 0.003
+stats 1
+
+# All particles strike line 1 from the flow region inside the square.  None of C, N, and CO
+# is compatible with either of the other two, so the final line-1 inventory is
+# C=1, O=0, N=1, CO=1.  The other three lines remain zero.
+create_particles air single C 0.1 -0.3 0.0 0.0 -100.0 0.0
+run 1
+create_particles air single N 0.1 -0.3 0.0 0.0 -100.0 0.0
+run 1
+create_particles air single CO 0.1 -0.3 0.0 0.0 -100.0 0.0
+run 1

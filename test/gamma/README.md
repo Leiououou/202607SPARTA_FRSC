@@ -5,10 +5,30 @@ reaction-file paths resolve.
 
 Deterministic serial cases:
 
+- `in.face_nsite_noleave`: a legacy nsite resident survives two incompatible
+  impacts; only the incident particles remain in the gas.
+- `in.face_only_one_noleave`: the globally unique one-site resident survives
+  two incompatible impacts.
+- `in.face_gank_noallow_noleave`: a full noallow inventory remains full after
+  an incompatible arrival and is then consumed by two compatible arrivals.
+
+- `in.face_gank_allow`: `every_n=2 allow` retains five C simulator particles
+  and then completes five C+O reactions, proving compatible matching beyond
+  the first logical capacity chunk.
+- `in.face_gank_noallow`: two C particles fill their inventory; a third C
+  triggers same-species double scattering and leaves one stored C, which a
+  following O consumes.
+- `in.face_gank_no`: explicit `gank no` retains the legacy `nsite` parser and
+  behavior. Omitting both `gank` and `only_one` remains the same legacy path.
+- `in.surf_gank_inventory_dump`: writes the four gank inventory columns to an
+  independent `dump surf` file. Its final bottom-surface state is
+  `C=1, O=0, N=1, CO=1`, and the other three surfaces remain empty. Supply the
+  output path with, for example,
+  `-var OUTFILE '/tmp/gank_inventory.*.dat'`.
 - `in.face_only_one_cycle`: `only_one yes` omits `nsite`; an empty-face
   adsorption followed by a matching impact completes one reaction cycle.
 - `in.face_only_one_unmatched`: an unmatched occupied single site emits both
-  particles and becomes vacant.
+  particles and becomes vacant when `noleave` is omitted.
 - `in.face_only_one_no`: explicit `only_one no` retains the legacy
   `nsite`-based parser and behavior.
 - `in.surf_only_one`: replicated explicit surfaces use one site per element.
@@ -34,6 +54,13 @@ Deterministic serial cases:
 
 MPI cases:
 
+- `in.surf_gank_inventory_dump` can also be run on 2 and 4 ranks; its final
+  per-ID inventory must match the serial result even if MPI changes row order.
+
+- `in.mpi_face_gank_stress`: x-partitioned ranks update the same global box
+  face inventory and stress atomic vector read/modify/write arbitration.
+- `in.mpi_surf_gank_coarse`: coarse explicit surfaces spanning several grid
+  partitions stress unique-owner per-species inventories.
 - `in.mpi_surf_only_one_distributed`: distributed explicit surfaces stress
   one-site owner/ghost state consistency.
 - `in.mpi_face_only_one_stress`: x-partitioned ranks collide with the same
@@ -56,3 +83,6 @@ spa_serial -var RXNFILE gamma_bad_formula.surf -in in.parser
 ```
 
 Only the comments case should succeed; the other three are expected failures.
+`in.gank_invalid_capacity` and `in.gank_inactive_partner` are also expected
+failures: `every_n` must be positive, and each positive-gamma gank species must
+have a mapped partner whose gamma is also positive.

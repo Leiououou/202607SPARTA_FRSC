@@ -1,0 +1,11 @@
+seed 123456
+dimension 3
+boundary oo oo so
+create_box 0 1 0 1 0 1
+create_grid 1 1 1
+global nrho 1.0 fnum 1.0
+species ../20260714/air.species C O CO
+mixture air C O CO
+# O is the only mapped partner of C, but gamma_O=0, so C inventory could
+# never be consumed.  gank must reject this command during construction.
+surf_react grxn gamma gank yes every_n 2 allow gamma_co.surf face 300.0 C 1.0 O 0.0

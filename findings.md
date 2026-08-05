@@ -129,3 +129,64 @@
 - `noallow` 下，若入射 A 无兼容伙伴且 `n_A >= N`，选择一个已存 A 与入射 A 同时按 Tw 漫反射，库存 `n_A--`；如果 A+A 本身是定义反应，则兼容反应优先，不进入满容量分支。
 - gank 的严格 MPI 语义不能沿用现有按时间步合并 delta 的 nsite 状态；需要唯一属主 RMA 窗口保存每 surf × 每表面物种的整条库存向量，并在一次排他锁内完成读取、加权选择和读改写。
 - 建议初始化硬检查：正 gamma 物种必须出现在反应物集合中，且至少有一个正 gamma 的兼容伙伴，否则 allow 模式会产生不可消耗库存。
+- gank RMA 窗口可固定为 `owned_surfs * nspecies_surf` 个64位整数；allow扩容是逻辑容量，无需重建窗口。每次碰撞用一把排他锁覆盖整条库存向量，避免同一步跨rank重复消耗伙伴或越过noallow容量。
+- 最终实现中，兼容反应始终先于容量处理；noallow仅在没有兼容伙伴且本物种库存达到every_n时执行同种双散射，库存从N降为N-1。权威库存为64位RMA状态，每步镜像到原有gamma自定义属性供输出。
+
+## 2026-08-05：compute surf 输出 gank 分物种库存评估
+
+- `compute surf` 的现有关键字均是碰撞事件统计量，输出列固定为 `ngroup*nvalue`，并在 `surf_tally()` 中按混合物组累加；gank库存则是表面瞬时状态量，不能在碰撞回调中累加。
+- gank已在每个时间步把权威64位RMA库存镜像到显式表面自定义数组 `gamma_<surf_react-ID>_species`。反应ID为`gamma`时，属性名是`gamma_gamma_species`，可通过`s_gamma_gamma_species[i]`或通配符直接输出。
+- 一个无参数`species_n`自动展开全部物种会引入反应模型ID歧义、动态列数、物种顺序和多mixture-group语义问题，属于中等改动而非简单增加一个case。
+- 若以后确需集成到compute surf，推荐显式单物种接口，例如重复书写`species_n gamma O`、`species_n gamma C`等；其中`gamma`是surf_react ID。状态列应在`post_process_surf()`读取，而不是在`surf_tally()`累加。
+- 当前最小方案是不改compute surf：dump中直接加入`s_gamma_gamma_species[*]`获得各物种瞬时库存；若需要时间平均，则单独建立只包含这些custom列的`fix ave/surf`，因为现有fix ave/surf禁止在同一个fix中混合碰撞tally compute与非tally custom属性。
+
+## 2026-08-05：gank 独立库存文件输出实现依据
+
+- `build_surface_species()`按全局`particle->species`索引升序建立`species_surf[]`，因此custom数组列顺序是“参与gamma/初始覆盖/反应的物种在species定义中的顺序”，并非gamma系数参数顺序或反应文件首次出现顺序。
+- `sync_gank_state()`每步从唯一属主RMA窗口取快照，将64位整数库存写入owned `gamma_<ID>_species` double数组，再执行`spread_custom()`；`dump surf`的custom路径直接读取owned数组，不会重新累计或按碰撞次数重复库存。
+- 独立dump必须定义在`surf_react gamma`之后，因为custom数组在gamma构造阶段创建。`s_gamma_<ID>_species[*]`会由输入通配符展开为全部库存列。
+- 显式surf可以直接输出该custom数组；FACE模式没有per-surf custom数组，应继续通过其他专用统计路径处理。本任务针对用户的`... gamma.surf surf 300 ...`显式表面配置。
+- 确定性显式surf测试使用species命令顺序`C O N CO CO2 N2`，启动日志正确打印四个库存字段依次为C、O、N、CO。依次注入互不兼容的C、N、CO后，最终独立dump中底边surf为`C=1,O=0,N=1,CO=1`，其余三个surf均为零。
+- 2和4进程运行得到相同的按surf ID库存；2进程文件行序为`1,3,2,4`而4进程为`1,2,3,4`，确认后处理必须按ID匹配，不能假设MPI dump行序已排序。
+- 最终clean MPI编译通过。新库存输出1/2/4进程回归均为底边`C=1,O=0,N=1,CO=1`；原共享FACE压力测试2/4进程均为1547次反应，跨分区surf压力测试2/4进程分别正常完成5310/5314次反应。
+
+## 2026-08-05：修改进程精简版路径盘点
+
+- 代码归档存在：`sparta_20260714`、`sparta_20260722`、`sparta_20260728`、`sparta-20260729`、`sparta_20260804`、`sparta_20260805`。20260727没有单独命名归档，其功能随后合并进20260729归档。
+- 历史验证目录集中在当前工作区`test/20260714*`、`test/20260722_*`、`test/20260727_*`、`test/20260728_1`、`test/20260729_1`和`test/gamma`。
+- gamma圆柱计算归档位于`D:\博一\sparta代码修改流程\test\cylinder_gamma`；Orion版本算例位于`D:\博一\catalytic\z_0804\{80,90,100}_gCO`和`z_0805\{80,90,100}_gCO`。
+- `sparta_20260805/src/surf_react_gamma.cpp`与当前工作区源码SHA256一致；z_0805三个高度的`spa_mpi`与当前最终二进制SHA256均为`642FE926A049B58037CF29C81DBB84E43D8BD9836F83919486ED60A43137A7C6`。
+- 精简版共登记66个本地路径，其中60个当前存在；仅z_0804和z_0805的六个`data_80/data_90/data_100`运行时输出目录尚未创建，已在文档中明确标注为提交/运行前需建立，而非现存计算结果。
+- z_0805三个`test.sh`当前仍引用超算0804程序`/data/user/shengpengju/sparta_20260804/build/src/spa_0804`；精简版已保留该实际路径并提示运行20260805版前更新`SPARTA_EXE`。
+
+## 2026-08-05：常gamma近期尝试PPT提纲依据
+
+- 初始动机：80 km NC与论文相差约0.3%--5.5%，而FC低约16%--20%；当前FC-NC催化增量仅为论文的53%--58%，因此重点审查表面复合状态机而不是整体流场热流定义。
+- 模型迭代依次包括原nsite库存、`only_one`共享驻留槽、`gank allow`分物种无限逻辑库存、`gank every_n=1 noallow`有限库存，以及`prob`非守恒激进热流上包络。
+- `gank allow`中CO库存从50000步的123693增长到150000步的372074，近似随时间线性增长；CO和C比例近似不变，使热流事件率可进入准稳态，但表面库存本身不稳态。
+- 100 km在250000步的`gank 1 noallow`与`gank 1024 allow`峰值分别为9.1307与9.1403 kW/m2，全曲线RMS相对差异0.1971%，说明该高度的总热流对容量变化不敏感。
+- 论文明确描述首粒子驻留、第二粒子同微元配对、不匹配时两者离开，并指出O+O->O2和CO+O->CO2是催化热流主要贡献；因此`only_one`最接近文字机制，兼容优先的长期库存会抑制O2通道。
+
+## 2026-08-05：gamma `noleave`实现语义
+
+- `noleave`是位于site-mode子句之后、反应文件之前的可选裸关键词；nsite可直接写在`gamma`之后，only_one/gank写在各自完整模式子句之后。省略时完全保留旧语义。
+- nsite与only_one中，不兼容配对不再释放选中的驻留粒子，入射粒子由外层surf/boundary collide正常散射；兼容反应、空位吸附和gamma门槛失败均不变。
+- gank仍先搜索兼容库存；无伙伴且低于容量时仍吸附。仅当noallow本物种库存已满时，noleave阻止原来的库存减一和双散射，使库存保持N并只散射入射粒子。allow模式接受该关键词但其无满容量释放分支。
+- 只返回`0`且不设置`velreset`即可让外层配置的碰撞模型处理入射粒子；only_one/gank RMA锁在返回前显式释放，nsite不产生delta，因此三种状态均保持。
+
+## 2026-08-05：catalytic 全部 80 km 最新结果汇总
+
+- 递归扫描共发现 8 个含 `80surf.<step>.dat` 的结果文件夹，统一采用各文件夹数字步数最大的快照；全部文件均含 `f_2[10]`，对应当前输入中的 `etot`。
+- 纳入结果及最新步数：only_one 300000、gank1 noallow 40000、prob 50000、prob max 20000、原 gamma_CO=0 100000、gamma=0 300000、nsite gamma_CO=1 90000、NC 240000。
+- 对应 TPS 峰值依次约为 56.158、56.494、56.186、55.070、50.376、40.387、57.179、40.264 kW/m2；论文 FC 驻点约 71 kW/m2。
+- `z_0805/80_gCO` 当前没有 `80surf.*.dat`，因此不会作为有效结果曲线纳入；脚本未来发现新结果目录时会自动加入。
+## 2026-08-05：gamma 吸附—复合能量记账审查
+
+- `Update` 在碰撞前复制完整 `iorig`，碰撞后只调用一次 `ComputeSurf::surf_tally(iorig,ip,jp)`；首次吸附把 `ip=NULL`，因此 KE/EROT/EVIB 按 `E_in-0` 全部计入壁面。
+- 第二次兼容撞击时，gamma 清除一个库存计数，把当前 `ip` 物种改成生成物，并用内部 diffuse 模型以 `Twall`、适应系数1.0重采样速度、转动能和振动能；`ComputeSurf` 计算 `E_current_in-E_product_out`。
+- 两次事件相加为 `E_first_in + E_second_in - E_product_out + Qreaction`，第一颗粒子的能量虽然不保存在库存里，但已在吸附时入账，因此无需在复合时再次加入。
+- `ECHEM` 仅在 `reaction!=0` 时加入一次 `weight*reaction_coeff*fluxscale`；`ETOT` 将相同反应热加入一次，并与KE/EROT/EVIB严格可加。粒子能量不含化学形成能，因此显式Q不是重复计算。
+- gamma内部生成物漫反射器固定`acc=1.0`，输入工况外层亦为`diffuse 300 1`，生成物完全能量适应没有遗漏。
+- 正/零/负反应热现有单事件测试分别得到：正热`etot=ke+2.5e-16`、零热`etot=ke`、负热`etot=ke-2.5e-16`，符号和一次性加入正确。
+- 新建两撞击only_one最小测试：第一步吸附`ke=etot=1.325e-19,echem=0`；第二步复合`ke=-1.22632e-17,echem=5e-16,etot=4.87737e-16`，严格满足分项和。未发现所问三类遗漏/重复。
+- 仍未计入的是独立的“吸附热/表面结合能”，gamma模型只使用气相复合反应热；但Zuppardi/DS2V给出的壁面模型同样以复合反应热为核心，不能据此解释当前约14 kW/m2缺口。

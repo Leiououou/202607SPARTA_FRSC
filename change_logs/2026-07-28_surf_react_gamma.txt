@@ -92,3 +92,64 @@ Validation:
 - A clean MPI build and four serial regressions passed.
 - Shared-face, distributed-surf, and coarse cross-partition tests passed on
   2 and 4 MPI ranks after the fix.
+
+2026-08-05: gank compatible per-species inventory mode
+
+Command extensions:
+- Added `gank no` as an explicit alias for the unchanged n_site path.
+- Added:
+    surf_react ID gamma gank yes every_n N allow|noallow
+      file surf|face Tw [tally_only yes|no] [species gamma] ...
+- Omitting both `gank` and `only_one` still selects the original n_site mode.
+- `gank yes` omits n_site, rejects init_cover, and starts all inventories at
+  zero. It is a separate mode from only_one.
+
+Behavior:
+- Every surface has one independent DSMC-particle inventory for each surface
+  reactant species.
+- Compatible stored partners are selected with probability proportional to
+  their inventory count; a compatible reaction always precedes capacity
+  handling.
+- `allow` stores an unbounded 64-bit count with capacity interpreted in
+  logical chunks of every_n; it performs no dynamic MPI allocation.
+- `noallow` stores up to every_n particles per species. A further unmatched
+  same-species arrival removes one stored particle and diffusely scatters both
+  particles, leaving the inventory at every_n-1.
+- Positive-gamma species without any positive-gamma mapped partner are
+  rejected during initialization.
+
+Parallel state:
+- The unique owner of every face or explicit surf stores a 64-bit inventory
+  vector in an MPI RMA window.
+- One exclusive passive-target lock covers the complete weighted partner
+  selection and read/modify/write update.
+- Authoritative inventory vectors are mirrored to existing custom state
+  arrays each timestep for output and diagnostics.
+
+2026-08-05: independent per-species inventory output
+
+- `compute surf` remains unchanged; gank inventory is a surface state rather
+  than a collision-event tally.
+- For explicit surfaces, use `s_gamma_ID_species[*]` in `dump surf` to write
+  one instantaneous raw DSMC inventory count per surface species to a separate
+  file. `s_gamma_ID_total` is available when a total column is also desired.
+- Gamma initialization now prints every dump field and its species mapping.
+  The order follows the selected species in the SPARTA species list.
+- MPI dump row order may differ from surface-ID order, so output examples keep
+  the `id` field and post-processing must match by ID.
+- A deterministic four-species explicit-surface test produced
+  `C=1, O=0, N=1, CO=1` on the impacted surface in serial, 2-rank, and 4-rank
+  runs; all other surfaces remained empty.
+
+2026-08-05: optional noleave behavior
+
+- Added the bare `noleave` keyword after the selected nsite, only_one, or gank
+  mode clause and before the reaction filename.
+- In nsite and only_one modes, an incompatible impact no longer releases the
+  selected resident; only the incident particle scatters.
+- In gank noallow mode, an unmatched arrival at full same-species capacity no
+  longer removes one stored particle; inventory remains full and only the
+  incident particle scatters. Compatible-first matching and normal adsorption
+  below capacity are unchanged.
+- Omitting `noleave` preserves all previous release behavior and input syntax.
+- Added deterministic serial coverage for all three modes.

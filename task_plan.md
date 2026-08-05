@@ -115,4 +115,102 @@
 45. [complete] 评估命令语法、旧模式兼容关系和错误输入检查
 46. [complete] 评估串行、FACE、显式 surf、MPI RMA 和网格变化实现范围
 47. [complete] 制定单元回归、MPI 压力、统计选择和80 km物理验证计划
-48. [pending] 用户确认最终语法及两个边界语义后开始实现
+48. [complete] 用户确认最终语法及回退规则，授权开始实现
+49. [complete] 实现向后兼容的 gank 参数解析、反应网络检查和串行状态机
+50. [complete] 实现每 surf×物种的严格 MPI RMA 库存及状态镜像
+51. [complete] 增加 allow/noallow、加权配对、回退和错误输入测试
+52. [complete] clean 编译并完成串行、2/4进程回归与压力测试
+53. [complete] 更新命令文档、测试说明和变更记录
+
+## 新任务：评估 compute surf 输出 gank 分物种库存（只读评估）
+
+目标：评估在 `compute surf` 中增加吸附物种库存列的接口与实现复杂度；本阶段不修改功能源码。
+
+54. [complete] 核对 compute surf 列布局、gamma 库存自定义属性、MPI 同步时机及现有输出通道，形成接口建议
+
+## 新任务：gank 分物种库存独立文件输出
+
+目标：不修改 `compute surf`，复用 `gamma_<surf_react-ID>_species` 自定义表面数组，将每个显式 surf 上各吸附物种的 DSMC 库存输出到独立文件；打印明确的列—物种映射，并完成串行/MPI 验证、文档和编译。不会运行 80 km 正式算例。
+
+55. [complete] 核对库存物种排序、状态同步和 dump surf/custom 的串行及MPI输出路径
+56. [complete] 在 gamma 初始化输出中打印 custom 库存数组列号与物种名映射
+57. [complete] 新增独立库存 dump 示例和确定性串行测试
+58. [complete] 运行2/4进程库存输出测试，检查全局surf库存一致性
+59. [complete] 更新使用文档、测试说明、变更记录和外部代码修改进程
+60. [complete] clean MPI编译并完成相关回归测试
+
+## 新任务：代码修改进程精简版
+
+目标：在外部修改流程目录新建一份便于直接查用的精简记录，只保留各版本新增命令、完整使用示例，以及代码版本和计算/验证文件路径；原详细记录保持不变。
+
+61. [complete] 盘点20260714至20260805的命令变化、代码归档和计算目录
+62. [complete] 编写`代码修改进程_精简版.txt`
+63. [complete] 校验文档内所有本地路径、命令ID和当前二进制哈希
+64. [complete] 完成精简记录交付并登记生成位置
+
+## 新任务：常gamma近期尝试PPT前置PDF
+
+目标：将近期围绕Zuppardi Orion算例的常gamma模型修改、计算动机、主要问题、关键结果和当前结论整理为简洁的横向PDF，便于直接拆分制作PPT，并保存到用户桌面。
+
+65. [complete] 汇总研究动机、模型迭代、关键数值结果和论文对照结论
+66. [complete] 生成横向PPT提纲PDF并保存到桌面
+67. [complete] 渲染全部页面并完成视觉与文本核验
+68. [complete] 交付PDF及简短内容说明
+
+## 新任务：gamma `only_one noleave` 驻留保持模式
+
+目标：为 `surf_react gamma` 的 nsite、only_one 和 gank 三种状态机增加通用可选裸关键词 `noleave`。启用后，未发生反应时只让入射粒子继续散射，已存在的驻留粒子/库存保持；gank 无兼容伙伴且未满时仍正常吸附，noallow 满容量时不再释放库存粒子。省略时维持现有行为。完成向后兼容解析、严格MPI状态更新、针对性回归、clean编译和文档记录。
+
+69. [complete] 核对 only_one 参数解析、串行/RMA状态转移和现有测试入口
+70. [complete] 实现三种模式通用 noleave 语法、状态机及非法位置检查
+71. [complete] 增加 nsite/only_one/gank 保持行为及旧行为回归测试
+72. [complete] 完成串行、2/4进程压力测试与clean MPI编译
+73. [complete] 更新命令文档、测试说明和代码修改记录
+
+新错误记录：首次在沙箱内启动 WSL 编译返回 `Wsl/Service/CreateInstance/E_ACCESSDENIED`（1次）；按权限流程升级执行后编译成功。
+
+新错误记录：首次用PowerShell组合`rg`正则搜索`${...}`时双引号转义触发解析错误（1次）；改用单引号正则并拆分搜索后解决。
+
+新错误记录：首次运行独立库存测试时默认`log.sparta`无法在挂载目录创建（1次），改用`-log /tmp/...`；随后发现本版本`dump surf`不支持`dump_modify sort id`（1次），已从测试输入删除该非必要选项。
+
+新错误记录：显式方形surf测试从外部及内部近壁切分单元创建单粒子均失败（2次）；第三次改为10×10细网格、从未切分的内部单元起步并在单步内飞向底边。
+
+新错误记录：制作PPT前置PDF时，系统MSYS2 Python缺少reportlab；首次执行`pip install --user`因PEP 668 externally-managed-environment被拒绝（1次），改用工作区独立虚拟环境安装，避免修改系统Python。
+
+新错误记录：独立虚拟环境安装reportlab/pypdf/pdfplumber超过120秒并超时，依赖未安装（1次）；改用本机已有XeLaTeX生成PDF，并继续使用Poppler渲染核验。
+
+新错误记录：首次XeLaTeX编译因未加载TikZ positioning库报错（1次），补充库后解决；初次逐页渲染发现第2、7、9页局部拥挤，压缩内容并复检后消除可见裁切。
+
+新错误记录：最终重编译时沙箱进程无法写入已有TeX临时目录（2次），按权限流程在同一工作区内完成编译；首次`pdftotext`写校验文件亦受限（1次），改为标准输出内存校验。
+
+新错误记录：启动`noleave`实现审查时，PowerShell下对`src\\surf_react_gamma.*`使用路径通配符且误写不存在的`tests`目录，导致`rg`失败（1次）；后续改为明确文件路径和实际`test`目录。
+
+新错误记录：首次用PowerShell双引号封装WSL shell循环运行noleave测试时，循环变量被外层解析吞掉且无SPARTA输出（1次）；改为逐项显式执行，避免双层变量转义。
+## 新任务：美化代码修改进程精简版
+
+74. [complete] 按“版本索引—命令速查—配置对照—用户计算目录—程序路径”重排精简版
+75. [complete] 删除内部验证文件与测试说明，仅保留用户实际计算文件夹
+76. [complete] 覆盖回外部记录目录并核对关键命令、路径与 noleave 版本提醒
+
+## 新任务：汇总 catalytic 下全部 80 km 热流结果
+
+目标：盘点 `D:\博一\catalytic` 下所有 80 km 计算结果，统一提取各算例最新有效表面总热流，在一张图中与 Zuppardi 论文 FC 参考曲线对照，并交付可重复运行的 MATLAB 脚本。
+
+77. [complete] 递归盘点所有 80 km 算例、结果文件和已有后处理脚本
+78. [complete] 核对各文件热流列、几何映射、统计窗口与论文 FC 数据来源
+79. [complete] 编写汇总绘图脚本并设置清晰的曲线分组和图例
+80. [complete] 使用 MATLAB 实际运行，核对纳入算例、步数和数值范围
+81. [complete] 将脚本保存到 catalytic 总目录并交付说明
+
+## 新任务：gamma 吸附—复合能量记账审查
+
+目标：逐行核查第一颗粒子吸附、第二颗粒子触发复合、生成物散射及反应热统计，判断入射能、生成物带走能量和显式反应热是否遗漏或重复；仅诊断，不修改源码。
+
+82. [complete] 定位 gamma 状态机、粒子创建/删除和能量 tally 调用链
+83. [complete] 审查首次吸附时入射粒子的平动/转动/振动能去向
+84. [complete] 审查复合时驻留粒子、入射粒子和生成物散射能量去向
+85. [complete] 审查 reaction heat 到 echem/etot 的缩放、符号及重复计数风险
+86. [complete] 用最小单事件算例或现有测试定量验证代码级能量平衡
+87. [complete] 汇总结论、确定性证据和仍需验证的边界
+
+错误记录：首次用 PowerShell 双引号封装 WSL shell 循环时，`$f` 被外层解析为空，三个测试均因空文件名失败（1次）；改为逐条显式运行，避免双层变量转义。

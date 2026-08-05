@@ -1,0 +1,28 @@
+seed 123456
+dimension 3
+boundary pp pp so
+
+create_box 0 1 0 1 0 100
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species ../20260727_ps_schu/air.species O O2
+mixture air O O2
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# O2(s) is incompatible with O.  noleave keeps O2(s), so both O impacts
+# scatter individually and no O2 particle is emitted from the surface.
+surf_react grxn gamma noleave gamma_oo.surf face 300.0 1.0 init_cover O2 1.0 O 1.0 O2 1.0
+bound_modify zlo react grxn
+
+compute cnt count O O2
+timestep 0.001
+stats 1
+stats_style step time np nsreact c_cnt[1] c_cnt[2] sr_grxn[1] sr_grxn[2]
+
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1

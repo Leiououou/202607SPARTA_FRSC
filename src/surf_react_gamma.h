@@ -47,6 +47,10 @@ class SurfReactGamma : public SurfReact {
   int firstflag;
   int tally_only_flag;
   int only_one_flag;
+  int noleave_flag;
+  int gank_flag;
+  int gank_allow_flag;
+  int every_n;
 
   // only_one state is stored once globally, on the unique owner of each
   // explicit surface or box face.  Collision procs access it through RMA.
@@ -54,6 +58,14 @@ class SurfReactGamma : public SurfReact {
   MPI_Win one_state_win;
   int *one_state_owned;
   int one_state_nown;
+
+  // gank state is a globally unique per-surface inventory vector.  Counts
+  // are DSMC particle counts, one independent inventory per surface species.
+
+  MPI_Win gank_state_win;
+  bigint *gank_state_owned;
+  bigint *gank_state_buffer;
+  int gank_state_nown;
 
   double twall;
   double nsite;
@@ -147,6 +159,11 @@ class SurfReactGamma : public SurfReact {
   int lock_one_state(int, int &, MPI_Aint &);
   void put_one_state(int, MPI_Aint, int);
   void sync_one_state();
+  void create_gank_state_window();
+  void lock_gank_state(int, int &, MPI_Aint &);
+  void put_gank_state(int, MPI_Aint);
+  void sync_gank_state();
+  void validate_gank_reactions();
 
   int assigned_to_this(int);
   long int max_sites(int);

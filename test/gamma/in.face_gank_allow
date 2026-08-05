@@ -1,0 +1,45 @@
+seed 123456
+dimension 3
+boundary pp pp so
+
+create_box 0 1 0 1 0 100
+create_grid 1 1 1
+
+global nrho 1.0 fnum 1.0
+species ../20260714/air.species C O CO
+mixture air C O CO
+
+surf_collide wall diffuse 300.0 1.0
+bound_modify zlo collide wall
+
+# every_n=2, but allow must retain all five C simulator particles.
+surf_react grxn gamma gank yes every_n 2 allow gamma_co.surf face 300.0 C 1.0 O 1.0
+bound_modify zlo react grxn
+
+compute cnt count C O CO
+timestep 0.001
+stats 1
+stats_style step time np nsreact c_cnt[1] c_cnt[2] c_cnt[3] sr_grxn[1] sr_grxn[2]
+
+create_particles air single C 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single C 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single C 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single C 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single C 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+
+# Each O must find one of the five stored C partners.
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1
+create_particles air single O 0.5 0.5 0.099 0.0 0.0 -100.0
+run 1

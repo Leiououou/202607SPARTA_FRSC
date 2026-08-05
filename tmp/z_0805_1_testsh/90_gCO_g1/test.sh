@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#SBATCH -n 128
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=128
+#SBATCH --output=%j.out
+#SBATCH --error=%j.err
+
+export OMPI_MCA_coll=^hcoll
+ulimit -l unlimited
+module load openmpi/5.0.5
+export SPARTA_COMM_BUFFER_SIZE=4000
+
+SPARTA_EXE="/data/user/shengpengju/sparta_20260805_1/build/src/spa_0805_1"
+INPUT_FILE=in.orion
+
+if [ ! -x "$SPARTA_EXE" ]; then
+    echo "ERROR: SPARTA executable not found or not executable: $SPARTA_EXE" >&2
+    exit 1
+fi
+
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "ERROR: SPARTA input file not found: $INPUT_FILE" >&2
+    exit 1
+fi
+
+NP=$(srun hostname -s | wc -l)
+mpirun -np "$NP" "$SPARTA_EXE" < "$INPUT_FILE"

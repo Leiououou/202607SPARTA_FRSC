@@ -10,9 +10,11 @@ no user-facing `nsync` argument.
 ## Command syntax
 
 ```text
-surf_react ID gamma file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
-surf_react ID gamma only_one no file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
-surf_react ID gamma only_one yes file_name surf|face Tw [tally_only yes|no] [species gamma] ...
+surf_react ID gamma [noleave] file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
+surf_react ID gamma only_one no [noleave] file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
+surf_react ID gamma only_one yes [noleave] file_name surf|face Tw [tally_only yes|no] [species gamma] ...
+surf_react ID gamma gank no [noleave] file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
+surf_react ID gamma gank yes every_n N allow|noallow [noleave] file_name surf|face Tw [tally_only yes|no] [species gamma] ...
 ```
 
 - `ID` is the user-defined surface-reaction model ID.
@@ -27,6 +29,17 @@ surf_react ID gamma only_one yes file_name surf|face Tw [tally_only yes|no] [spe
 - With `only_one yes`, `n_site` is omitted and every box face or explicit
   surface element has exactly one globally shared site. `init_cover` is not
   accepted; every site starts vacant.
+- `gank` must immediately follow `gamma`. Omitting both `gank` and `only_one`,
+  or specifying `gank no`, selects the original `n_site` mode.
+- `gank yes` omits `n_site` and requires `every_n N allow|noallow`. `N` is a
+  positive integer number of DSMC simulator particles and is an independent
+  capacity for every storable species on every face/element. `init_cover` is
+  not accepted and all inventories start empty.
+- `noleave` is an optional bare keyword placed after the selected site-mode
+  clause and before `file_name`. If an incident particle passes its gamma gate
+  but no reaction executes, already stored particles remain on the surface and
+  only the incident particle undergoes the configured ordinary scattering.
+  Omitting `noleave` preserves the original release behavior.
 - `init_cover species fraction` may be repeated for different species.
   Fractions must lie in `[0,1]` and their sum may not exceed one.
 - `tally_only` defaults to `no`.
@@ -48,6 +61,20 @@ Single-site example:
 
 ```text
 surf_react recomb gamma only_one yes gamma.surf surf 1000.0 O 1.0
+surf_modify all react recomb
+```
+
+Keep the single resident after an incompatible impact:
+
+```text
+surf_react recomb gamma only_one yes noleave gamma.surf surf 1000.0 O 1.0 C 1.0
+surf_modify all react recomb
+```
+
+Well-mixed per-species inventory example:
+
+```text
+surf_react recomb gamma gank yes every_n 10 noallow gamma.surf surf 300.0 O 1.0 N 1.0 C 1.0 CO 1.0
 surf_modify all react recomb
 ```
 
@@ -98,9 +125,10 @@ For an incident gas particle of species `A`:
 4. If the site contains `B(s)` and the file defines `A + B --> C` in either
    reactant order, one `B(s)` is consumed and the incident particle record is
    changed to the sole gas product `C`.
-5. If the occupied species has no matching file reaction, the stored particle
-   is released and both it and the incident particle scatter diffusely at
-   `Tw`; the site becomes vacant.
+5. If the occupied species has no matching file reaction, the default behavior
+   releases the stored particle and scatters both particles diffusely at `Tw`,
+   leaving the site vacant. With `noleave`, the stored particle and coverage
+   are unchanged and only the incident particle scatters.
 
 The emitted product is internally scattered by a fully accommodating diffuse
 model at `Tw`. Translational energy is sampled at `Tw`; rotational and
@@ -117,6 +145,84 @@ which follows the existing `adsorb` storage convention.
 
 With `only_one yes`, the capacity is exactly one and is independent of area,
 `fnum`, particle weight, and MPI process count.
+
+## `gank yes`: compatible well-mixed inventories
+
+`gank yes` replaces spatial site sampling with an independent inventory count
+for every surface reactant species on every face/element. Counts are numbers
+of DSMC simulator particles, not physical molecules and not coverages derived
+from `n_site`.
+
+After the incident particle passes its species gamma gate, all stored species
+that have a mapped reaction with the incident species form the compatible set.
+If their counts are `n_B`, partner `B` is selected with probability
+
+```text
+P(B | A) = n_B / sum_j(n_j)
+```
+
+over compatible species only. One selected `B` is consumed, the mapped gas
+product is emitted at `Tw`, and the normal reaction and heat tallies apply.
+Partner matching always precedes capacity handling, including when an
+inventory is full.
+
+If no compatible partner exists:
+
+- with `allow`, the incident species adsorbs. Its logical capacity begins at
+  `N` and grows in chunks of `N`; the implementation stores a 64-bit count, so
+  logical expansion does not reallocate or rebuild the MPI window;
+- with `noallow`, the incident species adsorbs while its own inventory count is
+  below `N`. At `N`, one stored particle of the same species is removed and it
+  and the incident particle both scatter diffusely at `Tw`, leaving count
+  `N-1` and producing no reaction heat. With `noleave`, a full inventory
+  remains at `N` and only the incident particle scatters.
+
+Different species do not share a capacity. A positive-gamma species must have
+at least one mapped reaction partner that also has positive gamma; otherwise
+the command is rejected to prevent a permanently non-consumable inventory.
+
+## Outputting per-species inventories
+
+For explicit surfaces (`surf` mode), the current inventory is already mirrored
+to the per-surface custom array
+
+```text
+gamma_ID_species
+```
+
+where `ID` is the `surf_react` ID. It can be written to a separate file without
+adding inventory state to the collision-tally columns produced by `compute
+surf`. For example, if the reaction ID is `gamma`:
+
+```text
+dump inventory surf all 10000 data/adsorbed_species.*.dat id s_gamma_gamma_species[*]
+```
+
+The wildcard expands to one column per surface species. At initialization,
+rank zero prints the exact mapping, for example:
+
+```text
+Gank inventory dump fields:
+  s_gamma_gamma_species[1] = C
+  s_gamma_gamma_species[2] = O
+  s_gamma_gamma_species[3] = N
+  s_gamma_gamma_species[4] = CO
+```
+
+Column order follows the order of the selected species in the SPARTA species
+list, so input scripts and post-processing should use the printed mapping
+rather than infer the order from the gamma coefficient list or reaction file.
+The values are instantaneous, dimensionless counts of adsorbed DSMC simulator
+particles. They are not divided by area or time and are not multiplied by
+`fnum` or particle weight. The optional total count is available as
+`s_gamma_ID_total`.
+
+MPI output row order is not guaranteed to follow surface ID order. Always
+include the `id` field and join or sort rows by that ID in post-processing. The
+inventory custom array is created by `surf_react gamma`, so the `dump` command
+must appear after the corresponding `surf_react` command. This custom-array
+output applies to explicit surfaces; `face` mode does not create dumpable
+per-surface custom attributes.
 
 ## Energy and heat tallies
 
@@ -199,6 +305,15 @@ not one site per rank. The owner state is mirrored to the existing output
 attributes at the end of each timestep. This strict arbitration adds one-sided
 MPI communication to each gamma-gated event and can cost more than the
 batched-delta path used by `only_one no`.
+
+With `gank yes`, each global surface ID instead owns one 64-bit inventory
+vector. Every gamma-gated collision locks the unique owner, fetches the entire
+vector, performs weighted compatible selection and the count update as one
+atomic read/modify/write transaction, then unlocks it. At the end of each
+timestep the authoritative counts are mirrored into the existing
+`gamma_ID_total` and `gamma_ID_species` output attributes. This provides strict
+cross-rank capacity and consumption semantics for faces, replicated surfaces,
+and explicit/distributed surfaces.
 
 The owner window is initialized through a self-target `MPI_Put` enclosed by
 `MPI_Win_lock`/`MPI_Win_unlock`. All `MPI_Get`, `MPI_Put`, and
