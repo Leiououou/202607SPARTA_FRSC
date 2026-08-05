@@ -45,22 +45,48 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   if (surf->implicit)
     error->all(FLERR,"Cannot use surf_react gamma with implicit surfaces");
 
-  if (narg < 6) error->all(FLERR,"Illegal surf_react gamma command");
+  if (narg < 5) error->all(FLERR,"Illegal surf_react gamma command");
 
   me = comm->me;
   nprocs = comm->nprocs;
   distributed = surf->distributed;
 
-  if (strcmp(arg[3],"face") == 0) mode = FACE;
-  else if (strcmp(arg[3],"surf") == 0) mode = SURF;
+  // Backward-compatible forms:
+  //   ID gamma file mode Tw nsite ...
+  //   ID gamma only_one no  file mode Tw nsite ...
+  //   ID gamma only_one yes file mode Tw ...
+
+  only_one_flag = 0;
+  int ibase = 2;
+  if (strcmp(arg[ibase],"only_one") == 0) {
+    if (narg < ibase+2)
+      error->all(FLERR,"Illegal surf_react gamma command");
+    if (strcmp(arg[ibase+1],"yes") == 0) only_one_flag = 1;
+    else if (strcmp(arg[ibase+1],"no") == 0) only_one_flag = 0;
+    else error->all(FLERR,"Illegal surf_react gamma only_one option");
+    ibase += 2;
+  }
+
+  int nrequired = only_one_flag ? 3 : 4;
+  if (narg < ibase+nrequired)
+    error->all(FLERR,"Illegal surf_react gamma command");
+
+  int file_index = ibase;
+  int mode_index = ibase+1;
+  int twall_index = ibase+2;
+  int iarg = ibase+3;
+
+  if (strcmp(arg[mode_index],"face") == 0) mode = FACE;
+  else if (strcmp(arg[mode_index],"surf") == 0) mode = SURF;
   else error->all(FLERR,"Illegal surf_react gamma command");
 
   if (mode == SURF && surf->nsurf == 0)
     error->all(FLERR,"Cannot use surf_react gamma when no surfs exist");
 
-  twall = input->numeric(FLERR,arg[4]);
-  nsite = input->numeric(FLERR,arg[5]);
-  if (twall <= 0.0 || nsite <= 0.0)
+  twall = input->numeric(FLERR,arg[twall_index]);
+  nsite = 0.0;
+  if (!only_one_flag) nsite = input->numeric(FLERR,arg[iarg++]);
+  if (twall <= 0.0 || (!only_one_flag && nsite <= 0.0))
     error->all(FLERR,"Illegal surf_react gamma command");
 
   int nspecies = particle->nspecies;
@@ -79,9 +105,11 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   int tally_only_set = 0;
   double initial_sum = 0.0;
 
-  int iarg = 6;
   while (iarg < narg) {
     if (strcmp(arg[iarg],"init_cover") == 0) {
+      if (only_one_flag)
+        error->all(FLERR,
+                   "Cannot use surf_react gamma init_cover with only_one yes");
       if (iarg+2 >= narg)
         error->all(FLERR,"Illegal surf_react gamma command");
 
@@ -141,7 +169,7 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   rlist = NULL;
   nlist = maxlist = 0;
   reaction_map = NULL;
-  readfile(arg[2]);
+  readfile(arg[file_index]);
   if (nlist == 0)
     error->all(FLERR,"Surf_react gamma reaction file has no reactions");
 
@@ -165,7 +193,7 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   char *dargs[4];
   dargs[0] = (char *) "react_gamma";
   dargs[1] = (char *) "diffuse";
-  dargs[2] = arg[4];
+  dargs[2] = arg[twall_index];
   dargs[3] = (char *) "1.0";
   diffuse = new SurfCollideDiffuse(sparta,4,dargs);
   diffuse_coeffs[0] = twall;
@@ -192,6 +220,10 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
   total_state = area = weight = NULL;
   species_delta = NULL;
 
+  one_state_win = MPI_WIN_NULL;
+  one_state_owned = NULL;
+  one_state_nown = 0;
+
   if (mode == FACE) create_per_face_state();
   else create_per_surf_state();
 
@@ -203,6 +235,9 @@ SurfReactGamma::SurfReactGamma(SPARTA *sparta, int narg, char **arg) :
 SurfReactGamma::~SurfReactGamma()
 {
   if (copy) return;
+
+  if (one_state_win != MPI_WIN_NULL) MPI_Win_free(&one_state_win);
+  one_state_owned = NULL;
 
   delete random;
   delete diffuse;
@@ -268,11 +303,23 @@ void SurfReactGamma::init()
   if (mode == FACE) initialize_cover_face();
   else initialize_per_surf_state();
 
+  if (only_one_flag) create_one_state_window();
+
   if (me == 0) {
     if (screen)
       fprintf(screen,"  Wall chemistry model: constant-gamma\n");
     if (logfile)
       fprintf(logfile,"  Wall chemistry model: constant-gamma\n");
+    if (screen) {
+      if (only_one_flag)
+        fprintf(screen,"  Site mode: one site per surface\n");
+      else fprintf(screen,"  Site mode: nsite-based, nsite = %.8g\n",nsite);
+    }
+    if (logfile) {
+      if (only_one_flag)
+        fprintf(logfile,"  Site mode: one site per surface\n");
+      else fprintf(logfile,"  Site mode: nsite-based, nsite = %.8g\n",nsite);
+    }
     if (tally_only_flag) {
       if (screen) fprintf(screen,"  *** TALLY-ONLY mode: "
                           "reactions counted but NOT executed ***\n");
@@ -309,19 +356,48 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
   double gamma = gamma_coeff[incident];
   if (gamma <= 0.0 || random->uniform() >= gamma) return 0;
 
-  int jsurf = select_surface_species(isurf);
+  int jsurf;
+  int one_owner = -1;
+  MPI_Aint one_disp = 0;
+
+  // A one-site surface is a global state, not a per-rank cached count.
+  // Hold an exclusive passive-target lock while reading and changing it so
+  // simultaneous collisions on the same surf are serialized across ranks.
+
+  if (only_one_flag) {
+    int encoded = lock_one_state(isurf,one_owner,one_disp);
+    if (encoded < 0 || encoded > particle->nspecies) {
+      MPI_Win_unlock(one_owner,one_state_win);
+      error->one(FLERR,"Invalid surf_react gamma one-site species");
+    }
+    jsurf = encoded ? species2surf[encoded-1] : -1;
+    if (encoded && jsurf < 0) {
+      MPI_Win_unlock(one_owner,one_state_win);
+      error->one(FLERR,"Invalid surf_react gamma one-site species");
+    }
+  } else jsurf = select_surface_species(isurf);
 
   // vacant site: adsorption is a state transition, not a file reaction
 
   if (jsurf < 0) {
-    if (tally_only_flag) return 0;
+    if (tally_only_flag) {
+      if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
+      return 0;
+    }
 
     int iad = species2surf[incident];
-    if (iad < 0)
+    if (iad < 0) {
+      if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
       error->one(FLERR,"Surf_react gamma incident species cannot adsorb");
+    }
 
-    mark_surface(isurf);
-    species_delta[isurf][iad]++;
+    if (only_one_flag) {
+      put_one_state(one_owner,one_disp,incident+1);
+      MPI_Win_unlock(one_owner,one_state_win);
+    } else {
+      mark_surface(isurf);
+      species_delta[isurf][iad]++;
+    }
     ip = NULL;
     return 0;
   }
@@ -332,10 +408,18 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
   int adsorbed = species_surf[jsurf];
   int ireaction = reaction_map[incident][adsorbed];
   if (ireaction < 0) {
-    if (tally_only_flag) return 0;
+    if (tally_only_flag) {
+      if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
+      return 0;
+    }
 
-    mark_surface(isurf);
-    species_delta[isurf][jsurf]--;
+    if (only_one_flag) {
+      put_one_state(one_owner,one_disp,0);
+      MPI_Win_unlock(one_owner,one_state_win);
+    } else {
+      mark_surface(isurf);
+      species_delta[isurf][jsurf]--;
+    }
 
     // create the desorbed particle at the incident particle's collision point
     // add_particle() can reallocate the particle array, so repoint ip if needed
@@ -362,10 +446,18 @@ int SurfReactGamma::react(Particle::OnePart *&ip, int isurf, double *norm,
   // tally-only candidates do not execute chemistry
   // outer surf collision still performs its configured scattering/heat tally
 
-  if (tally_only_flag) return 0;
+  if (tally_only_flag) {
+    if (only_one_flag) MPI_Win_unlock(one_owner,one_state_win);
+    return 0;
+  }
 
-  mark_surface(isurf);
-  species_delta[isurf][jsurf]--;
+  if (only_one_flag) {
+    put_one_state(one_owner,one_disp,0);
+    MPI_Win_unlock(one_owner,one_state_win);
+  } else {
+    mark_surface(isurf);
+    species_delta[isurf][jsurf]--;
+  }
 
   ip->ispecies = rlist[ireaction].product;
   diffuse->wrapper(ip,norm,NULL,diffuse_coeffs);
@@ -420,7 +512,8 @@ void SurfReactGamma::tally_update()
 
   // No PS clock is used.  Commit gas/surface state changes every timestep.
 
-  if (mode == FACE) update_state_face();
+  if (only_one_flag) sync_one_state();
+  else if (mode == FACE) update_state_face();
   else update_state_surf();
 }
 
@@ -460,6 +553,168 @@ void SurfReactGamma::grid_changed()
   weight = surf->edvec_local[surf->ewhich[weight_index]];
 
   surf->assign_unique();
+}
+
+/* ----------------------------------------------------------------------
+   create the globally unique one-site state
+   value = 0 for vacant, gas species index + 1 for occupied
+   explicit surface ownership follows Surf::collate_*():
+     owner = (surf ID - 1) % nprocs
+     displacement = (surf ID - 1) / nprocs
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::create_one_state_window()
+{
+  if (mode == FACE) {
+    one_state_nown = nface/nprocs;
+    if (me < nface % nprocs) one_state_nown++;
+  } else one_state_nown = surf->nown;
+
+  MPI_Aint nbytes = (MPI_Aint) one_state_nown * sizeof(int);
+  MPI_Win_allocate(nbytes,sizeof(int),MPI_INFO_NULL,world,
+                   &one_state_owned,&one_state_win);
+
+  // Initialize through a legal passive-target RMA epoch.  MPI_Win_sync()
+  // cannot be called outside an epoch, and strict multi-node OSC backends
+  // report MPI_ERR_RMA_SYNC for that usage.
+
+  if (one_state_nown) {
+    int *zero = new int[one_state_nown];
+    memset(zero,0,one_state_nown*sizeof(int));
+    MPI_Win_lock(MPI_LOCK_EXCLUSIVE,me,0,one_state_win);
+    MPI_Put(zero,one_state_nown,MPI_INT,
+            me,0,one_state_nown,MPI_INT,one_state_win);
+    MPI_Win_unlock(me,one_state_win);
+    delete [] zero;
+  }
+  MPI_Barrier(world);
+}
+
+/* ----------------------------------------------------------------------
+   map a local collision surface to its unique state owner and displacement
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::one_state_location(int isurf, int &owner,
+                                         MPI_Aint &disp)
+{
+  surfint id;
+  if (mode == FACE) {
+    int iface = isurf;
+    if (iface < 0 || iface >= nface)
+      error->one(FLERR,"Invalid surf_react gamma box face");
+    id = iface + 1;
+  } else {
+    if (isurf < 0 || isurf >= surf->nlocal+surf->nghost)
+      error->one(FLERR,"Invalid surf_react gamma surface index");
+    if (domain->dimension == 2) id = surf->lines[isurf].id;
+    else id = surf->tris[isurf].id;
+  }
+
+  if (id < 1 || (mode == SURF && id > surf->nsurf))
+    error->one(FLERR,"Invalid surf_react gamma surface ID");
+
+  owner = (int) ((id-1) % nprocs);
+  disp = (MPI_Aint) ((id-1) / nprocs);
+}
+
+/* ----------------------------------------------------------------------
+   acquire exclusive access and return the encoded one-site state
+   caller must update if needed and unlock the returned owner
+------------------------------------------------------------------------- */
+
+int SurfReactGamma::lock_one_state(int isurf, int &owner, MPI_Aint &disp)
+{
+  one_state_location(isurf,owner,disp);
+
+  int encoded = 0;
+  MPI_Win_lock(MPI_LOCK_EXCLUSIVE,owner,0,one_state_win);
+  MPI_Get(&encoded,1,MPI_INT,owner,disp,1,MPI_INT,one_state_win);
+  MPI_Win_flush(owner,one_state_win);
+  return encoded;
+}
+
+/* ---------------------------------------------------------------------- */
+
+void SurfReactGamma::put_one_state(int owner, MPI_Aint disp, int encoded)
+{
+  MPI_Put(&encoded,1,MPI_INT,owner,disp,1,MPI_INT,one_state_win);
+  MPI_Win_flush(owner,one_state_win);
+}
+
+/* ----------------------------------------------------------------------
+   mirror the unique owner state into the existing output arrays
+   all collision locks have been released before tally_update() is called
+------------------------------------------------------------------------- */
+
+void SurfReactGamma::sync_one_state()
+{
+  MPI_Barrier(world);
+
+  // Fetch through the window, including for the local target.  This is valid
+  // for both MPI's unified and separate public/private memory models.
+
+  int *snapshot = NULL;
+  if (one_state_nown) {
+    snapshot = new int[one_state_nown];
+    MPI_Win_lock(MPI_LOCK_SHARED,me,0,one_state_win);
+    MPI_Get(snapshot,one_state_nown,MPI_INT,me,0,one_state_nown,MPI_INT,
+            one_state_win);
+    MPI_Win_unlock(me,one_state_win);
+  }
+
+  if (mode == FACE) {
+    int *one = new int[nface];
+    int *all = new int[nface];
+    for (int i = 0; i < nface; i++) one[i] = 0;
+    for (int iface = me, i = 0; iface < nface; iface += nprocs, i++)
+      one[iface] = snapshot[i];
+
+    MPI_Allreduce(one,all,nface,MPI_INT,MPI_SUM,world);
+
+    for (int iface = 0; iface < nface; iface++) {
+      face_total_state[iface] = all[iface] ? 1.0 : 0.0;
+      for (int j = 0; j < nspecies_surf; j++)
+        face_species_state[iface][j] = 0.0;
+      if (all[iface]) {
+        if (all[iface] < 1 || all[iface] > particle->nspecies)
+          error->all(FLERR,"Invalid surf_react gamma one-site species");
+        int jsurf = species2surf[all[iface]-1];
+        if (jsurf < 0)
+          error->all(FLERR,"Invalid surf_react gamma one-site species");
+        face_species_state[iface][jsurf] = 1.0;
+      }
+    }
+
+    delete [] one;
+    delete [] all;
+    delete [] snapshot;
+    return;
+  }
+
+  double *owned_total = surf->edvec[surf->ewhich[total_state_index]];
+  double **owned_species =
+    surf->edarray[surf->ewhich[species_state_index]];
+
+  for (int i = 0; i < surf->nown; i++) {
+    int encoded = snapshot[i];
+    owned_total[i] = encoded ? 1.0 : 0.0;
+    for (int j = 0; j < nspecies_surf; j++) owned_species[i][j] = 0.0;
+    if (encoded) {
+      if (encoded < 1 || encoded > particle->nspecies)
+        error->all(FLERR,"Invalid surf_react gamma one-site species");
+      int jsurf = species2surf[encoded-1];
+      if (jsurf < 0)
+        error->all(FLERR,"Invalid surf_react gamma one-site species");
+      owned_species[i][jsurf] = 1.0;
+    }
+  }
+
+  surf->spread_custom(total_state_index);
+  surf->spread_custom(species_state_index);
+
+  total_state = surf->edvec_local[surf->ewhich[total_state_index]];
+  species_state = surf->edarray_local[surf->ewhich[species_state_index]];
+  delete [] snapshot;
 }
 
 /* ----------------------------------------------------------------------
@@ -977,6 +1232,7 @@ int SurfReactGamma::assigned_to_this(int isurf)
 
 long int SurfReactGamma::max_sites(int isurf)
 {
+  if (only_one_flag) return 1;
   return (long int) ceil(nsite*area[isurf] /
                          (update->fnum*weight[isurf]));
 }

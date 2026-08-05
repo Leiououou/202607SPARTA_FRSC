@@ -97,4 +97,35 @@
 - 现有 `react()` 已实现：入射粒子先用其 gamma 判定；空位点则吸附；已占位则用无序 `reaction_map[incident][adsorbed]` 查表；未定义反应时释放吸附粒子并对两者执行 diffuse 散射。
 - 关键并行风险：显式 surf 状态变化在各进程的 `species_delta` 中累积，到每时间步 `tally_update()` 才通过 `collate_array()` 合并。同一全局 surf 可在多进程同时被判定为空并各自吸附，合并后可超过容量1。
 - 因此仅将 `max_sites()` 改为1不足以在 MPI 下实现严格单位点，且可能重现低 nsite 卡死/容量越界。
-- `init_cover` 对单位点存在分数覆盖的离散化歧义；`mode=FACE` 下 only_one 将意味整个盒边界面只有1个位点，两者需要在实现前确认语义。
+- `init_cover` 对单位点存在分数覆盖的离散化歧义；当前 `only_one yes` 明确禁止 `init_cover`，每个位点从空状态开始。
+- 粒子仍应由碰撞网格单元的进程推进；把整粒子送到 surf 属主会侵入移动和迁移主流程。
+- 严格全局占位改由唯一 surf 属主保存一个编码物种状态，并对每次通过 gamma 门槛的事件使用 MPI RMA 排他锁执行不可分割的读/改/写。
+- 显式 surf 复用 SPARTA 已有的 `(surfID-1) % nprocs` 属主约定；粗 surf 横跨多个网格分区时仍只有一个全局位点。
+- 原有按步合并 delta 的路径只用于 `only_one no`，保持向后兼容。
+- 2/4 进程的共享箱体面、分布式细 surf 和跨分区粗 surf 压力测试均已通过；无需修改 `surf_react_adsorb.cpp/.h`。
+
+## 2026-08-04：多节点 MPI_ERR_RMA_SYNC
+
+- 管理员日志确认真正的 abort 位于 `MPI_Win_sync`，错误码为 `MPI_ERR_RMA_SYNC`。
+- 当前初始化在 `MPI_Win_allocate` 后直接调用 `MPI_Win_sync`，但没有通过 `MPI_Win_lock` 或 `MPI_Win_lock_all` 建立 passive-target epoch；MPI 标准规定 sync/flush 只能在该 epoch 内调用。
+- 本地 OpenMPI 后端宽松接受了该调用，256 rank 多节点 UCX 路径进行了严格检查并 abort。
+- one-site RMA 窗口只保存每个 surf 一个 int。831 个 surf 全局约 3.3 KB，256 rank 下每 rank 约 3–4 个 int；它不包含 245000 个网格单元、surface2grid 映射或迁移数据。
+- UCX 1.16/1.17 警告是独立的平台环境告警，不是这次 `MPI_ERR_RMA_SYNC` 的直接代码原因。
+
+## 2026-08-05：80 km 常 gamma 热流偏低分析
+
+- 论文 Table 7 给出 80 km 直接进入驻点热流：FC 71.4 kW/m2，NC 37.8 kW/m2；论文明确总热流为 `q=qc+qr`，FC/NC 均为 300 K、完全适应漫反射，FC 的五个表面反应概率均为1，且全部反应热传给壁面。
+- 当前 80 km `gamma_CO=1` 最新结果峰值为 57.179 kW/m2，NC 峰值为 40.264 kW/m2；因此并非基础对流热流整体低20%，而是 FC-NC 催化增量不足。
+- 在 s=0.1--1.8 m 的共同位置，当前 NC 比论文 NC 高约 0.3%--5.5%，当前 FC 比论文 FC 低约16.3%--19.9%。
+- 当前催化增量约14.9--16.8 kW/m2，论文约28.1--30.5 kW/m2；当前仅为论文的53%--58%，且该比例沿TPS基本恒定。这说明首要问题是表面复合事件率/催化热通量口径，而不是几何排序、驻点取平均或整条对流热流缩放。
+- 当前驻点附近 `gamma_CO=1` 能量分量为 etot=57.179、ke=22.566、erot=7.606、evib=14.062、echem=12.944 kW/m2；NC 为 etot=40.264、ke=26.680、erot=6.136、evib=7.448、echem=0。FC-NC=16.915 kW/m2，其中直接 echem 为12.944 kW/m2。
+- `gamma.surf` 中五个反应热与论文 Table 5 数值一致；加入 `gamma_CO=1` 后 CO+O 反应是当前全局最多的表面反应，因此漏设 CO 已被修正，但仍不能解释剩余约一半的催化增量缺口。
+
+## 2026-08-05：gamma `gank` 分物种库存设计
+
+- `gank yes` 不使用共享总容量；每个 surf 对每种可吸附物种保存独立的模拟粒子库存计数。入射粒子先在全部兼容库存中按数量加权选伴，有伙伴则反应，无伙伴才进入本物种库存逻辑。
+- 建议语法：`gamma gank yes every_n N allow|noallow file mode Tw ...`；`N` 必须为正整数。`gank no` 回到现有 nsite 路径并继续要求 nsite；旧语法保持不变。`gank` 与 `only_one` 应互斥。
+- `allow` 的分块扩容无需动态重分配：以64位库存计数保存实际数量，逻辑容量为 `ceil(count/N)*N`，可另外统计扩容次数和最大库存。
+- `noallow` 下，若入射 A 无兼容伙伴且 `n_A >= N`，选择一个已存 A 与入射 A 同时按 Tw 漫反射，库存 `n_A--`；如果 A+A 本身是定义反应，则兼容反应优先，不进入满容量分支。
+- gank 的严格 MPI 语义不能沿用现有按时间步合并 delta 的 nsite 状态；需要唯一属主 RMA 窗口保存每 surf × 每表面物种的整条库存向量，并在一次排他锁内完成读取、加权选择和读改写。
+- 建议初始化硬检查：正 gamma 物种必须出现在反应物集合中，且至少有一个正 gamma 的兼容伙伴，否则 allow 模式会产生不可消耗库存。

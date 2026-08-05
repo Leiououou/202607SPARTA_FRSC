@@ -11,6 +11,8 @@ no user-facing `nsync` argument.
 
 ```text
 surf_react ID gamma file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
+surf_react ID gamma only_one no file_name surf|face Tw n_site [init_cover species fraction] ... [tally_only yes|no] [species gamma] ...
+surf_react ID gamma only_one yes file_name surf|face Tw [tally_only yes|no] [species gamma] ...
 ```
 
 - `ID` is the user-defined surface-reaction model ID.
@@ -18,7 +20,13 @@ surf_react ID gamma file_name surf|face Tw n_site [init_cover species fraction] 
 - `surf` applies the model to explicit surface elements; `face` applies it to
   box faces.
 - `Tw` is the wall temperature in K and must be positive.
-- `n_site` is the site number density and must be positive.
+- `only_one` must immediately follow `gamma`. It accepts `yes` or `no` and
+  defaults to `no` when omitted.
+- With `only_one no`, `n_site` is the site number density and must be
+  positive. This is the original, backward-compatible behavior.
+- With `only_one yes`, `n_site` is omitted and every box face or explicit
+  surface element has exactly one globally shared site. `init_cover` is not
+  accepted; every site starts vacant.
 - `init_cover species fraction` may be repeated for different species.
   Fractions must lie in `[0,1]` and their sum may not exceed one.
 - `tally_only` defaults to `no`.
@@ -34,6 +42,13 @@ Example:
 ```text
 surf_react recomb gamma gamma.surf face 1000.0 6.022e18 init_cover O 0.25 init_cover N 0.10 tally_only no O 0.5 N 0.2
 bound_modify zlo react recomb
+```
+
+Single-site example:
+
+```text
+surf_react recomb gamma only_one yes gamma.surf surf 1000.0 O 1.0
+surf_modify all react recomb
 ```
 
 ## Reaction file
@@ -76,27 +91,32 @@ For an incident gas particle of species `A`:
 1. The chemistry gate succeeds with probability `gamma_A`. A failed gate
    leaves the event to the configured ordinary surface-collision model.
 2. On success, one site is sampled uniformly from the element/face capacity.
+   With `only_one yes`, this is the element/face's sole global site.
 3. If the sampled site is vacant, `A` adsorbs: the gas particle is removed and
    one `A(s)` site is added. This implicit adsorption is not a file reaction
    and does not increment surface-reaction tallies.
 4. If the site contains `B(s)` and the file defines `A + B --> C` in either
    reactant order, one `B(s)` is consumed and the incident particle record is
    changed to the sole gas product `C`.
-5. If the occupied species has no matching file reaction, the particle
-   receives the configured ordinary surface collision.
+5. If the occupied species has no matching file reaction, the stored particle
+   is released and both it and the incident particle scatter diffusely at
+   `Tw`; the site becomes vacant.
 
 The emitted product is internally scattered by a fully accommodating diffuse
 model at `Tw`. Translational energy is sampled at `Tw`; rotational and
 vibrational energy use SPARTA's standard particle samplers and are active when
 the corresponding gas collision energy styles are active.
 
-The site capacity used for a face or explicit element is
+With `only_one no`, the site capacity used for a face or explicit element is
 
 ```text
 Ncapacity = ceil(n_site * area / (fnum * weight))
 ```
 
 which follows the existing `adsorb` storage convention.
+
+With `only_one yes`, the capacity is exactly one and is independent of area,
+`fnum`, particle weight, and MPI process count.
 
 ## Energy and heat tallies
 
@@ -157,7 +177,7 @@ performed.
 ## MPI behavior
 
 There is no PS time evolution and no `nsync` setting. Coverage changes are
-committed every timestep:
+committed every timestep. With `only_one no`:
 
 - `face` mode sums per-rank species deltas with `MPI_Allreduce`;
 - replicated explicit surfaces collate deltas by surface ID and spread the
@@ -169,6 +189,21 @@ Per-explicit-surface custom attributes are namespaced by reaction ID
 (`gamma_ID_*`) so independent gamma models do not share coverage storage.
 State bounds are checked after synchronization; negative counts or capacity
 overflow are fatal errors rather than silently breaking conservation.
+
+With `only_one yes`, each global surface ID has one state slot on a unique MPI
+owner. After a successful gamma trial, the collision rank acquires an
+exclusive passive-target MPI lock on that slot, reads and updates the occupied
+species as one serialized operation, and then performs the particle changes
+locally. Thus a surface spanning several grid partitions still has one site,
+not one site per rank. The owner state is mirrored to the existing output
+attributes at the end of each timestep. This strict arbitration adds one-sided
+MPI communication to each gamma-gated event and can cost more than the
+batched-delta path used by `only_one no`.
+
+The owner window is initialized through a self-target `MPI_Put` enclosed by
+`MPI_Win_lock`/`MPI_Win_unlock`. All `MPI_Get`, `MPI_Put`, and
+`MPI_Win_flush` calls are therefore executed within a passive-target epoch;
+the implementation does not use `MPI_Win_sync` outside an epoch.
 
 The current implementation is the standard CPU/MPI path and is not a new
 Kokkos reaction kernel.

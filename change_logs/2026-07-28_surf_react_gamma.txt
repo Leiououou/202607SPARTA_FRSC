@@ -45,3 +45,50 @@ Validation:
 - Comment handling passed; duplicate unordered pairs, missing heat, and
   multi-product formulas were rejected.
 - Existing adsorb GS/PS tally-only parser/runtime regression passed.
+
+2026-08-04: strict one-site option
+
+Command extensions:
+- Added an optional keyword immediately after the style:
+    surf_react ID gamma only_one no file surf|face Tw n_site ...
+    surf_react ID gamma only_one yes file surf|face Tw ...
+- Omitting `only_one` is identical to `only_one no` and preserves the original
+  parser and n_site-based behavior.
+- `only_one yes` omits n_site, starts every site vacant, and rejects
+  `init_cover`.
+
+Behavior and parallel consistency:
+- `only_one yes` assigns exactly one global state slot to every explicit surf
+  element or box face.
+- The state owner is unique across MPI ranks. Gamma-gated collisions serialize
+  read/modify/write access with an exclusive passive-target MPI window lock.
+- A surf spanning more than one grid partition therefore remains one physical
+  site instead of silently becoming one site per process.
+- An empty site adsorbs the incident species. An occupied mapped pair reacts.
+  An occupied unmapped pair releases the stored species and diffusely scatters
+  both particles.
+- Existing n_site delta/collate behavior is unchanged for `only_one no`.
+- No changes were made to surf_react_adsorb.cpp or surf_react_adsorb.h.
+
+Validation:
+- Clean WSL MPI build completed after the class-layout header change.
+- Deterministic adsorption/reaction and unmatched-pair serial tests passed.
+- Explicit `only_one no` compatibility and replicated-surf tests passed.
+- Shared box-face and explicit distributed-surf stress tests passed on 2 and
+  4 MPI ranks.
+- A four-element coarse surface spanning MPI grid partitions completed 57,092
+  surface collisions and 9,892 reactions on 2 ranks without a negative count,
+  capacity overflow, hang, or MPI-dependent duplicate site.
+
+2026-08-04: multi-node MPI RMA synchronization fix
+
+- Administrator logs identified MPI_ERR_RMA_SYNC in MPI_Win_sync during
+  one-site window initialization on a 256-rank multi-node UCX run.
+- Removed MPI_Win_sync outside a passive-target epoch.
+- Window initialization now zeroes each rank's owned slots with a self-target
+  MPI_Put enclosed by MPI_Win_lock/MPI_Win_unlock.
+- The RMA window stores one integer per global surface; it does not contain
+  grid cells, surface2grid maps, or migration data.
+- A clean MPI build and four serial regressions passed.
+- Shared-face, distributed-surf, and coarse cross-partition tests passed on
+  2 and 4 MPI ranks after the fix.

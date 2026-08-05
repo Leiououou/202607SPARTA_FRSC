@@ -21,6 +21,7 @@ SurfReactStyle(gamma,SurfReactGamma)
 #ifndef SPARTA_SURF_REACT_GAMMA_H
 #define SPARTA_SURF_REACT_GAMMA_H
 
+#include "mpi.h"
 #include "surf_react.h"
 
 namespace SPARTA_NS {
@@ -45,6 +46,14 @@ class SurfReactGamma : public SurfReact {
   int mode;
   int firstflag;
   int tally_only_flag;
+  int only_one_flag;
+
+  // only_one state is stored once globally, on the unique owner of each
+  // explicit surface or box face.  Collision procs access it through RMA.
+
+  MPI_Win one_state_win;
+  int *one_state_owned;
+  int one_state_nown;
 
   double twall;
   double nsite;
@@ -133,6 +142,11 @@ class SurfReactGamma : public SurfReact {
   void initialize_cover_surf();
   void update_state_face();
   void update_state_surf();
+  void create_one_state_window();
+  void one_state_location(int, int &, MPI_Aint &);
+  int lock_one_state(int, int &, MPI_Aint &);
+  void put_one_state(int, MPI_Aint, int);
+  void sync_one_state();
 
   int assigned_to_this(int);
   long int max_sites(int);

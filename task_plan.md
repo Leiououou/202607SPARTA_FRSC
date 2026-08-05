@@ -77,4 +77,42 @@
 24. [complete] 定义新老语法兼容矩阵及 only_one 单位点状态机
 25. [complete] 识别 MPI 跨进程同时占位为实现前的关键架构门槛
 26. [complete] 列出分阶段实现、回归、并行压力和物理验证计划
-27. [pending] 用户确认 FACE/init_cover 边界语义和 MPI 严格一致性方案后才开始实现
+27. [complete] 用户确认开始实现；only_one 从空位点开始，FACE 也采用全局唯一位点
+28. [complete] 增加向后兼容的 `only_one yes|no` 命令解析
+29. [complete] 实现严格的单个位点串行事件状态机
+30. [complete] 用唯一属主 MPI RMA 状态替代 only_one 的进程局部增量
+31. [complete] 增加串行、兼容性、共享面和跨分区显式 surf 测试
+32. [complete] 完整重编译并完成串行、2/4 进程回归与压力测试
+33. [complete] 更新命令文档、测试说明和变更记录
+
+## 新任务：修复多节点 `MPI_ERR_RMA_SYNC`
+
+目标：移除 `only_one` 窗口初始化阶段位于 passive-target epoch 外的非法 `MPI_Win_sync`，改用标准兼容的自目标 lock/put/unlock 初始化，并重新完成归档和验证。
+
+34. [complete] 根据管理员日志定位 `MPI_Win_sync` 和 epoch 约束
+35. [complete] 将窗口清零改为合法的自目标 RMA 事务
+36. [complete] 完整 clean 编译并运行串行回归
+37. [complete] 运行 2/4 进程共享面和跨分区 surf 压力测试
+38. [complete] 审查全部 RMA 调用的 epoch 合法性
+39. [complete] 替换 sparta-20260804 归档 src 并更新修改记录
+
+## 新任务：常 gamma 热流较论文低约 20% 的原因分析
+
+目标：核准 Zuppardi 论文热流定义和算例条件，对照当前 gamma 两种模式的输入、输出与 MATLAB 后处理，识别造成约 20% 系统性低估的主要原因，并给出可区分各原因的验证方案。
+
+40. [complete] 提取论文中的工况、壁面模型、热流定义、数值设置和参考曲线
+41. [complete] 核对当前两种 gamma 模式的输入参数、统计口径和结果差异
+42. [in_progress] 定量检查可疑因素对约 20% 偏差的方向与量级
+43. [pending] 按证据强弱排序原因并提出最小验证矩阵
+
+新错误记录：首次用 PowerShell 汇总能量分量时 foreach 后直接接管道导致空管道解析错误（1次）；改为先累积对象数组再格式化，已解决。
+
+## 新任务：`surf_react gamma gank` 分物种库存模式（仅规划）
+
+目标：设计可选 `gank yes|no` 模式。`yes` 时每个 surf 为每种可吸附物种保存独立的模拟粒子库存，兼容伙伴按库存数量加权选择；`every_n N allow|noallow` 控制每物种容量分块及满容量行为。当前阶段只评估和规划，不修改功能源码。
+
+44. [complete] 明确 gank 状态机、兼容优先、加权选伴和每物种容量语义
+45. [complete] 评估命令语法、旧模式兼容关系和错误输入检查
+46. [complete] 评估串行、FACE、显式 surf、MPI RMA 和网格变化实现范围
+47. [complete] 制定单元回归、MPI 压力、统计选择和80 km物理验证计划
+48. [pending] 用户确认最终语法及两个边界语义后开始实现

@@ -83,7 +83,8 @@
       "Bash(awk 'BEGIN{ *)",
       "Bash(awk '{print $3}')",
       "Bash(awk '{print $4}')",
-      "Bash(pdftotext -layout \"d:/博一/气固相互作用/Molchanova/107105_1_online.pdf\" /tmp/molchanova2018.txt)"
+      "Bash(pdftotext -layout \"d:/博一/气固相互作用/Molchanova/107105_1_online.pdf\" /tmp/molchanova2018.txt)",
+      "Read(//d/博一/catalytic/zupparid/**)"
     ],
     "additionalDirectories": [
       "D:\\博一\\气固相互作用\\202607_src\\schu_2018",

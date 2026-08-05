@@ -5,6 +5,13 @@ reaction-file paths resolve.
 
 Deterministic serial cases:
 
+- `in.face_only_one_cycle`: `only_one yes` omits `nsite`; an empty-face
+  adsorption followed by a matching impact completes one reaction cycle.
+- `in.face_only_one_unmatched`: an unmatched occupied single site emits both
+  particles and becomes vacant.
+- `in.face_only_one_no`: explicit `only_one no` retains the legacy
+  `nsite`-based parser and behavior.
+- `in.surf_only_one`: replicated explicit surfaces use one site per element.
 - `in.face_adsorb`: gamma-one impact on a vacant face; particle is absorbed.
 - `in.face_recombine`: full O(s) face; O becomes O2.
 - `in.face_tally_only`: candidate counted without chemistry.
@@ -27,6 +34,12 @@ Deterministic serial cases:
 
 MPI cases:
 
+- `in.mpi_surf_only_one_distributed`: distributed explicit surfaces stress
+  one-site owner/ghost state consistency.
+- `in.mpi_face_only_one_stress`: x-partitioned ranks collide with the same
+  global box faces and stress strict cross-rank one-site arbitration.
+- `in.mpi_surf_only_one_coarse`: four coarse explicit elements span multiple
+  MPI grid partitions and stress strict global one-site ownership.
 - `in.mpi_face_gamma_half`: two-cell/two-rank fixed-state gamma test.
 - `in.mpi_face_recombine`: two-cell/two-rank mutating state and conservation.
 - `in.mpi_surf_distributed`: distributed explicit-surface owner/ghost state.
